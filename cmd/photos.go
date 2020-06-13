@@ -36,11 +36,11 @@ var photosCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("photos called " + strings.Join(args, " "))
 
-		srcDir := extractSrcDir(args)
-		fmt.Printf("src dir: '%s'\n", srcDir)
+		src := extractPath(args, 0, ".")
+		fmt.Printf("src: '%s'\n", src)
 
-		dstDir := extractDstDir(args)
-		fmt.Printf("dst dir: '%s'\n", dstDir)
+		dstDir := extractPath(args, 1, "d:\\tmp\\test")
+		fmt.Printf("dst: '%s'\n", dstDir)
 
 		fmt.Printf("dry ryn: %v\n", DryRun)
 
@@ -48,7 +48,7 @@ var photosCmd = &cobra.Command{
 		if DryRun {
 			tagName = "TestName"
 		}
-		cmdToExec := exec.Command("exiftool", "-"+tagName+"<CreateDate", "-d", dstDir+"\\%Y.%m.%d\\%%f%%-c.%%e", srcDir)
+		cmdToExec := exec.Command("exiftool", "-"+tagName+"<CreateDate", "-d", dstDir+"\\%Y.%m.%d\\%%f%%-c.%%e", src)
 		fmt.Printf("command: '%s'\n", cmdToExec.String())
 
 		out, err := cmdToExec.CombinedOutput()
@@ -73,21 +73,26 @@ func init() {
 	// photosCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func extractSrcDir(args []string) string {
-	srcDir, err := filepath.Abs(args[0])
+func extractAbsPath(args []string, argPosition int, defaultValue string) string {
+	if len(args) > argPosition {
+		return getAbsPath(args[argPosition])
+	}
+
+	return getAbsPath(defaultValue)
+}
+
+func extractPath(args []string, argPosition int, defaultValue string) string {
+	if len(args) > argPosition {
+		return args[argPosition]
+	}
+
+	return defaultValue
+}
+
+func getAbsPath(path string) string {
+	result, err := filepath.Abs(path)
 	if err != nil {
 		panic(err)
 	}
-	return srcDir
-}
-
-func extractDstDir(args []string) string {
-	if len(args) > 1 {
-		dstDir, err := filepath.Abs(args[1])
-		if err != nil {
-			panic(err)
-		}
-		return dstDir
-	}
-	return "d:\\tmp\\test"
+	return result
 }
