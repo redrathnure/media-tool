@@ -1,0 +1,5 @@
+%Image::ExifTool::UserDefined::Shortcuts = (
+    VideoDate => ['quicktime:CreateDate', 'quicktime:ModifyDate', 'quicktime:TrackCreateDate', 'quicktime:TrackCreateDate', 'quicktime:TrackModifyDate', 'quicktime:MediaCreateDate', 'quicktime:MediaModifyDate'],
+	ImageDate => ['EXIF:CreateDate', 'EXIF:DateTimeOriginal'],
+    FileDate => ['File:FileModifyDate','File:FileAccessDate','File:FileCreateDate'],
+);

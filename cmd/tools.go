@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 )
 
@@ -51,9 +52,9 @@ func getAbsPath(path string) string {
 func execExifTool(agrs []string) {
 	cmdArgs := append([]string{"-v0", "-progress"}, agrs...)
 
-	cmd := exec.Command("exiftool", cmdArgs...)
+	cmd := exec.Command(getExifTools(), cmdArgs...)
 	//TODO print command for verbose mode
-	/*fmt.Printf("command: '%s'\n", cmd.String())*/
+	fmt.Printf("command: '%s'\n", cmd.String())
 
 	/*out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -69,4 +70,29 @@ func execExifTool(agrs []string) {
 	if err != nil {
 		fmt.Printf("exec error: '%s'\n", err)
 	}
+}
+
+var exifTool string = ""
+
+func getExifTools() string {
+	if exifTool != "" {
+		return exifTool
+	}
+
+	ex, err := os.Executable()
+	if err != nil {
+		fmt.Printf("Unable to use custom exiftool: '%s'\n", err)
+		exifTool = "exiftool"
+	} else {
+		exifTool, err = filepath.Abs(path.Join(filepath.Dir(ex), "exiftool", "exiftool.exe"))
+		if err != nil {
+			fmt.Printf("Unable to use custom exiftool: '%s'\n", err)
+			exifTool = "exiftool"
+		}
+		if _, err := os.Stat(exifTool); os.IsNotExist(err) {
+			fmt.Printf("Unable to use custom exiftool: '%s'\n", err)
+			exifTool = "exiftool"
+		}
+	}
+	return exifTool
 }
