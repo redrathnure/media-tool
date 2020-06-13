@@ -1,4 +1,6 @@
 /*
+Package cmd provides command handlers
+
 Copyright © 2020 Maksym Medvedev <redrathnure@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,21 +36,12 @@ var photosCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("photos called " + strings.Join(args, " "))
 
-		srcDir, err := filepath.Abs(args[0])
-		if err != nil {
-			panic(err)
-		}
+		srcDir := extractSrcDir(args)
 		fmt.Printf("src dir: '%s'\n", srcDir)
 
-		dstDir := "d:\\tmp\\test"
-
-		if len(args) > 1 {
-			dstDir, err = filepath.Abs(args[1])
-			if err != nil {
-				panic(err)
-			}
-		}
+		dstDir := extractDstDir(args)
 		fmt.Printf("dst dir: '%s'\n", dstDir)
+
 		fmt.Printf("dry ryn: %v\n", DryRun)
 
 		tagName := "FileName"
@@ -78,4 +71,23 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// photosCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func extractSrcDir(args []string) string {
+	srcDir, err := filepath.Abs(args[0])
+	if err != nil {
+		panic(err)
+	}
+	return srcDir
+}
+
+func extractDstDir(args []string) string {
+	if len(args) > 1 {
+		dstDir, err := filepath.Abs(args[1])
+		if err != nil {
+			panic(err)
+		}
+		return dstDir
+	}
+	return "d:\\tmp\\test"
 }
