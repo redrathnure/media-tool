@@ -22,8 +22,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"path/filepath"
-
 	"github.com/spf13/cobra"
 )
 
@@ -71,28 +69,4 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// photosCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-func extractAbsPath(args []string, argPosition int, defaultValue string) string {
-	if len(args) > argPosition {
-		return getAbsPath(args[argPosition])
-	}
-
-	return getAbsPath(defaultValue)
-}
-
-func extractPath(args []string, argPosition int, defaultValue string) string {
-	if len(args) > argPosition {
-		return args[argPosition]
-	}
-
-	return defaultValue
-}
-
-func getAbsPath(path string) string {
-	result, err := filepath.Abs(path)
-	if err != nil {
-		panic(err)
-	}
-	return result
 }
