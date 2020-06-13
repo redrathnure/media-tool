@@ -1,4 +1,6 @@
 /*
+Package cmd provides command handlers
+
 Copyright © 2020 Maksym Medvedev <redrathnure@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
