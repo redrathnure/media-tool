@@ -36,6 +36,9 @@ to quickly create a Cobra application.`,
 	},
 }
 
+//DryRun just test instead real file manimupations
+var DryRun bool
+
 func init() {
 	rootCmd.AddCommand(importCmd)
 
@@ -44,6 +47,8 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// importCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	importCmd.PersistentFlags().BoolVarP(&DryRun, "dry", "d", false, "Dry run")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

@@ -17,22 +17,52 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
+	"strings"
+
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
 
 // photosCmd represents the photos command
 var photosCmd = &cobra.Command{
-	Use:   "photos",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "photos sourceDir [targetDir]",
+	Short: "Import photos from SD card",
+	Long:  `Copy images from SD card to disk. By default creates subdirectories by dates.`,
+	Args:  cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("photos called")
+		fmt.Println("photos called " + strings.Join(args, " "))
+
+		srcDir, err := filepath.Abs(args[0])
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("src dir: '%s'\n", srcDir)
+
+		dstDir := "d:\\tmp\\test"
+
+		if len(args) > 1 {
+			dstDir, err = filepath.Abs(args[1])
+			if err != nil {
+				panic(err)
+			}
+		}
+		fmt.Printf("dst dir: '%s'\n", dstDir)
+		fmt.Printf("dry ryn: %v\n", DryRun)
+
+		tagName := "FileName"
+		if DryRun {
+			tagName = "TestName"
+		}
+		cmdToExec := exec.Command("exiftool", "-"+tagName+"<CreateDate", "-d", dstDir+"\\%Y.%m.%d\\%%f%%-c.%%e", srcDir)
+		fmt.Printf("command: '%s'\n", cmdToExec.String())
+
+		out, err := cmdToExec.CombinedOutput()
+		if err != nil {
+			fmt.Printf("exec error: '%s'\n", err)
+		}
+		fmt.Printf("exec out:\n%s", string(out[:]))
 	},
 }
 
