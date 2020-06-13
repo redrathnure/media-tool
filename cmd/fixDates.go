@@ -1,5 +1,5 @@
 /*
-Package cmd provides commands handlers
+Package cmd provides command handlers
 
 Copyright © 2020 Maksym Medvedev <redrathnure@gmail.com>
 
@@ -19,22 +19,44 @@ package cmd
 
 import (
 	"fmt"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
 
+var recursively bool
+
 // fixDatesCmd represents the fixDates command
 var fixDatesCmd = &cobra.Command{
-	Use:   "fixDates",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "fixDates [files]",
+	Short: "Fix EXIF/Quicktime dates",
+	Long: `Reads dates from file name and put into EXIF and Quicktime metadata attributes. 
+	files argument may be dir (proces all files) or wildcards file names (process only matched files)`,
+	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("fixDates called")
+		fmt.Println("fixDates called " + strings.Join(args, " "))
+
+		files := extractFiles(args)
+		fmt.Printf("files to process: '%s'\n", files)
+
+		fmt.Printf("recursively: %v\n", recursively)
+
+		execArgs := []string{"-v2", "-ImageDate<filename", "-VideoDate<filename", "-FileDate<filename", files}
+
+		if recursively {
+			execArgs = append(execArgs, "-r")
+		}
+
+		cmdToExec := exec.Command("exiftool", execArgs...)
+		fmt.Printf("command: '%s'\n", cmdToExec.String())
+
+		out, err := cmdToExec.CombinedOutput()
+		if err != nil {
+			fmt.Printf("exec error: '%s'\n", err)
+		}
+		fmt.Printf("exec out:\n%s", string(out[:]))
 	},
 }
 
@@ -50,4 +72,16 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// fixDatesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	fixDatesCmd.Flags().BoolVarP(&recursively, "recursively", "r", false, "also analyze child directories")
+}
+
+func extractFiles(args []string) string {
+	if len(args) > 0 {
+		dstDir, err := filepath.Abs(args[0])
+		if err != nil {
+			panic(err)
+		}
+		return dstDir
+	}
+	return "."
 }
