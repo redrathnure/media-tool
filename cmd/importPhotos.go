@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -46,14 +45,9 @@ var photosCmd = &cobra.Command{
 		if DryRun {
 			tagName = "TestName"
 		}
-		cmdToExec := exec.Command("exiftool", "-"+tagName+"<CreateDate", "-d", dstDir+"\\%Y.%m.%d\\%%f%%-c.%%e", src)
-		fmt.Printf("command: '%s'\n", cmdToExec.String())
 
-		out, err := cmdToExec.CombinedOutput()
-		if err != nil {
-			fmt.Printf("exec error: '%s'\n", err)
-		}
-		fmt.Printf("exec out:\n%s", string(out[:]))
+		exifToolArgs := []string{"-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\%%f%%-c.%%e", src}
+		execExifTool(exifToolArgs)
 	},
 }
 

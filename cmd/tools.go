@@ -18,6 +18,9 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -43,4 +46,27 @@ func getAbsPath(path string) string {
 		panic(err)
 	}
 	return result
+}
+
+func execExifTool(agrs []string) {
+	cmdArgs := append([]string{"-v0", "-progress"}, agrs...)
+
+	cmd := exec.Command("exiftool", cmdArgs...)
+	//TODO print command for verbose mode
+	/*fmt.Printf("command: '%s'\n", cmd.String())*/
+
+	/*out, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("exec error: '%s'\n", err)
+	}
+	fmt.Printf("exec out:\n%s", string(out[:]))
+	*/
+	cmd.Stdout = os.Stdout
+	//TODO print Stderr for verbose mode
+	cmd.Stderr = os.Stderr
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("exec error: '%s'\n", err)
+	}
 }

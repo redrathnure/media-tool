@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -43,20 +42,13 @@ var fixDatesCmd = &cobra.Command{
 
 		fmt.Printf("recursively: %v\n", recursively)
 
-		execArgs := []string{"-v2", "-ImageDate<filename", "-VideoDate<filename", "-FileDate<filename", files}
+		exifToolArgs := []string{"-v2", "-ImageDate<filename", "-VideoDate<filename", "-FileDate<filename", files}
 
 		if recursively {
-			execArgs = append(execArgs, "-r")
+			exifToolArgs = append(exifToolArgs, "-r")
 		}
 
-		cmdToExec := exec.Command("exiftool", execArgs...)
-		fmt.Printf("command: '%s'\n", cmdToExec.String())
-
-		out, err := cmdToExec.CombinedOutput()
-		if err != nil {
-			fmt.Printf("exec error: '%s'\n", err)
-		}
-		fmt.Printf("exec out:\n%s", string(out[:]))
+		execExifTool(exifToolArgs)
 	},
 }
 

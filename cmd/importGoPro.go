@@ -19,8 +19,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -51,40 +49,14 @@ var goproCmd = &cobra.Command{
 		}
 
 		//Images
-		cmdToExec := exec.Command("exiftool", "-v0", "-progress", "-FileDate<CreateDate", "-"+tagName+"<CreateDate", "-d", dstDir+"\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "jpg", src)
-		/*fmt.Printf("command: '%s'\n", cmdToExec.String())*/
-
-		/*out, err := cmdToExec.CombinedOutput()
-		if err != nil {
-			fmt.Printf("exec error: '%s'\n", err)
-		}
-		fmt.Printf("exec out:\n%s", string(out[:]))
-		*/
-		cmdToExec.Stdout = os.Stdout
-		cmdToExec.Stderr = os.Stderr
-
-		err := cmdToExec.Run()
-		if err != nil {
-			fmt.Printf("exec error: '%s'\n", err)
-		}
+		//TODO exclude file date for dry run
+		exifToolArgs := []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "jpg", src}
+		execExifTool(exifToolArgs)
 
 		//Video
-		cmdToExec = exec.Command("exiftool", "-v0", "-progress", "-FileDate<CreateDate", "-"+tagName+"<CreateDate", "-d", dstDir+"\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "mp4", src)
-		/*fmt.Printf("command: '%s'\n", cmdToExec.String())*/
-
-		/*out, err = cmdToExec.CombinedOutput()
-		if err != nil {
-			fmt.Printf("exec error: '%s'\n", err)
-		}
-		fmt.Printf("exec out:\n%s", string(out[:]))*/
-
-		cmdToExec.Stdout = os.Stdout
-		cmdToExec.Stderr = os.Stderr
-
-		err = cmdToExec.Run()
-		if err != nil {
-			fmt.Printf("exec error: '%s'\n", err)
-		}
+		//TODO exclude file date for dry run
+		exifToolArgs = []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "mp4", src}
+		execExifTool(exifToolArgs)
 	},
 }
 
