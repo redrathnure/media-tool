@@ -22,6 +22,8 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+
+	"github.com/redrathnure/media-tool/cmd/mtp"
 )
 
 // goproCmd represents the gopro command
@@ -31,17 +33,26 @@ var goproCmd = &cobra.Command{
 	Long: `Copy images and video from GoPro card to disk. 
 	By default creates subdirectories by dates, creates src directory 
 	and rename files according to creation data and content type.`,
-	Args: cobra.RangeArgs(1, 2),
+	Args: cobra.RangeArgs(0, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("gopro called " + strings.Join(args, " "))
 
-		src := extractPath(args, 0, ".")
+		src := extractPath(args, 0, "mtp:")
 		fmt.Printf("src: '%s'\n", src)
+
+		fmt.Printf("dry ryn: %v\n", DryRun)
+
+		if src == "mtp:" {
+			tmpSrc, err := mtp.LoadFromWpd("HERO", !DryRun)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("Files were downloaded to: %v\n", tmpSrc)
+			src = tmpSrc
+		}
 
 		dstDir := extractPath(args, 1, src+"\\..")
 		fmt.Printf("dst: '%s'\n", dstDir)
-
-		fmt.Printf("dry ryn: %v\n", DryRun)
 
 		tagName := "FileName"
 		if DryRun {
@@ -50,12 +61,12 @@ var goproCmd = &cobra.Command{
 
 		//Images
 		//TODO exclude file date for dry run
-		exifToolArgs := []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "jpg", src}
+		exifToolArgs := []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "jpg", "-r", src}
 		execExifTool(exifToolArgs)
 
 		//Video
 		//TODO exclude file date for dry run
-		exifToolArgs = []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "mp4", src}
+		exifToolArgs = []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "mp4", "-r", src}
 		execExifTool(exifToolArgs)
 	},
 }

@@ -128,3 +128,31 @@ Progress
 -v0 
 
 
+MTP
+
+
+
+src: 'mtp:'
+=== #0
+0 - HERO8 BLACK (HERO8 BLACK)
+s4#DCIM, ModTime:0, Size: 0, ChildCount: 1
+#DCIM\100GOPRO, ModTime:0, Size: 0, ChildCount: 1
+#DCIM\100GOPRO\GH010189.MP4, ModTime:0, Size: 159427, ChildCount: -1
+#Get_started_with_GoPro.url, ModTime:0, Size: 139, ChildCount: -1
+
+
+d:\dev\src\_tools\media-tool>media-tool import gopro
+gopro called
+src: 'mtp:'
+Checking MTP#0
+path separator: \
+s4obj: &{{0 0 true} 0 s4 DEVICE  99ed0160-17ff-4c44-9d98-1d7a6f941921}
+Processing : DCIM ( DCIM)
+Processing : DCIM\100GOPRO (DCIM 100GOPRO)
+Processing : DCIM\100GOPRO\GH010189.MP4 (DCIM\100GOPRO GH010189.MP4)
+Processing : Get_started_with_GoPro.url ( Get_started_with_GoPro.url)
+#DCIM, ModTime:0, Size: 0, ChildCount: 1
+#DCIM\100GOPRO, ModTime:0, Size: 0, ChildCount: 1
+#DCIM\100GOPRO\GH010189.MP4, ModTime:0, Size: 159427, ChildCount: -1
+#Get_started_with_GoPro.url, ModTime:0, Size: 139, ChildCount: -1
+0 - HERO8 BLACK (HERO8 BLACK)
