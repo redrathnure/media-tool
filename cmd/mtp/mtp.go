@@ -10,7 +10,7 @@ import (
 	"github.com/tobwithu/gowpd"
 )
 
-func LoadFromWpd(deviceDescriptionFilter string, removeFromOrigin bool) (string, error) {
+func LoadFromWpd(deviceDescriptionFilter string, rootDir string, removeFromOrigin bool) (string, error) {
 	err := gowpd.Init()
 	defer gowpd.Destroy()
 
@@ -37,7 +37,7 @@ func LoadFromWpd(deviceDescriptionFilter string, removeFromOrigin bool) (string,
 
 			fmt.Printf("Files will be downloaded into '%v' temp directory\n", tmpDir)
 
-			wpdRootDir := gowpd.PathSeparator + "DCIM"
+			wpdRootDir := gowpd.PathSeparator + rootDir
 			files := listWpdDir(dev, wpdRootDir)
 
 			for _, file := range files {

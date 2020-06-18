@@ -44,7 +44,7 @@ var goproCmd = &cobra.Command{
 
 		fmt.Printf("dry ryn: %v\n", DryRun)
 
-		src, err := mtp.LoadFromWpd("HERO", !DryRun)
+		src, err := mtp.LoadFromWpd("HERO", "DCIM", !DryRun)
 		if err != nil {
 			panic(err)
 		}
