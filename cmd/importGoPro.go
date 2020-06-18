@@ -48,6 +48,7 @@ var goproCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
+		defer removeDir(src, DryRun)
 		fmt.Printf("Files were downloaded to: %v\n", src)
 
 		tagName := "FileName"

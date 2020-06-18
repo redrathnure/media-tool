@@ -96,3 +96,36 @@ func getExifTools() string {
 	}
 	return exifTool
 }
+
+func removeDir(dirName string, removeNonEmpty bool) {
+	if removeNonEmpty || checkDirEmpty(dirName) {
+		os.RemoveAll(dirName)
+	}
+}
+
+func checkDirEmpty(dirName string) bool {
+	d, err := os.Open(dirName)
+	if err != nil {
+		return false
+	}
+	defer d.Close()
+
+	stat, err := d.Stat()
+	if err != nil || !stat.IsDir() {
+		return false
+	}
+
+	names, err := d.Readdirnames(-1)
+	if err != nil {
+		return false
+	}
+
+	for _, name := range names {
+		childIsEmpty := checkDirEmpty(path.Join(dirName, name))
+		if childIsEmpty {
+			return false
+		}
+	}
+
+	return true
+}
