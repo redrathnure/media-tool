@@ -3,6 +3,7 @@ package mtp
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -10,7 +11,55 @@ import (
 	"github.com/tobwithu/gowpd"
 )
 
-func LoadFromWpd(deviceDescriptionFilter string, rootDir string, removeFromOrigin bool) (string, error) {
+func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (string, error) {
+	err := gowpd.Init()
+	defer gowpd.Destroy()
+
+	if err != nil {
+		return "", err
+	}
+	resultDir := generateTmpDir(targetDir)
+	err = os.MkdirAll(resultDir, os.ModeDir)
+	if err != nil {
+		return "", err
+	}
+
+	mtpDeviceCount := gowpd.GetDeviceCount()
+	for i := 0; i < mtpDeviceCount; i++ {
+		fmt.Printf("Checking MTP#%v - %v (%v)...\n", i, gowpd.GetDeviceName(i), gowpd.GetDeviceDescription(i))
+
+		dev, err := gowpd.ChooseDevice(i)
+		if err != nil {
+			return "", err
+		}
+
+		tmpDir := path.Join(resultDir, fmt.Sprint(i))
+		err = os.MkdirAll(tmpDir, os.ModeDir)
+		if err != nil {
+			fmt.Printf("Unable to create '%v' temp directory. MTP#%v - %v (%v) was skipped\n", tmpDir, i, gowpd.GetDeviceName(i), gowpd.GetDeviceDescription(i))
+			continue
+		}
+
+		fmt.Printf("Files will be downloaded into '%v' temp directory\n", tmpDir)
+
+		wpdRootDir := gowpd.PathSeparator + deviceDir
+		files := listWpdDir(dev, wpdRootDir)
+
+		for _, file := range files {
+			copyFromWpd(file, wpdRootDir, tmpDir)
+		}
+
+		if removeFromOrigin {
+			removeFromWpd(files)
+		}
+	}
+
+	return resultDir, nil
+
+	//return "", fmt.Errorf("No '%v' WPD devices was found", deviceDescriptionFilter)
+}
+
+func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir string, removeFromOrigin bool) (string, error) {
 	err := gowpd.Init()
 	defer gowpd.Destroy()
 
@@ -29,7 +78,7 @@ func LoadFromWpd(deviceDescriptionFilter string, rootDir string, removeFromOrigi
 				return "", err
 			}
 
-			tmpDir := generateTmpDir()
+			tmpDir := generateTmpDir(targetDir)
 			err = os.MkdirAll(tmpDir, os.ModeDir)
 			if err != nil {
 				return "", err
@@ -37,7 +86,7 @@ func LoadFromWpd(deviceDescriptionFilter string, rootDir string, removeFromOrigi
 
 			fmt.Printf("Files will be downloaded into '%v' temp directory\n", tmpDir)
 
-			wpdRootDir := gowpd.PathSeparator + rootDir
+			wpdRootDir := gowpd.PathSeparator + deviceDir
 			files := listWpdDir(dev, wpdRootDir)
 
 			for _, file := range files {
@@ -65,10 +114,8 @@ func printWpdFile(file *wpdFile) {
 	}
 }
 
-func generateTmpDir() string {
-	//TODO extract constant
-	//TODO get from config
-	return filepath.Join("d:\\tmp\\goproimport", time.Now().Format("20060102_150405"))
+func generateTmpDir(targetDir string) string {
+	return filepath.Join(targetDir, time.Now().Format("20060102_150405"))
 }
 
 func listWpdDir(dev *gowpd.Device, dir string) map[string]*wpdFile {

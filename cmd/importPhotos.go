@@ -27,8 +27,8 @@ import (
 // photosCmd represents the photos command
 var photosCmd = &cobra.Command{
 	Use:   "photos sourceDir [targetDir]",
-	Short: "Import photos from SD card",
-	Long:  `Copy images from SD card to disk. By default creates subdirectories by dates.`,
+	Short: "Import photos from directory",
+	Long:  `Copy images from sourceDir to ditargetDirsk. By default creates subdirectories by dates.`,
 	Args:  cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("photos called " + strings.Join(args, " "))
