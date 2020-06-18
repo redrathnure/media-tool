@@ -22,33 +22,26 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	"github.com/redrathnure/media-tool/cmd/mtp"
 )
 
-// goproCmd represents the gopro command
-var goproCmd = &cobra.Command{
-	Use:   "gopro targetDir",
-	Short: "Import GoPro media",
-	Long: `Copy images and video from GoPro card (WPD) to disk. 
-	By default creates subdirectories by dates and rename files 
-	according to creation data and content type.`,
-	Args: cobra.RangeArgs(1, 1),
+// video represents the gopro command
+var importVideo = &cobra.Command{
+	Use:   "video sourceDir [targetDir]",
+	Short: "Import video media from directory",
+	Long: `Copy images and video from directory to disk. 
+	By default creates subdirectories by dates and rename 
+	files according to creation data and content type.`,
+	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("gopro called " + strings.Join(args, " "))
+		fmt.Println("video called " + strings.Join(args, " "))
 
-		fmt.Printf("src: 'GoPro' media\n")
+		src := extractPath(args, 0, ".")
+		fmt.Printf("src: '%s'\n", src)
 
-		dstDir := extractPath(args, 0, ".")
+		dstDir := extractPath(args, 1, src+"\\..")
 		fmt.Printf("dst: '%s'\n", dstDir)
 
 		fmt.Printf("dry ryn: %v\n", DryRun)
-
-		src, err := mtp.LoadFromWpd("HERO", !DryRun)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("Files were downloaded to: %v\n", src)
 
 		tagName := "FileName"
 		if DryRun {
@@ -68,7 +61,7 @@ var goproCmd = &cobra.Command{
 }
 
 func init() {
-	importCmd.AddCommand(goproCmd)
+	importCmd.AddCommand(importVideo)
 
 	// Here you will define your flags and configuration settings.
 
