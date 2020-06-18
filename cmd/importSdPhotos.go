@@ -28,12 +28,13 @@ import (
 
 // sdPhotos represents the gopro command
 var sdPhotos = &cobra.Command{
-	Use:   "sdPhotos targetDir",
+	Use:   "sdphotos targetDir",
 	Short: "Import photos from SD card(s)",
 	Long: `Copy images and video from SD card(s)to disk. 
 	By default creates subdirectories by dates and rename files 
 	according to creation data and content type.`,
-	Args: cobra.RangeArgs(1, 1),
+	Args:    cobra.RangeArgs(1, 1),
+	Aliases: []string{"sd", "sdPhotos"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("gopro called " + strings.Join(args, " "))
 

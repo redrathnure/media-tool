@@ -33,7 +33,8 @@ var goproCmd = &cobra.Command{
 	Long: `Copy images and video from GoPro card (WPD) to disk. 
 	By default creates subdirectories by dates and rename files 
 	according to creation data and content type.`,
-	Args: cobra.RangeArgs(1, 1),
+	Args:    cobra.RangeArgs(1, 1),
+	Aliases: []string{"GoPro"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("gopro called " + strings.Join(args, " "))
 
