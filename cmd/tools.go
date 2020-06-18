@@ -106,6 +106,7 @@ func removeDir(dirName string, removeNonEmpty bool) {
 func checkDirEmpty(dirName string) bool {
 	d, err := os.Open(dirName)
 	if err != nil {
+		fmt.Printf("'%v' unable to open", dirName)
 		return false
 	}
 	defer d.Close()
@@ -122,7 +123,7 @@ func checkDirEmpty(dirName string) bool {
 
 	for _, name := range names {
 		childIsEmpty := checkDirEmpty(path.Join(dirName, name))
-		if childIsEmpty {
+		if !childIsEmpty {
 			return false
 		}
 	}
