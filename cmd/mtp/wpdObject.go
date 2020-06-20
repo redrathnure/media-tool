@@ -48,7 +48,7 @@ func (wf wpdFile) initChildren() {
 		}
 		rel := filepath.Join(curPath, o.Name)
 
-		fmt.Printf("Reading info: %v \n", rel)
+		fmt.Printf("Found: %v \n", rel)
 
 		child := newWpdFile(wf.filePath, wf.wpdDevice, o)
 		wf.chidren[child.fileName] = &child
