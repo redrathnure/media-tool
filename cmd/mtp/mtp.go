@@ -71,7 +71,7 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 	for i := 0; i < mtpDeviceCount; i++ {
 		fmt.Printf("Checking MTP#%v - %v (%v)...\n", i, gowpd.GetDeviceName(i), gowpd.GetDeviceDescription(i))
 
-		if strings.Contains(gowpd.GetDeviceDescription(i), deviceDescriptionFilter) {
+		if strings.Contains(gowpd.GetDeviceDescription(i), deviceDescriptionFilter) || strings.Contains(gowpd.GetDeviceName(i), deviceDescriptionFilter) {
 
 			dev, err := gowpd.ChooseDevice(i)
 			if err != nil {
