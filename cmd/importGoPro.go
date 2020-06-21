@@ -88,17 +88,17 @@ var goproCmd = &cobra.Command{
 		exifTool.exec(imgArgs)
 
 		//Video
-		videoArgs := exifTool.newArgs()
+		vidArgs := exifTool.newArgs()
 		if !DryRun {
-			imgArgs.changeFileDate("CreateDate")
+			vidArgs.changeFileDate("CreateDate")
 		}
-		videoArgs.changeTag(tagName, "CreateDate")
-		videoArgs.forDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e")
-		videoArgs.forVideoMp4()
-		videoArgs.recursively()
-		videoArgs.src(src)
+		vidArgs.changeTag(tagName, "CreateDate")
+		vidArgs.forDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e")
+		vidArgs.forVideoMp4()
+		vidArgs.recursively()
+		vidArgs.src(src)
 
-		exifTool.exec(videoArgs)
+		exifTool.exec(vidArgs)
 	},
 }
 
