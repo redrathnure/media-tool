@@ -19,16 +19,11 @@ package cmd
 
 import (
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
-)
-
-const (
-	defaultExiftool = "exiftool"
 )
 
 func extractAbsPath(args []string, argPosition int, defaultValue string) string {
@@ -53,48 +48,6 @@ func getAbsPath(path string) string {
 		panic(err)
 	}
 	return result
-}
-
-func execExifTool(agrs []string) {
-	cmdArgs := append([]string{"-v0", "-progress"}, agrs...)
-
-	cmd := exec.Command(getExifTools(), cmdArgs...)
-
-	log.Debugf("ExifTool command: '%s'\n", cmd.String())
-
-	cmd.Stdout = os.Stdout
-	//TODO print Stderr for verbose mode
-	cmd.Stderr = os.Stderr
-
-	err := cmd.Run()
-	if err != nil {
-		log.Warningf("ExifTool exec error: '%s'", err)
-	}
-}
-
-var exifTool string = ""
-
-func getExifTools() string {
-	if exifTool != "" {
-		return exifTool
-	}
-
-	ex, err := os.Executable()
-	if err != nil {
-		log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, defaultExiftool)
-		exifTool = defaultExiftool
-	} else {
-		exifTool, err = filepath.Abs(path.Join(filepath.Dir(ex), "exiftool", "exiftool.exe"))
-		if err != nil {
-			log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, defaultExiftool)
-			exifTool = defaultExiftool
-		}
-		if _, err := os.Stat(exifTool); os.IsNotExist(err) {
-			log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, defaultExiftool)
-			exifTool = defaultExiftool
-		}
-	}
-	return exifTool
 }
 
 func removeDir(dirName string, removeNonEmpty bool) {
