@@ -21,8 +21,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/redrathnure/media-tool/cmd/mtp"
+)
+
+const (
+	cfgImportGoProDefaultDst = "import.gopro.default.targetDir"
 )
 
 // goproCmd represents the gopro command
@@ -31,15 +36,25 @@ var goproCmd = &cobra.Command{
 	Short: "Import GoPro media",
 	Long: `Copy images and video from GoPro card (WPD) to disk. 
 	By default creates subdirectories by dates and rename files 
-	according to creation data and content type.`,
-	Args:    cobra.RangeArgs(1, 1),
+	according to creation data and content type. 
+	If no targetDir was specified application will try to read 
+	'import.gopro.default.targetDir' configuration property`,
+	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"GoPro"},
 	Run: func(cmd *cobra.Command, args []string) {
 		printCommandArgs(cmd, args)
 
 		log.Infof("src: 'GoPro' media")
 
-		dstDir := extractPath(args, 0, ".")
+		dstDir := extractPath(args, 0, "")
+		if dstDir == "" {
+			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportGoProDefaultDst)
+			dstDir = viper.GetString(cfgImportGoProDefaultDst)
+			if dstDir == "" {
+				log.Errorf("No target dir was specified")
+				os.Exit(1)
+			}
+		}
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", DryRun)
@@ -57,28 +72,38 @@ var goproCmd = &cobra.Command{
 			tagName = "TestName"
 		}
 
+		exifTool := getExifTool()
+
 		//Images
-		//TODO exclude file date for dry run
-		exifToolArgs := []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "jpg", "-r", src}
-		execExifTool(exifToolArgs)
+		imgArgs := exifTool.newArgs()
+		if !DryRun {
+			imgArgs.changeFileDate("CreateDate")
+		}
+		imgArgs.changeTag(tagName, "CreateDate")
+		imgArgs.forDateFormat(dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e")
+		imgArgs.forImages()
+		imgArgs.recursively()
+		imgArgs.src(src)
+
+		exifTool.exec(imgArgs)
 
 		//Video
-		//TODO exclude file date for dry run
-		exifToolArgs = []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "mp4", "-r", src}
-		execExifTool(exifToolArgs)
+		videoArgs := exifTool.newArgs()
+		if !DryRun {
+			imgArgs.changeFileDate("CreateDate")
+		}
+		videoArgs.changeTag(tagName, "CreateDate")
+		videoArgs.forDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e")
+		videoArgs.forVideoMp4()
+		videoArgs.recursively()
+		videoArgs.src(src)
+
+		exifTool.exec(videoArgs)
 	},
 }
 
 func init() {
 	importCmd.AddCommand(goproCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// goproCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// goproCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	viper.SetDefault(cfgImportGoProDefaultDst, "")
 }

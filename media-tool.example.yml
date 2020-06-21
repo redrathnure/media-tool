@@ -1,3 +1,6 @@
 exiftool:
-  path: "$APP_DIR\\exiftool\\exiftool.exe"
-  
+  path: $APP_DIR\exiftool\exiftool.exe
+import:
+  gopro:
+    default:
+      targetdir: d:\video\gopro

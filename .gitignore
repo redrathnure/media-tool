@@ -1,3 +1,4 @@
 *.exe
 /go.sum
 /media-tool.exe~
+/text.yaml
