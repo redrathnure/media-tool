@@ -100,13 +100,6 @@ func (tool *exifToolWrapper) exec(args *exifToolArgs) {
 	}
 }
 
-func execExifTool(args []string) {
-	tool := getExifTool()
-	toolArgs := tool.newArgs()
-	toolArgs.add(args...)
-	getExifTool().exec(toolArgs)
-}
-
 func (tool *exifToolWrapper) newArgs() *exifToolArgs {
 	return &exifToolArgs{args: tool.defaultArgs}
 }

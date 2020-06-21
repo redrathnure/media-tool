@@ -56,8 +56,6 @@ func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (
 	}
 
 	return resultDir, nil
-
-	//return "", fmt.Errorf("No '%v' WPD devices was found", deviceDescriptionFilter)
 }
 
 func buildMtpDeviceLabel(deviceNumber int) string {

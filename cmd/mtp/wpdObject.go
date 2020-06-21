@@ -6,10 +6,7 @@ import (
 	"github.com/tobwithu/gowpd"
 )
 
-const (
-	//TODO take care about recycle bin
-	systemDir = "System Volume Information"
-)
+var ignoreFiles = []string{"System Volume Information", "$RECYCLE.BIN"}
 
 type wpdFile struct {
 	filePath  string
@@ -36,15 +33,19 @@ func newWpdFile(parentDir string, dev *gowpd.Device, obj *gowpd.Object) wpdFile 
 }
 
 func (wf wpdFile) initChildren() {
-	objs, _ := wf.wpdDevice.GetChildObjects(wf.wpdObject.Id)
-	//TODO error handling
+	objs, err := wf.wpdDevice.GetChildObjects(wf.wpdObject.Id)
+	if err != nil {
+		log.Warningf("Unable to read children for %v: %v", wf.filePath, err)
+	}
 
 	curPath := wf.filePath
 	for _, o := range objs {
 
-		if o.Name == systemDir {
+		if isIgnored(o.Name) {
+			log.Debugf("Skipping '%v' file", o.Name)
 			continue
 		}
+
 		rel := filepath.Join(curPath, o.Name)
 
 		log.Debugf("Found: %v", rel)
@@ -72,4 +73,13 @@ func (wf wpdFile) deleteFile() error {
 		return wf.wpdDevice.Delete(wf.wpdObject.Id)
 	}
 	return nil
+}
+
+func isIgnored(fileName string) bool {
+	for _, ignore := range ignoreFiles {
+		if fileName == ignore {
+			return true
+		}
+	}
+	return false
 }
