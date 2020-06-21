@@ -18,6 +18,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -30,15 +31,19 @@ const (
 	cfgExifToolPath = "exiftool.path"
 )
 
-type extifToolWrapper struct {
+type exifToolWrapper struct {
 	cmd         string
 	defaultArgs []string
 }
 
-var exifToolObj *extifToolWrapper
+type exifToolArgs struct {
+	args []string
+}
 
-func newExtifTool() *extifToolWrapper {
-	result := extifToolWrapper{
+var exifToolObj *exifToolWrapper
+
+func newExifTool() *exifToolWrapper {
+	result := exifToolWrapper{
 		cmd:         "exiftool",
 		defaultArgs: []string{"-v0", "-progress"},
 	}
@@ -46,7 +51,14 @@ func newExtifTool() *extifToolWrapper {
 	return &result
 }
 
-func (tool extifToolWrapper) initCmd() {
+func getExifTool() *exifToolWrapper {
+	if exifToolObj == nil {
+		exifToolObj = newExifTool()
+	}
+	return exifToolObj
+}
+
+func (tool *exifToolWrapper) initCmd() {
 	customPath := viper.GetString(cfgExifToolPath)
 	if customPath != "" {
 
@@ -72,9 +84,8 @@ func (tool extifToolWrapper) initCmd() {
 	}
 }
 
-func (tool extifToolWrapper) exec(agrs []string) {
-	cmdArgs := append(tool.defaultArgs, agrs...)
-	cmd := exec.Command(tool.cmd, cmdArgs...)
+func (tool *exifToolWrapper) exec(args *exifToolArgs) {
+	cmd := exec.Command(tool.cmd, args.args...)
 
 	log.Debugf("ExifTool command: '%s'\n", cmd.String())
 
@@ -89,12 +100,49 @@ func (tool extifToolWrapper) exec(agrs []string) {
 	}
 }
 
-func execExifTool(agrs []string) {
-	if exifToolObj == nil {
-		exifToolObj = newExtifTool()
-	}
+func execExifTool(args []string) {
+	tool := getExifTool()
+	toolArgs := tool.newArgs()
+	toolArgs.add(args...)
+	getExifTool().exec(toolArgs)
+}
 
-	exifToolObj.exec(agrs)
+func (tool *exifToolWrapper) newArgs() *exifToolArgs {
+	return &exifToolArgs{args: tool.defaultArgs}
+}
+
+func (toolArgs *exifToolArgs) add(args ...string) {
+	toolArgs.args = append(toolArgs.args, args...)
+}
+
+func (toolArgs *exifToolArgs) recursively() {
+	toolArgs.add("-r")
+}
+
+func (toolArgs *exifToolArgs) src(dirOrFilepath string) {
+	toolArgs.add(dirOrFilepath)
+}
+
+func (toolArgs *exifToolArgs) forImages() {
+	toolArgs.add("-ext", "jpg")
+}
+
+func (toolArgs *exifToolArgs) forVideoMp4() {
+	toolArgs.add("-ext", "mp4")
+}
+
+func (toolArgs *exifToolArgs) forDateFormat(dateFormat string) {
+	toolArgs.add("-d", dateFormat)
+}
+
+func (toolArgs *exifToolArgs) changeTag(tagName string, tagValue string) {
+	toolArgs.add(fmt.Sprintf("-%s<%s", tagName, tagValue))
+}
+
+func (toolArgs *exifToolArgs) changeFileDate(tagValue string) {
+	toolArgs.changeTag("FileModifyDate", tagValue)
+	toolArgs.changeTag("FileAccessDate", tagValue)
+	toolArgs.changeTag("FileCreateDate", tagValue)
 }
 
 func init() {
