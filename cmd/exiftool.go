@@ -131,6 +131,10 @@ func (toolArgs *exifToolArgs) forVideoMp4() {
 	toolArgs.add("-ext", "mp4")
 }
 
+func (toolArgs *exifToolArgs) forVideoAvchd() {
+	toolArgs.add("-ext", "mts")
+}
+
 func (toolArgs *exifToolArgs) forDateFormat(dateFormat string) {
 	toolArgs.add("-d", dateFormat)
 }

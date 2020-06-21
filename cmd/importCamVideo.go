@@ -22,8 +22,13 @@ import (
 	"path"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/redrathnure/media-tool/cmd/mtp"
+)
+
+const (
+	cfgImportCamVideoDefaultDst = "import.camvideo.default.targetDir"
 )
 
 // goproCmd represents the gopro command
@@ -32,15 +37,25 @@ var camVideoCmd = &cobra.Command{
 	Short: "Import media from Panasonic camcoder",
 	Long: `Copy video from Panasonic camcoder (WPD) to disk. 
 	By default creates subdirectories by dates and rename files 
-	according to creation data and content type.`,
-	Args:    cobra.RangeArgs(1, 1),
+	according to creation data and content type.
+	If no targetDir was specified application will try to read 
+	'import.camvideo.default.targetDir' configuration property`,
+	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"camvideo", "CamVideo"},
 	Run: func(cmd *cobra.Command, args []string) {
 		printCommandArgs(cmd, args)
 
 		log.Infof("src: 'CamSD' media")
 
-		dstDir := extractPath(args, 0, ".")
+		dstDir := extractPath(args, 0, "")
+		if dstDir == "" {
+			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportCamVideoDefaultDst)
+			dstDir = viper.GetString(cfgImportCamVideoDefaultDst)
+			if dstDir == "" {
+				log.Errorf("No target dir was specified")
+				os.Exit(1)
+			}
+		}
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", DryRun)
@@ -59,12 +74,25 @@ var camVideoCmd = &cobra.Command{
 		}
 
 		//Video
-		//TODO exclude file date for dry run
-		exifToolArgs := []string{"-FileDate<DateTimeOriginal", "-" + tagName + "<DateTimeOriginal", "-d", dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e", "-ext", "mts", "-r", src}
-		execExifTool(exifToolArgs)
+		exifTool := getExifTool()
+
+		//Images
+		videoArgs := exifTool.newArgs()
+		if !DryRun {
+			videoArgs.changeFileDate("DateTimeOriginal")
+		}
+		videoArgs.changeTag(tagName, "DateTimeOriginal")
+		videoArgs.forDateFormat(dstDir + "\\%Y.%m.%d\\VID_%Y%m%d_%H%M%S%%-c.%%e")
+		videoArgs.forVideoAvchd()
+		videoArgs.recursively()
+		videoArgs.src(src)
+
+		exifTool.exec(videoArgs)
 	},
 }
 
 func init() {
 	importCmd.AddCommand(camVideoCmd)
+
+	viper.SetDefault(cfgImportCamVideoDefaultDst, "")
 }

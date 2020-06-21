@@ -4,3 +4,6 @@ import:
   gopro:
     default:
       targetdir: d:\video\gopro
+  camvideo:
+    default:
+      targetdir: d:\video\camera
