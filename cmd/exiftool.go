@@ -146,7 +146,6 @@ func (toolArgs *exifToolArgs) changeTag(tagName string, tagValue string) {
 
 func (toolArgs *exifToolArgs) changeFileDate(tagValue string) {
 	toolArgs.changeTag("FileModifyDate", tagValue)
-	toolArgs.changeTag("FileAccessDate", tagValue)
 	toolArgs.changeTag("FileCreateDate", tagValue)
 }
 
