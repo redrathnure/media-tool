@@ -125,6 +125,7 @@ func (toolArgs *exifToolArgs) src(dirOrFilepath string) {
 
 func (toolArgs *exifToolArgs) forImages() {
 	toolArgs.add("-ext", "jpg")
+	toolArgs.add("-ext", "nef")
 }
 
 func (toolArgs *exifToolArgs) forVideoMp4() {

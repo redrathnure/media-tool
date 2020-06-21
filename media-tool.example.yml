@@ -1,9 +1,12 @@
 exiftool:
   path: $APP_DIR\exiftool\exiftool.exe
 import:
-  gopro:
+  goPro:
     default:
-      targetdir: d:\video\gopro
-  camvideo:
+      targetDir: d:\video\gopro
+  camVideo:
     default:
-      targetdir: d:\video\camera
+      targetDir: d:\video\camera
+  sdPhotos:
+    default:
+      targetDir: d:\photos\

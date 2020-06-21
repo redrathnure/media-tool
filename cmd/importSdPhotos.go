@@ -21,8 +21,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/redrathnure/media-tool/cmd/mtp"
+)
+
+const (
+	cfgImportSdPhotosDefaultDst = "import.sdPhotos.default.targetDir"
 )
 
 // sdPhotos represents the gopro command
@@ -31,15 +36,25 @@ var sdPhotos = &cobra.Command{
 	Short: "Import photos from SD card(s)",
 	Long: `Copy images and video from SD card(s)to disk. 
 	By default creates subdirectories by dates and rename files 
-	according to creation data and content type.`,
-	Args:    cobra.RangeArgs(1, 1),
+	according to creation data and content type.
+	If no targetDir was specified application will try to read 
+	'import.sdPhotos.default.targetDir' configuration property`,
+	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"sd", "sdPhotos"},
 	Run: func(cmd *cobra.Command, args []string) {
 		printCommandArgs(cmd, args)
 
-		log.Infof("src: 'GoPro' media")
+		log.Infof("src: USB flash with 'DCIM' dir")
 
-		dstDir := extractPath(args, 0, ".")
+		dstDir := extractPath(args, 0, "")
+		if dstDir == "" {
+			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportSdPhotosDefaultDst)
+			dstDir = viper.GetString(cfgImportSdPhotosDefaultDst)
+			if dstDir == "" {
+				log.Errorf("No target dir was specified")
+				os.Exit(1)
+			}
+		}
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", DryRun)
@@ -57,28 +72,26 @@ var sdPhotos = &cobra.Command{
 			tagName = "TestName"
 		}
 
-		//Images
-		//TODO exclude file date for dry run
-		exifToolArgs := []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\%%f%%-c.%%e", "-ext", "jpg", "-ext", "nef", "-r", src}
-		execExifTool(exifToolArgs)
+		exifTool := getExifTool()
 
-		//Video
-		//TODO exclude file date for dry run
-		exifToolArgs = []string{"-FileDate<CreateDate", "-" + tagName + "<CreateDate", "-d", dstDir + "\\%Y.%m.%d\\%%f%%-c.%%e", "-ext", "mp4", "-r", src}
-		execExifTool(exifToolArgs)
+		//Images and video
+		imgArgs := exifTool.newArgs()
+		if !DryRun {
+			imgArgs.changeFileDate("CreateDate")
+		}
+		imgArgs.changeTag(tagName, "CreateDate")
+		imgArgs.forDateFormat(dstDir + "\\%Y.%m.%d\\%%f%%-c.%%e")
+		imgArgs.forImages()
+		imgArgs.forVideoMp4()
+		imgArgs.recursively()
+		imgArgs.src(src)
+
+		exifTool.exec(imgArgs)
 	},
 }
 
 func init() {
 	importCmd.AddCommand(sdPhotos)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// goproCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// goproCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	viper.SetDefault(cfgImportSdPhotosDefaultDst, "")
 }
