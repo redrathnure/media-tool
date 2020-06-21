@@ -20,8 +20,14 @@ package cmd
 import (
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
+	"strings"
+
+	"github.com/spf13/viper"
+)
+
+const (
+	cfgExifToolPath = "exiftool.path"
 )
 
 type extifToolWrapper struct {
@@ -41,22 +47,29 @@ func newExtifTool() *extifToolWrapper {
 }
 
 func (tool extifToolWrapper) initCmd() {
-	ex, err := os.Executable()
-	if err != nil {
-		log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
-		return
-	}
-	customePath, err := filepath.Abs(path.Join(filepath.Dir(ex), "exiftool", "exiftool.exe"))
-	if err != nil {
-		log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
-		return
-	}
-	if _, err := os.Stat(customePath); os.IsNotExist(err) {
-		log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
-		return
-	}
+	customPath := viper.GetString(cfgExifToolPath)
+	if customPath != "" {
 
-	tool.cmd = customePath
+		if strings.Contains(customPath, "$APP_DIR") {
+			ex, err := os.Executable()
+			if err != nil {
+				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+				return
+			}
+			customPath = strings.ReplaceAll(customPath, "$APP_DIR", filepath.Dir(ex))
+			customPath, err = filepath.Abs(customPath)
+			if err != nil {
+				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+				return
+			}
+			if _, err := os.Stat(customPath); os.IsNotExist(err) {
+				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+				return
+			}
+		}
+
+		tool.cmd = customPath
+	}
 }
 
 func (tool extifToolWrapper) exec(agrs []string) {
@@ -82,4 +95,8 @@ func execExifTool(agrs []string) {
 	}
 
 	exifToolObj.exec(agrs)
+}
+
+func init() {
+	viper.SetDefault(cfgExifToolPath, "")
 }
