@@ -18,9 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/spf13/cobra"
 )
 
@@ -33,15 +30,15 @@ var importVideo = &cobra.Command{
 	files according to creation data and content type.`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("video called " + strings.Join(args, " "))
+		printCommandArgs(cmd, args)
 
 		src := extractPath(args, 0, ".")
-		fmt.Printf("src: '%s'\n", src)
+		log.Infof("src: '%s'", src)
 
 		dstDir := extractPath(args, 1, src+"\\..")
-		fmt.Printf("dst: '%s'\n", dstDir)
+		log.Infof("dst: '%s'", dstDir)
 
-		fmt.Printf("dry ryn: %v\n", DryRun)
+		log.Infof("dry ryn: %v", DryRun)
 
 		tagName := "FileName"
 		if DryRun {

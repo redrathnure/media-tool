@@ -18,9 +18,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"os"
 	"path"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -37,21 +36,22 @@ var camVideoCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(1, 1),
 	Aliases: []string{"camvideo", "CamVideo"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("camVideo called " + strings.Join(args, " "))
+		printCommandArgs(cmd, args)
 
-		fmt.Printf("src: 'CamSD' media\n")
+		log.Infof("src: 'CamSD' media")
 
 		dstDir := extractPath(args, 0, ".")
-		fmt.Printf("dst: '%s'\n", dstDir)
+		log.Infof("dst: '%s'", dstDir)
 
-		fmt.Printf("dry ryn: %v\n", DryRun)
+		log.Infof("dry ryn: %v", DryRun)
 
 		src, err := mtp.LoadFromWpd("CAM", path.Join("PRIVATE", "AVCHD", "BDMV", "STREAM"), dstDir, !DryRun)
 		if err != nil {
-			panic(err)
+			log.Errorf("Unable to copy camcoder files: %v", err)
+			os.Exit(1)
 		}
 		defer removeDir(src, DryRun)
-		fmt.Printf("Files were downloaded to: %v\n", src)
+		log.Infof("Files were downloaded to: %v", src)
 
 		tagName := "FileName"
 		if DryRun {

@@ -18,11 +18,17 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
+
+	"github.com/spf13/cobra"
+)
+
+const (
+	defaultExiftool = "exiftool"
 )
 
 func extractAbsPath(args []string, argPosition int, defaultValue string) string {
@@ -53,22 +59,16 @@ func execExifTool(agrs []string) {
 	cmdArgs := append([]string{"-v0", "-progress"}, agrs...)
 
 	cmd := exec.Command(getExifTools(), cmdArgs...)
-	//TODO print command for verbose mode
-	fmt.Printf("command: '%s'\n", cmd.String())
 
-	/*out, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("exec error: '%s'\n", err)
-	}
-	fmt.Printf("exec out:\n%s", string(out[:]))
-	*/
+	log.Debugf("ExifTool command: '%s'\n", cmd.String())
+
 	cmd.Stdout = os.Stdout
 	//TODO print Stderr for verbose mode
 	cmd.Stderr = os.Stderr
 
 	err := cmd.Run()
 	if err != nil {
-		fmt.Printf("exec error: '%s'\n", err)
+		log.Warningf("ExifTool exec error: '%s'", err)
 	}
 }
 
@@ -81,17 +81,17 @@ func getExifTools() string {
 
 	ex, err := os.Executable()
 	if err != nil {
-		fmt.Printf("Unable to use custom exiftool: '%s'\n", err)
-		exifTool = "exiftool"
+		log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, defaultExiftool)
+		exifTool = defaultExiftool
 	} else {
 		exifTool, err = filepath.Abs(path.Join(filepath.Dir(ex), "exiftool", "exiftool.exe"))
 		if err != nil {
-			fmt.Printf("Unable to use custom exiftool: '%s'\n", err)
-			exifTool = "exiftool"
+			log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, defaultExiftool)
+			exifTool = defaultExiftool
 		}
 		if _, err := os.Stat(exifTool); os.IsNotExist(err) {
-			fmt.Printf("Unable to use custom exiftool: '%s'\n", err)
-			exifTool = "exiftool"
+			log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, defaultExiftool)
+			exifTool = defaultExiftool
 		}
 	}
 	return exifTool
@@ -106,18 +106,20 @@ func removeDir(dirName string, removeNonEmpty bool) {
 func checkDirEmpty(dirName string) bool {
 	d, err := os.Open(dirName)
 	if err != nil {
-		fmt.Printf("'%v' unable to open", dirName)
+		log.Debugf("'%v' unable to open", dirName)
 		return false
 	}
 	defer d.Close()
 
 	stat, err := d.Stat()
 	if err != nil || !stat.IsDir() {
+		log.Debugf("'%v' is file and cannot be deleted", dirName)
 		return false
 	}
 
 	names, err := d.Readdirnames(-1)
 	if err != nil {
+		log.Debugf("Unable to list '%v' children", dirName)
 		return false
 	}
 
@@ -129,4 +131,8 @@ func checkDirEmpty(dirName string) bool {
 	}
 
 	return true
+}
+
+func printCommandArgs(cmd *cobra.Command, args []string) {
+	log.Debugf("%v called with '%v' args", cmd.CommandPath, strings.Join(args, " "))
 }

@@ -18,10 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"path/filepath"
-	"strings"
-
 	"github.com/spf13/cobra"
 )
 
@@ -35,12 +31,12 @@ var fixDatesCmd = &cobra.Command{
 	files argument may be dir (proces all files) or wildcards file names (process only matched files)`,
 	Args: cobra.RangeArgs(0, 1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("fixDates called " + strings.Join(args, " "))
+		printCommandArgs(cmd, args)
 
-		files := extractFiles(args)
-		fmt.Printf("files to process: '%s'\n", files)
+		files := extractPath(args, 0, ".")
+		log.Infof("files to process: '%s'", files)
 
-		fmt.Printf("recursively: %v\n", recursively)
+		log.Infof("recursively: %v", recursively)
 
 		exifToolArgs := []string{"-v2", "-ImageDate<filename", "-VideoDate<filename", "-FileDate<filename", files}
 
@@ -65,15 +61,4 @@ func init() {
 	// is called directly, e.g.:
 	// fixDatesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	fixDatesCmd.Flags().BoolVarP(&recursively, "recursively", "r", false, "also analyze child directories")
-}
-
-func extractFiles(args []string) string {
-	if len(args) > 0 {
-		dstDir, err := filepath.Abs(args[0])
-		if err != nil {
-			panic(err)
-		}
-		return dstDir
-	}
-	return "."
 }

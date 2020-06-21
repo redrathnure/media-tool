@@ -18,9 +18,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/spf13/cobra"
 )
 
@@ -31,15 +28,15 @@ var photosCmd = &cobra.Command{
 	Long:  `Copy images from sourceDir to ditargetDirsk. By default creates subdirectories by dates.`,
 	Args:  cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("photos called " + strings.Join(args, " "))
+		printCommandArgs(cmd, args)
 
 		src := extractPath(args, 0, ".")
-		fmt.Printf("src: '%s'\n", src)
+		log.Infof("src: '%s'", src)
 
 		dstDir := extractPath(args, 1, "d:\\tmp\\test")
-		fmt.Printf("dst: '%s'\n", dstDir)
+		log.Infof("dst: '%s'", dstDir)
 
-		fmt.Printf("dry ryn: %v\n", DryRun)
+		log.Infof("dry ryn: %v", DryRun)
 
 		tagName := "FileName"
 		if DryRun {

@@ -26,7 +26,8 @@ func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (
 
 	mtpDeviceCount := gowpd.GetDeviceCount()
 	for i := 0; i < mtpDeviceCount; i++ {
-		fmt.Printf("Checking MTP#%v - %v (%v)...\n", i, gowpd.GetDeviceName(i), gowpd.GetDeviceDescription(i))
+		mtpLabel := buildMtpDeviceLabel(i)
+		log.Infof("Checking MTP#%v - '%s'...", i, mtpLabel)
 
 		dev, err := gowpd.ChooseDevice(i)
 		if err != nil {
@@ -36,11 +37,11 @@ func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (
 		tmpDir := path.Join(resultDir, fmt.Sprint(i))
 		err = os.MkdirAll(tmpDir, os.ModeDir)
 		if err != nil {
-			fmt.Printf("Unable to create '%v' temp directory. MTP#%v - %v (%v) was skipped\n", tmpDir, i, gowpd.GetDeviceName(i), gowpd.GetDeviceDescription(i))
+			log.Warningf("Unable to create '%v' temp directory. MTP#%v - '%s' was skipped", tmpDir, i, mtpLabel)
 			continue
 		}
 
-		fmt.Printf("Files will be downloaded into '%v' temp directory\n", tmpDir)
+		log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
 
 		wpdRootDir := gowpd.PathSeparator + deviceDir
 		files := listWpdDir(dev, wpdRootDir)
@@ -59,6 +60,10 @@ func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (
 	//return "", fmt.Errorf("No '%v' WPD devices was found", deviceDescriptionFilter)
 }
 
+func buildMtpDeviceLabel(deviceNumber int) string {
+	return fmt.Sprintf("%v (%v)", gowpd.GetDeviceName(deviceNumber), gowpd.GetDeviceDescription(deviceNumber))
+}
+
 func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir string, removeFromOrigin bool) (string, error) {
 	err := gowpd.Init()
 	defer gowpd.Destroy()
@@ -69,7 +74,8 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 
 	mtpDeviceCount := gowpd.GetDeviceCount()
 	for i := 0; i < mtpDeviceCount; i++ {
-		fmt.Printf("Checking MTP#%v - %v (%v)...\n", i, gowpd.GetDeviceName(i), gowpd.GetDeviceDescription(i))
+		mtpLabel := buildMtpDeviceLabel(i)
+		log.Infof("Checking MTP#%v - '%s'...", i, mtpLabel)
 
 		if strings.Contains(gowpd.GetDeviceDescription(i), deviceDescriptionFilter) || strings.Contains(gowpd.GetDeviceName(i), deviceDescriptionFilter) {
 
@@ -81,10 +87,11 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 			tmpDir := generateTmpDir(targetDir)
 			err = os.MkdirAll(tmpDir, os.ModeDir)
 			if err != nil {
+				log.Warningf("Unable to create '%v' temp directory. MTP#%v - '%s' was skipped", tmpDir, i, mtpLabel)
 				return "", err
 			}
 
-			fmt.Printf("Files will be downloaded into '%v' temp directory\n", tmpDir)
+			log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
 
 			wpdRootDir := gowpd.PathSeparator + deviceDir
 			files := listWpdDir(dev, wpdRootDir)
@@ -100,14 +107,14 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 			return tmpDir, nil
 		}
 
-		fmt.Printf("MTP#%v is not a GoPro device\n", i)
+		log.Infof("MTP#%v is not a GoPro device", i)
 	}
 
-	return "", fmt.Errorf("No '%v' WPD devices was found", deviceDescriptionFilter)
+	return "", fmt.Errorf("No '%v' MTP devices was found", deviceDescriptionFilter)
 }
 
 func printWpdFile(file *wpdFile) {
-	fmt.Printf("%v (isDir: %v)\n", file.filePath, file.wpdObject.IsDir)
+	log.Infof("%v (isDir: %v)", file.filePath, file.wpdObject.IsDir)
 
 	for _, file := range file.chidren {
 		printWpdFile(file)
@@ -121,7 +128,7 @@ func generateTmpDir(targetDir string) string {
 func listWpdDir(dev *gowpd.Device, dir string) map[string]*wpdFile {
 	obj := dev.FindObject(dir)
 	if obj == nil {
-		fmt.Printf("%v was not found.\n", dir)
+		log.Warningf("%v was not found.", dir)
 		return make(map[string]*wpdFile)
 	}
 
@@ -144,7 +151,6 @@ func sizeToLabel(size int64) string {
 }
 
 func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string) {
-
 	if wpdFile.wpdObject.IsDir {
 		for _, child := range wpdFile.chidren {
 			copyFromWpd(child, wpdRootDir, tmpDir)
@@ -153,16 +159,16 @@ func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string) {
 		relWpdFilePath := wpdFile.relPath(wpdRootDir)
 		targetFile := filepath.Join(tmpDir, relWpdFilePath)
 
-		fmt.Printf("Copying from '%v' to %v... ", wpdFile.filePath, targetFile)
+		log.Debugf("Copying from '%v' to %v... ", wpdFile.filePath, targetFile)
 		targetDir := filepath.Dir(targetFile)
 		os.MkdirAll(targetDir, os.ModeDir)
 
 		copyCount, error := wpdFile.copyTo(targetFile)
 
 		if error != nil {
-			fmt.Printf("filed - %v\n", error)
+			log.Infof("Copy of '%v' - filed - %v", wpdFile.filePath, error)
 		} else {
-			fmt.Printf("done ('%v')\n", sizeToLabel(copyCount))
+			log.Infof("Copy of '%v' - done ('%v')", wpdFile.filePath, sizeToLabel(copyCount))
 			wpdFile.wasCopied = true
 		}
 	}
@@ -170,17 +176,17 @@ func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string) {
 
 func removeFromWpd(wpdFiles map[string]*wpdFile) {
 	for _, file := range wpdFiles {
-		fmt.Printf("Deleting '%v'...", file.filePath)
-		if file.wasCopied {
+		log.Debugf("Deleting '%v'...", file.filePath)
 
+		if file.wasCopied {
 			err := file.deleteFile()
 			if err != nil {
-				fmt.Printf(" failed: %v\n", err)
+				log.Infof("Deleting of '%v' - failed: %v", file.filePath, err)
 			} else {
-				fmt.Printf(" done\n")
+				log.Infof("Deleting of '%v' - done", file.filePath)
 			}
 		} else {
-			fmt.Printf(" skipped\n")
+			log.Infof("Deleting of '%v' - skipped", file.filePath)
 		}
 
 		removeFromWpd(file.chidren)

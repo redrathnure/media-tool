@@ -160,7 +160,6 @@ Processing : Get_started_with_GoPro.url ( Get_started_with_GoPro.url)
 
 
 TODO list
-* Use logging
 ** Extract logging format to the config
 * Remove sr from videcam
 * Parse exiftool output. Warning: [minor] to debug

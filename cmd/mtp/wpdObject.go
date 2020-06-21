@@ -1,7 +1,6 @@
 package mtp
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/tobwithu/gowpd"
@@ -48,7 +47,7 @@ func (wf wpdFile) initChildren() {
 		}
 		rel := filepath.Join(curPath, o.Name)
 
-		fmt.Printf("Found: %v \n", rel)
+		log.Debugf("Found: %v", rel)
 
 		child := newWpdFile(wf.filePath, wf.wpdDevice, o)
 		wf.chidren[child.fileName] = &child
@@ -58,7 +57,7 @@ func (wf wpdFile) initChildren() {
 func (wf wpdFile) relPath(basepath string) string {
 	result, err := filepath.Rel(basepath, wf.filePath)
 	if err != nil {
-		fmt.Printf("Unable to calculate relative path for %v regarding %v \n", wf.filePath, basepath)
+		log.Warningf("Unable to calculate relative path for '%v' against to '%v'", wf.filePath, basepath)
 		result = wf.filePath
 	}
 	return result

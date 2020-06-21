@@ -18,8 +18,7 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-	"strings"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -36,21 +35,22 @@ var goproCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(1, 1),
 	Aliases: []string{"GoPro"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("gopro called " + strings.Join(args, " "))
+		printCommandArgs(cmd, args)
 
-		fmt.Printf("src: 'GoPro' media\n")
+		log.Infof("src: 'GoPro' media")
 
 		dstDir := extractPath(args, 0, ".")
-		fmt.Printf("dst: '%s'\n", dstDir)
+		log.Infof("dst: '%s'", dstDir)
 
-		fmt.Printf("dry ryn: %v\n", DryRun)
+		log.Infof("dry ryn: %v", DryRun)
 
 		src, err := mtp.LoadFromWpd("HERO", "DCIM", dstDir, !DryRun)
 		if err != nil {
-			panic(err)
+			log.Errorf("Unable to copy GoPro files: %v", err)
+			os.Exit(1)
 		}
 		defer removeDir(src, DryRun)
-		fmt.Printf("Files were downloaded to: %v\n", src)
+		log.Infof("Files were downloaded to: %v", src)
 
 		tagName := "FileName"
 		if DryRun {
