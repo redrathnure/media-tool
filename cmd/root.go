@@ -19,10 +19,11 @@ package cmd
 
 import (
 	"os"
+	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -40,10 +41,6 @@ var rootCmd = &cobra.Command{
 	Short: "Tooling to handle video and photo content",
 	Long: `Application for importing and correction of video and photo 
 	materials from digital video about photo cameras.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
-
 	Version: version,
 }
 
@@ -59,20 +56,11 @@ func Execute() {
 func init() {
 	initLogger()
 
+	cobra.OnInitialize(initLoggerLevel)
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.media-tool.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.media-tool/media-tool.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Print debug messages")
-
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -81,24 +69,23 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			log.Error(err)
-			os.Exit(1)
+		viper.SetConfigName("media-tool")
+		viper.SetConfigType("yml")
+
+		if ex, err := os.Executable(); err == nil {
+			rootConfigDir := path.Join(filepath.Dir(ex), "conf")
+			viper.AddConfigPath(rootConfigDir)
 		}
 
-		// Search config in home directory with name ".media-tool" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".media-tool")
+		viper.AddConfigPath("/etc/media-tool")
+		viper.AddConfigPath("$HOME/.media-tool")
+		viper.AddConfigPath("./conf")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
+	viper.AutomaticEnv()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		log.Debugf("Using config file:", viper.ConfigFileUsed())
+		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
-
-	initLoggerLevel()
 }
