@@ -29,7 +29,7 @@ var fixDatesCmd = &cobra.Command{
 	Short: "Fix EXIF/Quicktime dates",
 	Long: `Reads dates from file name and put into EXIF and Quicktime metadata attributes. 
 	files argument may be dir (proces all files) or wildcards file names (process only matched files)`,
-	Args: cobra.RangeArgs(0, 1),
+	Args: cobra.RangeArgs(1, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		printCommandArgs(cmd, args)
 
@@ -38,27 +38,26 @@ var fixDatesCmd = &cobra.Command{
 
 		log.Infof("recursively: %v", recursively)
 
-		exifToolArgs := []string{"-v2", "-ImageDate<filename", "-VideoDate<filename", "-FileDate<filename", files}
+		exifTool := getExifTool()
 
+		//Images and video
+		imgArgs := exifTool.newArgs()
+		imgArgs.changeFileDate("filename")
+		imgArgs.changeExifDate("filename")
+		imgArgs.changeMp4Date("filename")
+		//imgArgs.forImages()
+		//imgArgs.forVideoMp4()
 		if recursively {
-			exifToolArgs = append(exifToolArgs, "-r")
+			imgArgs.recursively()
 		}
+		imgArgs.src(files)
 
-		execExifTool(exifToolArgs)
+		exifTool.exec(imgArgs)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(fixDatesCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// fixDatesCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// fixDatesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	fixDatesCmd.Flags().BoolVarP(&recursively, "recursively", "r", false, "also analyze child directories")
 }

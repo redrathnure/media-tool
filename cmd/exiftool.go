@@ -145,8 +145,25 @@ func (toolArgs *exifToolArgs) changeTag(tagName string, tagValue string) {
 }
 
 func (toolArgs *exifToolArgs) changeFileDate(tagValue string) {
+	//File:
 	toolArgs.changeTag("FileModifyDate", tagValue)
 	toolArgs.changeTag("FileCreateDate", tagValue)
+}
+
+func (toolArgs *exifToolArgs) changeExifDate(tagValue string) {
+	//'EXIF:
+	toolArgs.changeTag("CreateDate", tagValue)
+	toolArgs.changeTag("DateTimeOriginal", tagValue)
+}
+
+func (toolArgs *exifToolArgs) changeMp4Date(tagValue string) {
+	//quicktime:
+	toolArgs.changeTag("CreateDate", tagValue)
+	toolArgs.changeTag("ModifyDate", tagValue)
+	toolArgs.changeTag("TrackCreateDate", tagValue)
+	toolArgs.changeTag("TrackModifyDate", tagValue)
+	toolArgs.changeTag("MediaCreateDate", tagValue)
+	toolArgs.changeTag("MediaModifyDate", tagValue)
 }
 
 func init() {
