@@ -172,3 +172,4 @@ TODO list
 * Prepare Readme
 * Copy speed indicator
 * systemDir = "System Volume Information" //TODO take care about recycle bin
+* exiftool -short -groupNames -if "$file:MIMEType=~/video/i" * for image and video
