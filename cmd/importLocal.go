@@ -32,7 +32,8 @@ var importLocal = &cobra.Command{
 	Use:   "local sourceDir [targetDir]",
 	Short: "Import media from local directory",
 	Long: `Copy images and video from directory to disk. 
-	By default creates subdirectories by dates and  keep original file name.`,
+	By default creates subdirectories by dates and  keep original file name.
+	Combination of -f . -r flags and same src and dst dirs may be used to corrent file names and creation date`,
 	Args: cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		printCommandArgs(cmd, args)
