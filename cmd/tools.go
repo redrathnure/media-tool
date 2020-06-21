@@ -134,5 +134,5 @@ func checkDirEmpty(dirName string) bool {
 }
 
 func printCommandArgs(cmd *cobra.Command, args []string) {
-	log.Debugf("%v called with '%v' args", cmd.CommandPath, strings.Join(args, " "))
+	log.Debugf("%s called with '%v' args", cmd.CommandPath(), strings.Join(args, " "))
 }
