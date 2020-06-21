@@ -156,3 +156,20 @@ Processing : Get_started_with_GoPro.url ( Get_started_with_GoPro.url)
 #DCIM\100GOPRO\GH010189.MP4, ModTime:0, Size: 159427, ChildCount: -1
 #Get_started_with_GoPro.url, ModTime:0, Size: 139, ChildCount: -1
 0 - HERO8 BLACK (HERO8 BLACK)
+
+
+
+TODO list
+* Use logging
+** Extract logging format to the config
+* Remove sr from videcam
+* Parse exiftool output. Warning: [minor] to debug
+* Config
+* Remember latest used folder
+* Build script + prepare arhive
+* Update version based on git info
+* Store image and videos formats to the config (mp4 and tsd)
+* Put tags istead non standard tag aliases
+* Prepare Readme
+* Copy speed indicator
+* systemDir = "System Volume Information" //TODO take care about recycle bin
