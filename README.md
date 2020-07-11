@@ -1,175 +1,90 @@
+# Media Toolkit
 
+TL;TR 
+Tool to import video and photos from cameras like GoPro, Nikon DSLR or Panasonic camcoders. Plus additional features to correct file and EXIF/metadata dates. For Windows users only (at least now).
 
+## Motivation
 
+Primary goal was to simplify import from various digital cameras.   
+Each device has "own way" how to be connected to PC/Laptop and how to name files. I need a tool which will abstragate me from all this differences and copy media files to my laptop with needed (for me) naming. Ideally doing this automatically without any additional questions.Also I would like to get rid of proprietary and/or outdated applications like HD Writer.   
 
-## additional info
-ffprobe -v quiet VID_20200611_115538.MP4 -print_format json -show_entries stream_tags:format_tags
+So, my base workflow has following points:
+1. I have a place for home/family video and separate place for photos. 
+2. All media files organized by date (e.g. `2020.01.02` or `2020.01.02_Awesome_Event`). `YYYY.MM.DD` date format help me in searching, processing an arhivig activities. 
+3. I came to ide to have unified file naming scheme with timestamp in file name. e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`. Especially I dislike GoPro naming :) 
+4. Sometimes I need to parse date from file name and put it into the embeded metadata (EXIF for photo and QuickTime attributes for video).
 
-ffprobe -v quiet VID_20200611_115538.MP4 -print_format json -show_entries stream_tags:format_tags
+This application was designed according to these points. And as extra goal, I want to practice in GoLang programming a bit :)
 
 
-ffprobe -v quiet VID_20200611_115538.MP4 -print_format json  -show_format
-{
-    "format": {
-        "filename": "VID_20200611_115538.MP4",
-        "nb_streams": 5,
-        "nb_programs": 0,
-        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
-        "format_long_name": "QuickTime / MOV",
-        "start_time": "0.000000",
-        "duration": "50.730667",
-        "size": "382249905",
-        "bit_rate": "60279105",
-        "probe_score": 100,
-        "tags": {
-            "major_brand": "mp41",
-            "minor_version": "538120216",
-            "compatible_brands": "mp41",
-            "creation_time": "2020-06-11T11:55:38.000000Z",
-            "firmware": "HD8.01.01.60.00"
-        }
-    }
-}
+*WARNING* You use it at your own risk and without any warranties. Author is not responsible for any kind of loss or damage of your data. It is strongly recommended to make backups. 
 
+## Installation
 
-Go
-https://github.com/smith-30/go-ffprobe/blob/master/ffprobe.go
-https://github.com/asticode/go-astiffprobe
+Step 1. Installing Application
 
-https://github.com/dsoprea/go-exiftool
-https://github.com/barasher/go-exiftool
+Build project, e.g. by executing `go build` command and copy result `media-tool.exe` file to some convinient location. If you prefer CLI interface it has sense to add this location to `$PATH`. Otherwise windows shortcuts may be good alternative (e.g. several shortcuts for different cases with well recognized icons). 
 
+Step 2. Installing Exiftool
 
-exiftool
-https://exiftool.org/#running
-https://exiftool.org/faq.html#Q5
+Application uses [ExifTool by Phil Harvey](https://exiftool.org/) to perform files and metadata manipulations. Please visit https://exiftool.org/ and download stable version. I use 12.01 for Windows. `exiftool.exe` should be placed into `APP_DIR\exiftool` dir OR into any `$PATH` location.
 
-exiftool -short -groupNames 
-exiftool.exe -short -groupNames
+Step 3. (optional) Prepare Default Configuration
 
-Exiftool –quicktime:createdate=2015:03:07 11:08:19 :\march_7_kiteboarding\FILE0020.mp4
+`$HOME\.media-tool\media-tool.yaml` OR `APP_DIR\conf\media-tool.yml` file contains configuration for default locations. May be ussefull if media files always should be imported to the same location(s). Please see `media-tool.example.yml` file and chapters bellow for more details.
 
-exiftool -v2 -quicktime:CreateDate="2015:03:07 11:08:19" -quicktime:ModifyDate="2015:03:07 11:08:19" -quicktime:TrackCreateDate="2015:03:07 11:08:19" quicktime:TrackCreateDate="2015:03:07 11:08:19" quicktime:TrackModifiedDate="2015:03:07 11:08:19" quicktime:MediaCreateDate="2015:03:07 11:08:19" quicktime:MediaModifyDate="2015:03:07 11:08:19" FILE0020.mp4
-exiftool -v2 -quicktime:CreateDate="2015:03:07 11:08:19" -quicktime:ModifyDate="2015:03:07 11:08:19" -quicktime:TrackCreateDate="2015:03:07 11:08:19" -quicktime:TrackCreateDate="2015:03:07 11:08:19" -quicktime:TrackModifyDate="2015:03:07 11:08:19" -quicktime:MediaCreateDate="2015:03:07 11:08:19" -quicktime:MediaModifyDate="2015:03:07 11:08:19" FILE0020.mp4
 
+## Commands And Common Usage Tips
 
-exiftool -v2 "-quicktime:CreateDate<filename" "-quicktime:ModifyDate<filename" "-quicktime:TrackCreateDate<filename" "-quicktime:TrackCreateDate<filename" "-quicktime:TrackModifyDate<filename" "-quicktime:MediaCreateDate<filename" "-quicktime:MediaModifyDate<filename" FILE0020.mp4
+Application provides several commands for differnt case. Please use `media-tool -h` or `media-tool cmd -h` to get description and related arguments.
 
-exiftool "-alldates<filename"
+Each command has `--config` or `-c` arg to specify configuration file from non default location. May be usefull if `$HOME\.media-tool\media-tool.yaml` OR `APP_DIR\conf\media-tool.yml` do not work well or if you just need to keep two or more configurations.
 
+Each commang has `-v` or `--verbose` arg which enable extra logging and may be useful for troubleshooting or initial learning phase.
 
-%Image::ExifTool::UserDefined::Shortcuts = (
-    VideoDate => ['quicktime:CreateDate', 'quicktime:ModifyDate', 'quicktime:TrackCreateDate', 'quicktime:TrackCreateDate', 'quicktime:TrackModifyDate', 'quicktime:MediaCreateDate', 'quicktime:MediaModifyDate'],
-    FileDate => ['File:FileModifyDate','File:FileAccessDate','File:FileCreateDate'],
-);
+And almost every command has `-d` or `--dry` arg which may be used to simulate import wihtout any file removal.
 
+And finally, all import commands work in two steps 1. is to copy files from device to temp folder and 2. come files from temp folder to target one. If media file cannot be processed (e.g. incorect/unexpected format or not enought disk space) these files will stay in temp directory. So pleasse check your temp directoy (and related configuration) in case of any issues.
 
-exiftool -v2 "-videodate<filename"
+### Import GoPro Video
 
-exiftool -v2 -videodate="2010:03:04 18:51:58+02:00" - TZ does not work
+`media-tool import gopro` command try to find connected GoPro camera and import files into specified directory.   
+If target dir was not specified, command takes it from config file.   
+Was tested with GoPro HERO8, however should also work with HERO 7 model.   
 
-exiftool -v2 "-videodate<filename" "-filedate<filename"
+### Import Photos
 
-exiftool -v2 "-ImageDate<filename" "-VideoDate<filename" "-FileDate<filename"
+`media-tool import sdphotos` command try to find SD cart from DSLR cameras and import photos into specified directory. 
+If target dir was not specified, command takes it from config file.   
+Was tested with Nikon D800, however should also work with everything what stores `jpeg` or `NEF` files in `DCIM` folder.   
 
+### Import Video From Panasonic Camcorder
 
+`media-tool import camvideo` command try to find connected camcoderand import video into specified directory. 
+If target dir was not specified, command takes it from config file. WARNING Seems Panasonic cameras expose ReadOnly storage, this is why after successful import you have to manually remove files from camera.  
+Was tested with Panasoic HC-V700 camera.
 
 
-exiftool "-FileName<CreateDate" -d "%Y%m%d_%H%M%S.%%e" DIR
-Or a new directory can be specified by setting the value of the Directory tag. For example, the following command moves all images originally in directory "DIR" into a directory hierarchy organized by year/month/day:
+### Organize Files By Date
 
-exiftool "-Directory<DateTimeOriginal" -d "%Y.%m.%d" -d -ext jpg .
+`media-tool import local` command suppose to move vide and image files from one local directory to another with creating date folders (e.g. `2020.01.02`).
 
 
+### Correcting Photo and Video Dates
 
-File name
-https://exiftool.org/filename.html
-https://exiftool.org/filename.html#ex6
+`media-tool import fixDates` command will try to read date from file name and put it to the EXIF or QuickTime metadata. Also command will try to set file creating date. May be useful for files after post processing.
 
-FileName, Directory or TestName 
+## Technical Remarks
 
+### How to Build
+Install GO v1.14.4 or later and execute `go build` from root directy.
 
-exiftool -d %Y%m%d_%H%M%%-c.%%e "-testname<CreateDate" tmp
 
-
-exiftool -d  %Y.%m.%d/src/%Y%m%d_%H%M%S%-c.%%e "-testname<quicktime:CreateDate" 
-exiftool -d %Y.%m.%d\src\VID_%Y%m%d_%H%M%S%-c.%%e "-testname<CreateDate"
-
-
-
-
-exiftool "-FileName<DateTimeOriginal" -d %Y.%m.%d\%%f%%-c.%%e -ext jpg .
-exiftool "-FileName<DateTimeOriginal" -d %Y.%m.%d\%%f%%-c.%%e -ext jpg .
-exiftool "-FileName<CreateDateTime" -d %Y.%m.%d\%%f%%-c.%%e -ext jpg .
-
-
-
-
-
-CO CLI
-https://github.com/spf13/cobra
-
-https://github.com/alecthomas/kong
-https://github.com/alecthomas/kingpin
-
-
-
-https://pkg.go.dev/github.com/spf13/viper?tab=overview
-
-
-GO todos
-https://taskfile.dev/#/installation
-https://taskfile.dev/#/
-
-
-
-
-Progress
--v0 
-
-
-MTP
-
-
-
-src: 'mtp:'
-=== #0
-0 - HERO8 BLACK (HERO8 BLACK)
-s4#DCIM, ModTime:0, Size: 0, ChildCount: 1
-#DCIM\100GOPRO, ModTime:0, Size: 0, ChildCount: 1
-#DCIM\100GOPRO\GH010189.MP4, ModTime:0, Size: 159427, ChildCount: -1
-#Get_started_with_GoPro.url, ModTime:0, Size: 139, ChildCount: -1
-
-
-d:\dev\src\_tools\media-tool>media-tool import gopro
-gopro called
-src: 'mtp:'
-Checking MTP#0
-path separator: \
-s4obj: &{{0 0 true} 0 s4 DEVICE  99ed0160-17ff-4c44-9d98-1d7a6f941921}
-Processing : DCIM ( DCIM)
-Processing : DCIM\100GOPRO (DCIM 100GOPRO)
-Processing : DCIM\100GOPRO\GH010189.MP4 (DCIM\100GOPRO GH010189.MP4)
-Processing : Get_started_with_GoPro.url ( Get_started_with_GoPro.url)
-#DCIM, ModTime:0, Size: 0, ChildCount: 1
-#DCIM\100GOPRO, ModTime:0, Size: 0, ChildCount: 1
-#DCIM\100GOPRO\GH010189.MP4, ModTime:0, Size: 159427, ChildCount: -1
-#Get_started_with_GoPro.url, ModTime:0, Size: 139, ChildCount: -1
-0 - HERO8 BLACK (HERO8 BLACK)
-
-
-
-TODO list
-** Extract logging format to the config
-* Remove sr from videcam
+### TODOs
+* Extract logging format to the config
 * Parse exiftool output. Warning: [minor] to debug
-* Config
-* Remember latest used folder
-* Build script + prepare arhive
-* Update version based on git info
+* Build script + prepare installation package
+* Update version based on git blame
 * Store image and videos formats to the config (mp4 and tsd)
-* Put tags istead non standard tag aliases
-* Prepare Readme
-* Copy speed indicator
-* systemDir = "System Volume Information" //TODO take care about recycle bin
-* exiftool -short -groupNames -if "$file:MIMEType=~/video/i" * for image and video
+* Coping speed and progress indicator
+* try exiftool -short -groupNames -if "$file:MIMEType=~/video/i" * for image and video
