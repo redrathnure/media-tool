@@ -125,6 +125,10 @@ func (toolArgs *exifToolArgs) forVideoMp4() {
 	toolArgs.add("-ext", "mp4")
 }
 
+func (toolArgs *exifToolArgs) forVideoLrv() {
+	toolArgs.add("-ext", "LRV")
+}
+
 func (toolArgs *exifToolArgs) forVideoAvchd() {
 	toolArgs.add("-ext", "mts")
 }
