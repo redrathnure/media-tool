@@ -112,6 +112,9 @@ var goproCmd = &cobra.Command{
 		vidPreviewArgs.src(src)
 
 		exifTool.exec(vidPreviewArgs)
+
+		removeFiles(src, "leinfo.sav")
+		removeFiles(src, "**\\*.THM")
 	},
 }
 

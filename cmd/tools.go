@@ -56,6 +56,20 @@ func removeDir(dirName string, removeNonEmpty bool) {
 	}
 }
 
+func removeFiles(baseDir string, glob string) {
+	files, err := filepath.Glob(baseDir + "\\" + glob)
+	if err != nil {
+		log.Warningf("Unable to open scan '%v' with '%v' pattern", baseDir, glob)
+	}
+	for _, file := range files {
+
+		err := os.Remove(file)
+		if err != nil {
+			log.Warningf("'%v' unable to remove", file)
+		}
+	}
+}
+
 func checkDirEmpty(dirName string) bool {
 	d, err := os.Open(dirName)
 	if err != nil {
