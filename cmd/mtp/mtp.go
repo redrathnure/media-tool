@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/tobwithu/gowpd"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (string, error) {
@@ -41,17 +43,23 @@ func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (
 			continue
 		}
 
-		log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
-
 		wpdRootDir := gowpd.PathSeparator + deviceDir
 		files := listWpdDir(dev, wpdRootDir)
 
-		for _, file := range files {
-			copyFromWpd(file, wpdRootDir, tmpDir)
-		}
+		if len(files) > 0 {
+			log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
 
-		if removeFromOrigin {
-			removeFromWpd(files)
+			progressBar := pb.Full.Start(len(files))
+
+			for _, file := range files {
+				copyFromWpd(file, wpdRootDir, tmpDir, progressBar)
+			}
+
+			if removeFromOrigin {
+				removeFromWpd(files)
+			}
+
+			progressBar.Finish()
 		}
 	}
 
@@ -89,17 +97,21 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 				return "", err
 			}
 
-			log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
-
 			wpdRootDir := gowpd.PathSeparator + deviceDir
 			files := listWpdDir(dev, wpdRootDir)
 
-			for _, file := range files {
-				copyFromWpd(file, wpdRootDir, tmpDir)
-			}
+			if len(files) > 0 {
+				log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
 
-			if removeFromOrigin {
-				removeFromWpd(files)
+				progressBar := pb.Full.Start(len(files))
+				for _, file := range files {
+					copyFromWpd(file, wpdRootDir, tmpDir, progressBar)
+				}
+				progressBar.Finish()
+
+				if removeFromOrigin {
+					removeFromWpd(files)
+				}
 			}
 
 			return tmpDir, nil
@@ -126,7 +138,7 @@ func generateTmpDir(targetDir string) string {
 func listWpdDir(dev *gowpd.Device, dir string) map[string]*wpdFile {
 	obj := dev.FindObject(dir)
 	if obj == nil {
-		log.Warningf("%v was not found.", dir)
+		log.Debugf("%v was not found.", dir)
 		return make(map[string]*wpdFile)
 	}
 
@@ -148,16 +160,21 @@ func sizeToLabel(size int64) string {
 		float64(size)/float64(div), "KMGTPE"[exp])
 }
 
-func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string) {
+func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string, progressBar *pb.ProgressBar) {
 	if wpdFile.wpdObject.IsDir {
-		for _, child := range wpdFile.chidren {
-			copyFromWpd(child, wpdRootDir, tmpDir)
+		children := wpdFile.chidren
+
+		progressBar.AddTotal(int64(len(children)))
+
+		for _, child := range children {
+			copyFromWpd(child, wpdRootDir, tmpDir, progressBar)
 		}
 	} else {
 		relWpdFilePath := wpdFile.relPath(wpdRootDir)
 		targetFile := filepath.Join(tmpDir, relWpdFilePath)
 
 		log.Debugf("Copying from '%v' to %v... ", wpdFile.filePath, targetFile)
+		progressBar.Set("prefix", fmt.Sprintf("[%v]", relWpdFilePath))
 		targetDir := filepath.Dir(targetFile)
 		os.MkdirAll(targetDir, os.ModeDir)
 
@@ -166,10 +183,12 @@ func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string) {
 		if error != nil {
 			log.Infof("Copy of '%v' - filed - %v", wpdFile.filePath, error)
 		} else {
-			log.Infof("Copy of '%v' - done ('%v')", wpdFile.filePath, sizeToLabel(copyCount))
+			log.Debugf("Copy of '%v' - done ('%v')", wpdFile.filePath, sizeToLabel(copyCount))
 			wpdFile.wasCopied = true
 		}
 	}
+
+	progressBar.Increment()
 }
 
 func removeFromWpd(wpdFiles map[string]*wpdFile) {
@@ -181,7 +200,7 @@ func removeFromWpd(wpdFiles map[string]*wpdFile) {
 			if err != nil {
 				log.Infof("Deleting of '%v' - failed: %v", file.filePath, err)
 			} else {
-				log.Infof("Deleting of '%v' - done", file.filePath)
+				log.Debugf("Deleting of '%v' - done", file.filePath)
 			}
 		} else {
 			log.Infof("Deleting of '%v' - skipped", file.filePath)
