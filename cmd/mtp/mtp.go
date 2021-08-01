@@ -174,7 +174,7 @@ func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string, progressBar
 		targetFile := filepath.Join(tmpDir, relWpdFilePath)
 
 		log.Debugf("Copying from '%v' to %v... ", wpdFile.filePath, targetFile)
-		progressBar.Set("prefix", fmt.Sprintf("[%v]", relWpdFilePath))
+		progressBar.Set("prefix", fmt.Sprintf("[%v] ", relWpdFilePath))
 		targetDir := filepath.Dir(targetFile)
 		os.MkdirAll(targetDir, os.ModeDir)
 
