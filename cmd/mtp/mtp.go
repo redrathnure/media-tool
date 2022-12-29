@@ -128,14 +128,6 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 	return "", fmt.Errorf("no '%v' MTP devices was found", deviceDescriptionFilter)
 }
 
-func printWpdFile(file *wpdFile) {
-	log.Infof("%v (isDir: %v)", file.filePath, file.wpdObject.IsDir)
-
-	for _, file := range file.chidren {
-		printWpdFile(file)
-	}
-}
-
 func generateTmpDir(targetDir string) string {
 	return filepath.Join(targetDir, time.Now().Format("20060102_150405"))
 }
