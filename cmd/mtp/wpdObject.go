@@ -18,7 +18,7 @@ type wpdFile struct {
 	wasCopied bool
 	wpdObject *gowpd.Object
 	wpdDevice *gowpd.Device
-	chidren   map[string]*wpdFile
+	chidren   []*wpdFile
 }
 
 func newWpdFile(parentDir string, dev *gowpd.Device, obj *gowpd.Object) wpdFile {
@@ -29,13 +29,13 @@ func newWpdFile(parentDir string, dev *gowpd.Device, obj *gowpd.Object) wpdFile 
 		parentDir: parentDir,
 		filePath:  filepath.Join(parentDir, obj.Name),
 		wasCopied: false,
-		chidren:   make(map[string]*wpdFile),
+		chidren:   make([]*wpdFile, 0),
 	}
 	result.initChildren()
 	return result
 }
 
-func (wf wpdFile) initChildren() {
+func (wf *wpdFile) initChildren() {
 	objs, err := wf.wpdDevice.GetChildObjects(wf.wpdObject.Id)
 	if err != nil {
 		log.Warningf("Unable to read children for %v: %v", wf.filePath, err)
@@ -54,11 +54,11 @@ func (wf wpdFile) initChildren() {
 		log.Debugf("Found: %v", rel)
 
 		child := newWpdFile(wf.filePath, wf.wpdDevice, o)
-		wf.chidren[child.fileName] = &child
+		wf.chidren = append(wf.chidren, &child)
 	}
 }
 
-func (wf wpdFile) relPath(basepath string) string {
+func (wf *wpdFile) relPath(basepath string) string {
 	result, err := filepath.Rel(basepath, wf.filePath)
 	if err != nil {
 		log.Warningf("Unable to calculate relative path for '%v' against to '%v'", wf.filePath, basepath)
@@ -67,7 +67,7 @@ func (wf wpdFile) relPath(basepath string) string {
 	return result
 }
 
-func (wf wpdFile) copyTo(targetFile string, progressBar *pb.ProgressBar) (int64, error) {
+func (wf *wpdFile) copyTo(targetFile string, progressBar *pb.ProgressBar) (int64, error) {
 	obj := wf.wpdObject
 	id := obj.Id
 
@@ -96,7 +96,7 @@ func (wf wpdFile) copyTo(targetFile string, progressBar *pb.ProgressBar) (int64,
 	//return wf.wpdDevice.CopyObjectFromDevice(targetFile, wf.wpdObject)
 }
 
-func (wf wpdFile) deleteFile() error {
+func (wf *wpdFile) deleteFile() error {
 	if !wf.wpdObject.IsDir {
 		return wf.wpdDevice.Delete(wf.wpdObject.Id)
 	}

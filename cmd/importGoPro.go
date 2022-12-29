@@ -7,7 +7,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,13 +59,13 @@ var goproCmd = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadFromWpd("HERO", "DCIM", dstDir, !DryRun)
+		src, err := mtp.LoadFromMatchedWpd("HERO", "DCIM", dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy GoPro files: %v", err)
 			os.Exit(1)
 		}
 		defer removeDir(src, DryRun)
-		log.Infof("Files were downloaded to: %v", src)
+		log.Infof("Files were downloaded to: %v. Moving to target folder...", src)
 
 		tagName := "FileName"
 		if DryRun {

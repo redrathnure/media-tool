@@ -88,12 +88,12 @@ func (fileIt *ExecutionFileIterator) GetFilesTotal() int {
 	return fileIt.plan.GetFilesCount()
 }
 
-func BuildExecutionPlan(rootDirs map[string]*wpdFile) *ExecutionPlan {
-	var result = ExecutionPlan{}
+func BuildExecutionPlan(rootDirs []*wpdFile) *ExecutionPlan {
+	var result = new(ExecutionPlan)
 	for _, file := range rootDirs {
-		addToPlan(file, &result)
+		addToPlan(file, result)
 	}
-	return &result
+	return result
 }
 
 func addToPlan(wpdFile *wpdFile, executionPlan *ExecutionPlan) {
