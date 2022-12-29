@@ -13,6 +13,8 @@ import (
 	"github.com/cheggaaa/pb/v3"
 )
 
+var ProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.}} {{end}}{{counters . "%s/%s" "%s/?"}} ({{speed . "%s/s" "..."}}) {{bar . }} {{percent . "%.0f%%" "?"}} {{rtime . "ETA %s"}}{{with string . "suffix"}} {{.}}{{end}}`
+
 func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (string, error) {
 	err := gowpd.Init()
 	defer gowpd.Destroy()
@@ -47,19 +49,19 @@ func LoadFromAllWpd(deviceDir string, targetDir string, removeFromOrigin bool) (
 		files := listWpdDir(dev, wpdRootDir)
 
 		if len(files) > 0 {
-			log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
+			log.Infof("Scanning '%s' ...", mtpLabel)
 
-			progressBar := pb.Full.Start(len(files))
+			executionPlan := BuildExecutionPlan(files)
+			log.Infof("%v files (%v) will be downloaded into '%v' temp directory", executionPlan.GetFilesCount(), executionPlan.GetTotalSizeString(), tmpDir)
 
-			for _, file := range files {
-				copyFromWpd(file, wpdRootDir, tmpDir, progressBar)
-			}
+			progressBar := ProgressTemplate.Start64(executionPlan.GetTotalSize())
+
+			copyToTmpDir(executionPlan, wpdRootDir, tmpDir, progressBar)
+			progressBar.Finish()
 
 			if removeFromOrigin {
 				removeFromWpd(files)
 			}
-
-			progressBar.Finish()
 		}
 	}
 
@@ -101,12 +103,15 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 			files := listWpdDir(dev, wpdRootDir)
 
 			if len(files) > 0 {
-				log.Infof("Files from '%s' will be downloaded into '%v' temp directory", mtpLabel, tmpDir)
+				log.Infof("Scanning '%s' ...", mtpLabel)
 
-				progressBar := pb.Full.Start(len(files))
-				for _, file := range files {
-					copyFromWpd(file, wpdRootDir, tmpDir, progressBar)
-				}
+				executionPlan := BuildExecutionPlan(files)
+				log.Infof("%v files (%v) will be downloaded into '%v' temp directory", executionPlan.GetFilesCount(), executionPlan.GetTotalSizeString(), tmpDir)
+
+				progressBar := ProgressTemplate.Start64(executionPlan.GetTotalSize())
+
+				copyToTmpDir(executionPlan, wpdRootDir, tmpDir, progressBar)
+
 				progressBar.Finish()
 
 				if removeFromOrigin {
@@ -120,7 +125,7 @@ func LoadFromWpd(deviceDescriptionFilter string, deviceDir string, targetDir str
 		log.Infof("MTP#%v is not a GoPro device", i)
 	}
 
-	return "", fmt.Errorf("No '%v' MTP devices was found", deviceDescriptionFilter)
+	return "", fmt.Errorf("no '%v' MTP devices was found", deviceDescriptionFilter)
 }
 
 func printWpdFile(file *wpdFile) {
@@ -160,25 +165,21 @@ func sizeToLabel(size int64) string {
 		float64(size)/float64(div), "KMGTPE"[exp])
 }
 
-func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string, progressBar *pb.ProgressBar) {
-	if wpdFile.wpdObject.IsDir {
-		children := wpdFile.chidren
+func copyToTmpDir(executionPlan *ExecutionPlan, wpdRootDir string, tmpDir string, progressBar *pb.ProgressBar) {
+	fileIterator := executionPlan.GetFileInterator()
+	for fileIterator.Current() != nil {
+		wpdFile := fileIterator.Current()
 
-		progressBar.AddTotal(int64(len(children)))
-
-		for _, child := range children {
-			copyFromWpd(child, wpdRootDir, tmpDir, progressBar)
-		}
-	} else {
 		relWpdFilePath := wpdFile.relPath(wpdRootDir)
 		targetFile := filepath.Join(tmpDir, relWpdFilePath)
 
 		log.Debugf("Copying from '%v' to %v... ", wpdFile.filePath, targetFile)
-		progressBar.Set("prefix", fmt.Sprintf("[%v] ", relWpdFilePath))
+		progressBar.Set("prefix", fmt.Sprintf("(%v/%v) '%v'", fileIterator.GetFilesCount(), fileIterator.GetFilesTotal(), relWpdFilePath))
+
 		targetDir := filepath.Dir(targetFile)
 		os.MkdirAll(targetDir, os.ModeDir)
 
-		copyCount, error := wpdFile.copyTo(targetFile)
+		copyCount, error := wpdFile.copyTo(targetFile, progressBar)
 
 		if error != nil {
 			log.Infof("Copy of '%v' - filed - %v", wpdFile.filePath, error)
@@ -186,9 +187,9 @@ func copyFromWpd(wpdFile *wpdFile, wpdRootDir string, tmpDir string, progressBar
 			log.Debugf("Copy of '%v' - done ('%v')", wpdFile.filePath, sizeToLabel(copyCount))
 			wpdFile.wasCopied = true
 		}
-	}
 
-	progressBar.Increment()
+		fileIterator.Next()
+	}
 }
 
 func removeFromWpd(wpdFiles map[string]*wpdFile) {

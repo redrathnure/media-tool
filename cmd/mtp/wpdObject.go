@@ -1,8 +1,11 @@
 package mtp
 
 import (
+	"io"
+	"os"
 	"path/filepath"
 
+	"github.com/cheggaaa/pb/v3"
 	"github.com/tobwithu/gowpd"
 )
 
@@ -64,8 +67,33 @@ func (wf wpdFile) relPath(basepath string) string {
 	return result
 }
 
-func (wf wpdFile) copyTo(targetFile string) (int64, error) {
-	return wf.wpdDevice.CopyObjectFromDevice(targetFile, wf.wpdObject)
+func (wf wpdFile) copyTo(targetFile string, progressBar *pb.ProgressBar) (int64, error) {
+	obj := wf.wpdObject
+	id := obj.Id
+
+	reader, err := wf.wpdDevice.GetReader(id)
+	if err != nil {
+		return 0, err
+	}
+	defer reader.Close()
+
+	f, err := os.Create(targetFile)
+	if err != nil {
+		return 0, err
+	}
+	writer := gowpd.NewBufWriteCloser(f, 0)
+	defer writer.Close()
+
+	proxyWriter := progressBar.NewProxyWriter(writer)
+
+	written, err := io.Copy(proxyWriter, reader)
+
+	if err != nil {
+		return 0, err
+	}
+	return written, gowpd.SetFileTime(targetFile, obj.ModTime)
+
+	//return wf.wpdDevice.CopyObjectFromDevice(targetFile, wf.wpdObject)
 }
 
 func (wf wpdFile) deleteFile() error {
