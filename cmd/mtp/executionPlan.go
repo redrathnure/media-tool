@@ -3,8 +3,9 @@ package mtp
 import "fmt"
 
 type ExecutionPlan struct {
-	files     []*wpdFile
-	totalSize int64
+	files      []*wpdFile
+	totalSize  int64
+	wpdRootDir string
 }
 
 type ExecutionFileIterator struct {
@@ -88,8 +89,9 @@ func (fileIt *ExecutionFileIterator) GetFilesTotal() int {
 	return fileIt.plan.GetFilesCount()
 }
 
-func BuildExecutionPlan(rootDirs []*wpdFile) *ExecutionPlan {
+func BuildExecutionPlan(rootDirs []*wpdFile, wpdRootDir string) *ExecutionPlan {
 	var result = new(ExecutionPlan)
+	result.wpdRootDir = wpdRootDir
 	for _, file := range rootDirs {
 		addToPlan(file, result)
 	}

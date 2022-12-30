@@ -13,7 +13,8 @@ import (
 	"github.com/cheggaaa/pb/v3"
 )
 
-var ProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.}} {{end}}{{counters . "%s/%s" "%s/?"}} ({{speed . "%s/s" "..."}}) {{bar . }} {{percent . "%.0f%%" "?"}} {{rtime . "ETA %s"}}{{with string . "suffix"}} {{.}}{{end}}`
+var CopyProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.}} {{end}}{{counters . "%s/%s" "%s/?"}} ({{speed . "%s/s" "..."}}) {{bar . }} {{percent . "%.0f%%" "?"}} {{rtime . "ETA %s"}}{{with string . "suffix"}} {{.}}{{end}}`
+var DeletingProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.}} {{end}}{{counters . "%s/%s" "%s/?"}} {{bar . }} {{percent . "%.0f%%" "?"}} {{rtime . "ETA %s"}}{{with string . "suffix"}} {{.}}{{end}}`
 
 type MtpDownloader struct {
 	resultDir string
@@ -129,17 +130,45 @@ func (downloader *MtpDownloader) copyContentToTempDir(deviceDir string) {
 	if len(wpdRootDirs) > 0 {
 		log.Infof("Scanning %s...", downloader.currentDeviceLabel)
 
-		executionPlan := BuildExecutionPlan(wpdRootDirs)
-		log.Infof("%v file(s) (%v) will be downloaded into '%v' temp directory", executionPlan.GetFilesCount(), executionPlan.GetTotalSizeString(), downloader.tmpDir)
-
-		progressBar := ProgressTemplate.Start64(executionPlan.GetTotalSize())
-		defer progressBar.Finish()
-
-		downloader.copyToTmpDir(executionPlan, wpdRootDirName, progressBar)
-
-		if !downloader.dryRun {
-			downloader.removeFromWpd(wpdRootDirs)
+		executionPlan := BuildExecutionPlan(wpdRootDirs, wpdRootDirName)
+		if executionPlan.IsEmpty() {
+			return
 		}
+		log.Infof("%v file(s) (%v) will be downloaded to '%v' temp directory", executionPlan.GetFilesCount(), executionPlan.GetTotalSizeString(), downloader.tmpDir)
+
+		downloader.copyToTmpDir(executionPlan)
+
+		downloader.removeSrcFiles(executionPlan)
+	}
+}
+
+func (downloader *MtpDownloader) removeSrcFiles(executionPlan *ExecutionPlan) {
+	if downloader.dryRun {
+		log.Infof("Source files will not be removed ('DryRun' flag is true)")
+		return
+	}
+
+	log.Infof("Deleting origin files from %v", downloader.currentDeviceLabel)
+	progressBar := DeletingProgressTemplate.Start(executionPlan.GetFilesCount())
+	defer progressBar.Finish()
+
+	fileIterator := executionPlan.GetFileInterator()
+	for fileIterator.Current() != nil {
+		wpdFile := fileIterator.Current()
+
+		progressBar.Set("prefix", fmt.Sprintf("(%v/%v) '%v'", fileIterator.GetFilesCount(), fileIterator.GetFilesTotal(), wpdFile.relPath(executionPlan.wpdRootDir)))
+
+		if wpdFile.wasCopied {
+			err := wpdFile.deleteFile()
+			if err != nil {
+				log.Infof("Deleting of '%v' - failed: %v", wpdFile.filePath, err)
+			}
+		} else {
+			log.Infof("Deleting of '%v' - skipped", wpdFile.filePath)
+		}
+		progressBar.Increment()
+
+		fileIterator.Next()
 	}
 }
 
@@ -189,12 +218,15 @@ func sizeToLabel(size int64) string {
 		float64(size)/float64(div), "KMGTPE"[exp])
 }
 
-func (downloader *MtpDownloader) copyToTmpDir(executionPlan *ExecutionPlan, wpdRootDir string, progressBar *pb.ProgressBar) {
+func (downloader *MtpDownloader) copyToTmpDir(executionPlan *ExecutionPlan) {
+	progressBar := CopyProgressTemplate.Start64(executionPlan.GetTotalSize())
+	defer progressBar.Finish()
+
 	fileIterator := executionPlan.GetFileInterator()
 	for fileIterator.Current() != nil {
 		wpdFile := fileIterator.Current()
 
-		relWpdFilePath := wpdFile.relPath(wpdRootDir)
+		relWpdFilePath := wpdFile.relPath(executionPlan.wpdRootDir)
 		targetFile := filepath.Join(downloader.tmpDir, relWpdFilePath)
 
 		log.Debugf("Copying from '%v' to %v... ", wpdFile.filePath, targetFile)
@@ -213,24 +245,5 @@ func (downloader *MtpDownloader) copyToTmpDir(executionPlan *ExecutionPlan, wpdR
 		}
 
 		fileIterator.Next()
-	}
-}
-
-func (downloader *MtpDownloader) removeFromWpd(filesToRemove []*wpdFile) {
-	for _, file := range filesToRemove {
-		log.Debugf("Deleting '%v'...", file.filePath)
-
-		if file.wasCopied {
-			err := file.deleteFile()
-			if err != nil {
-				log.Infof("Deleting of '%v' - failed: %v", file.filePath, err)
-			} else {
-				log.Debugf("Deleting of '%v' - done", file.filePath)
-			}
-		} else {
-			log.Infof("Deleting of '%v' - skipped", file.filePath)
-		}
-
-		downloader.removeFromWpd(file.chidren)
 	}
 }
