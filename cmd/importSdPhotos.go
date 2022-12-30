@@ -59,7 +59,7 @@ var sdPhotos = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadFromAllWpd("DCIM", dstDir, DryRun)
+		src, err := mtp.LoadSdPhotos(dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy photos files: %v", err)
 			os.Exit(1)

@@ -59,7 +59,7 @@ var goproCmd = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadFromMatchedWpd("HERO", "DCIM", dstDir, DryRun)
+		src, err := mtp.LoadGoProVideos(dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy GoPro files: %v", err)
 			os.Exit(1)

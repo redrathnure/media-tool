@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/tobwithu/gowpd"
@@ -17,32 +16,35 @@ var CopyProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.
 var DeletingProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.}} {{end}}{{counters . "%s/%s" "%s/?"}} {{bar . }} {{percent . "%.0f%%" "?"}} {{rtime . "ETA %s"}}{{with string . "suffix"}} {{.}}{{end}}`
 
 type MtpDownloader struct {
-	resultDir string
-	tmpDir    string
-	error     error
-	dryRun    bool
+	resultDir    string
+	tmpDir       string
+	error        error
+	dryRun       bool
+	deviceFilter MtpDeviceFilter
 
 	currentDeviceId    int
 	currentDeviceLabel string
 	currentDevice      *gowpd.Device
 }
 
-func LoadFromAllWpd(deviceDir string, targetDir string, dryRun bool) (string, error) {
-	result := MtpDownloader{dryRun: dryRun}
-	result.init(targetDir)
-	defer result.close()
-
-	result.loadFromAllDevices(deviceDir)
-
-	return result.GetResultDir(), result.GetError()
+func LoadSdPhotos(targetDir string, dryRun bool) (string, error) {
+	return loadFromAllWpd(SdPhotosFilter, DCIM_DIR, targetDir, dryRun)
 }
 
-func LoadFromMatchedWpd(deviceDescriptionFilter string, deviceDir string, targetDir string, dryRun bool) (string, error) {
-	result := MtpDownloader{dryRun: dryRun}
+func LoadGoProVideos(targetDir string, dryRun bool) (string, error) {
+	return loadFromAllWpd(GoProFilter, GOPRO_DIR, targetDir, dryRun)
+}
+
+func LoadCamVideos(targetDir string, dryRun bool) (string, error) {
+	return loadFromAllWpd(CamFilter, CAM_FILES_DIR, targetDir, dryRun)
+}
+
+func loadFromAllWpd(deviceFilter MtpDeviceFilter, deviceDir string, targetDir string, dryRun bool) (string, error) {
+	result := MtpDownloader{dryRun: dryRun, deviceFilter: deviceFilter}
 	result.init(targetDir)
 	defer result.close()
 
-	result.loadFromMatchedDevices(deviceDescriptionFilter, deviceDir)
+	result.loadFromMatchedDevices(deviceDir)
 
 	return result.GetResultDir(), result.GetError()
 }
@@ -75,7 +77,7 @@ func (downloader *MtpDownloader) close() {
 	gowpd.Destroy()
 }
 
-func (downloader *MtpDownloader) loadFromAllDevices(deviceDir string) {
+func (downloader *MtpDownloader) loadFromMatchedDevices(deviceDir string) {
 	if downloader.HasError() {
 		return
 	}
@@ -84,32 +86,12 @@ func (downloader *MtpDownloader) loadFromAllDevices(deviceDir string) {
 	for i := 0; i < mtpDeviceCount; i++ {
 		downloader.initCurrentDevice(i)
 		if downloader.HasError() {
-			//return
 			log.Warningf("Unable to read %s!", downloader.currentDeviceLabel)
 			continue
 		}
 
-		downloader.copyContentToTempDir(deviceDir)
-	}
-}
-
-func (downloader *MtpDownloader) loadFromMatchedDevices(deviceDescriptionFilter string, deviceDir string) {
-	if downloader.HasError() {
-		return
-	}
-
-	mtpDeviceCount := gowpd.GetDeviceCount()
-	for i := 0; i < mtpDeviceCount; i++ {
-		downloader.initCurrentDevice(i)
-		if downloader.HasError() {
-			//return
-			log.Warningf("Unable to read %s!", downloader.currentDeviceLabel)
-			continue
-		}
-
-		//TODO add filter by file name and filter by file/directory exists
-		if !strings.Contains(downloader.currentDeviceLabel, deviceDescriptionFilter) {
-			log.Infof("Skipping %s because does not match name filter", downloader.currentDeviceLabel)
+		if !downloader.deviceFilter.accept(downloader.currentDeviceId, downloader.currentDevice, downloader.currentDeviceLabel) {
+			log.Infof("Skipping %s device", downloader.currentDeviceLabel)
 			continue
 		}
 

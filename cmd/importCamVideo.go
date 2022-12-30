@@ -19,7 +19,6 @@ package cmd
 
 import (
 	"os"
-	"path"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -60,7 +59,7 @@ var camVideoCmd = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadFromMatchedWpd("CAM", path.Join("PRIVATE", "AVCHD", "BDMV", "STREAM"), dstDir, DryRun)
+		src, err := mtp.LoadCamVideos(dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy camcoder files: %v", err)
 			os.Exit(1)
