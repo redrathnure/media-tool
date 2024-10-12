@@ -1,6 +1,6 @@
 # Media Toolkit
 
-TL;TR 
+TL;TR;
 Tool to import video and photos from cameras like GoPro, Nikon DSLR or Panasonic camcoders. Plus additional features to correct file and EXIF/metadata dates. For Windows users only (at least now).
 
 ## Motivation
@@ -9,6 +9,7 @@ Primary goal was to simplify import from various digital cameras.
 Each device has "own way" how to be connected to PC/Laptop and how to name files. I need a tool which will abstragate me from all this differences and copy media files to my laptop with needed (for me) naming. Ideally doing this automatically without any additional questions.Also I would like to get rid of proprietary and/or outdated applications like HD Writer.   
 
 So, my base workflow has following points:
+
 1. I have a place for home/family video and separate place for photos. 
 2. All media files organized by date (e.g. `2020.01.02` or `2020.01.02_Awesome_Event`). `YYYY.MM.DD` date format help me in searching, processing an arhivig activities. 
 3. I came to ide to have unified file naming scheme with timestamp in file name. e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`. Especially I dislike GoPro naming :) 
@@ -32,7 +33,6 @@ Application uses [ExifTool by Phil Harvey](https://exiftool.org/) to perform fil
 Step 3. (optional) Prepare Default Configuration
 
 `$HOME\.media-tool\media-tool.yaml` OR `APP_DIR\conf\media-tool.yml` file contains configuration for default locations. May be ussefull if media files always should be imported to the same location(s). Please see `media-tool.example.yml` file and chapters bellow for more details.
-
 
 ## Commands And Common Usage Tips
 
@@ -64,11 +64,9 @@ Was tested with Nikon D800, however should also work with everything what stores
 If target dir was not specified, command takes it from config file. WARNING Seems Panasonic cameras expose ReadOnly storage, this is why after successful import you have to manually remove files from camera.  
 Was tested with Panasoic HC-V700 camera.
 
-
 ### Organize Files By Date
 
 `media-tool import local` command suppose to move vide and image files from one local directory to another with creating date folders (e.g. `2020.01.02`).
-
 
 ### Correcting Photo and Video Dates
 
@@ -77,10 +75,11 @@ Was tested with Panasoic HC-V700 camera.
 ## Technical Remarks
 
 ### How to Build
+
 Install GO v1.14.4 or later and execute `go build` from root directy.
 
-
 ### TODOs
+
 * Extract logging format to the config
 * Parse exiftool output. Warning: [minor] to debug
 * Build script + prepare installation package
