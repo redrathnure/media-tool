@@ -76,7 +76,12 @@ Was tested with Panasoic HC-V700 camera.
 
 ### How to Build
 
-Install GO v1.14.4 or later and execute `go build` from root directy.
+1. Install Go [v1.23.1 or later](https://go.dev/doc/install)
+2. Install [Mage](https://github.com/magefile/mage). E.g. by `mkdir %GOPATH%\src && cd %GOPATH%\src && git clone https://github.com/magefile/mage && cd mage && go run bootstrap.go`
+3. Use one of predefined tasks:
+    * `mage -l` - show avialable tasks
+    * `mage releasePkg` - prepare release package
+    * `mage reBuild` - build application
 
 ### TODOs
 

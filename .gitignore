@@ -4,3 +4,5 @@
 /text.yaml
 /conf/media-tool.yml
 vendor
+build
+dist
