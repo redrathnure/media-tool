@@ -21,9 +21,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// fixNamesCmd represents the fixNames command
-var fixNamesCmd = &cobra.Command{
-	Use:   "fixNames [files]",
+// cleanNamesCmd represents the fixNames command
+var cleanNamesCmd = &cobra.Command{
+	Use:   "names [files]",
 	Short: "Normalize image names and remove -copy suffix",
 	Long: `Renaming files with the -copy suffix to shorten variations. 
 	files argument may be dir (process all files) or wildcards file names (process only matched files)`,
@@ -62,8 +62,5 @@ var fixNamesCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(fixNamesCmd)
-
-	fixNamesCmd.Flags().BoolVarP(&recursively, "recursively", "r", false, "also analyze child directories")
-	fixNamesCmd.PersistentFlags().BoolVarP(&DryRun, "dry", "d", false, "Dry run")
+	cleanCmd.AddCommand(cleanNamesCmd)
 }
