@@ -165,6 +165,69 @@ func (toolArgs *exifToolArgs) changeMp4Date(tagValue string) {
 	toolArgs.changeTag("MediaModifyDate", tagValue)
 }
 
+func (toolArgs *exifToolArgs) cleanTag(tagName string) {
+	toolArgs.add(fmt.Sprintf("-%s=", tagName))
+}
+
+func (toolArgs *exifToolArgs) cleanVendorTags() {
+	toolArgs.cleanTag("Software")
+	toolArgs.cleanTag("WriterName")
+	toolArgs.cleanTag("ReaderName")
+	toolArgs.cleanTag("HistorySoftwareAgent")
+	toolArgs.cleanTag("LookCopyright")
+	toolArgs.cleanTag("XMPToolkit")
+	toolArgs.cleanTag("photoshop:all")
+	toolArgs.cleanTag("NikonCapture:all")
+	toolArgs.cleanTag("GIMP:all")
+	toolArgs.cleanTag("history*")
+}
+
+func (toolArgs *exifToolArgs) cleanCameraTags() {
+	// Camera vendor specific
+	toolArgs.cleanTag("Canon:all")
+	toolArgs.cleanTag("Sony:all")
+	toolArgs.cleanTag("GoPro:all")
+	toolArgs.cleanTag("Nikon:all")
+	toolArgs.cleanTag("FujiFilm:all")
+	toolArgs.cleanTag("HP:all")
+	toolArgs.cleanTag("Kodak:all")
+	toolArgs.cleanTag("Minolta:all")
+	toolArgs.cleanTag("Nintendo:all")
+	toolArgs.cleanTag("Olympus:all")
+	toolArgs.cleanTag("Panasonic:all")
+	toolArgs.cleanTag("Pentax:all")
+	toolArgs.cleanTag("Samsung:all")
+	toolArgs.cleanTag("Sanyo:all")
+	toolArgs.cleanTag("Sigma:all")
+	toolArgs.cleanTag("Sony:all")
+	toolArgs.cleanTag("CanonRaw:all")
+	toolArgs.cleanTag("MinoltaRaw:all")
+	toolArgs.cleanTag("PanasonicRaw:all")
+	toolArgs.cleanTag("SigmaRaw:all")
+
+	// Common shot parameters
+	toolArgs.cleanTag("all:canonexposuremode")
+	toolArgs.cleanTag("EXIF:Make")
+	toolArgs.cleanTag("EXIF:Model")
+	toolArgs.cleanTag("EXIF:FNumber")
+	toolArgs.cleanTag("Exposure*")
+	toolArgs.cleanTag("ISO")
+	toolArgs.cleanTag("Lens*")
+	toolArgs.cleanTag("Focal*")
+	toolArgs.cleanTag("Flash*")
+	toolArgs.cleanTag("Camera*")
+	toolArgs.cleanTag("Metering*")
+	toolArgs.cleanTag("Shutter*")
+	toolArgs.cleanTag("Megapixels*")
+	toolArgs.cleanTag("HasCrop")
+	toolArgs.cleanTag("Format")
+
+}
+
+func (toolArgs *exifToolArgs) cleanLocationTags() {
+	toolArgs.cleanTag("gps:all")
+}
+
 func init() {
 	viper.SetDefault(cfgExifToolPath, "")
 }
