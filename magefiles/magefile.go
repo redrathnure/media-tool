@@ -20,6 +20,8 @@ const (
 	distDir    = "./dist/"
 )
 
+var releaseArch = [...]string{"amd64", "arm64"}
+
 // Clean go modules
 func GoClean() error {
 	return sh.RunV("go", "clean")
@@ -44,6 +46,10 @@ func Clean() {
 	os.RemoveAll(buildDir)
 }
 
+func cleanArch(arch string) {
+	Clean()
+}
+
 // Build project
 func Build() error {
 	if err := sh.RunV("go", "version"); err != nil {
@@ -55,9 +61,14 @@ func Build() error {
 	return nil
 }
 
+func buildArch(arch string) error {
+	return Build()
+}
+
 // Clean and build project
-func ReBuild() {
-	mg.Deps(GoClean, Clean, Build)
+func ReBuild(arch string) {
+	//mg.Deps(GoClean, Clean, Build)
+	mg.Deps(GoClean, mg.F(cleanArch, arch), mg.F(buildArch, arch))
 }
 
 // Prepare release package
@@ -67,15 +78,19 @@ func ReleasePkg() error {
 		return err
 	}
 
-	fmt.Printf("Building %s release\n", version)
+	for _, arch := range releaseArch {
+		fmt.Printf("Building %s release for %s arch\n", version, arch)
 
-	ReBuild()
+		os.Setenv("GOARCH", arch)
 
-	if err := prepareReleaseDir(); err != nil {
-		return err
-	}
-	if err := buildReleasePackage(version); err != nil {
-		return err
+		ReBuild(arch)
+
+		if err := prepareReleaseDir(); err != nil {
+			return err
+		}
+		if err := buildReleasePackage(version, arch); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -86,7 +101,6 @@ func getGitVersion() (string, error) {
 }
 
 func prepareReleaseDir() error {
-
 	if err := os.MkdirAll(releaseDir, 0755); err != nil {
 		return err
 	}
@@ -109,8 +123,8 @@ func copyToDir(fileName, dstDir string) error {
 	return os.Link(fileName, dstDir+fileName)
 }
 
-func buildReleasePackage(version string) error {
-	releaseFile := fmt.Sprintf("%s/media-tool_%s_x64.zip", distDir, version)
+func buildReleasePackage(version, arch string) error {
+	releaseFile := fmt.Sprintf("%s/media-tool_%s_%s.zip", distDir, version, arch)
 	fmt.Printf("Building '%s' archive\n", releaseFile)
 
 	os.MkdirAll(distDir, 0755)
