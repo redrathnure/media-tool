@@ -26,9 +26,9 @@ var recursively bool
 // fixDatesCmd represents the fixDates command
 var fixDatesCmd = &cobra.Command{
 	Use:   "fixDates [files]",
-	Short: "Fix EXIF/Quicktime dates",
-	Long: `Reads dates from file name and put into EXIF and Quicktime metadata attributes. 
-	files argument may be dir (proces all files) or wildcards file names (process only matched files)`,
+	Short: "Fix Exif/QuickTime dates",
+	Long: `Reads dates from file name and put into Exif and QuickTime metadata attributes. 
+	files argument may be dir (process all files) or wildcards file names (process only matched files)`,
 	Args: cobra.RangeArgs(1, 1),
 	Run: func(cmd *cobra.Command, args []string) {
 		printCommandArgs(cmd, args)
