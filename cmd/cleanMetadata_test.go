@@ -8,7 +8,6 @@ import (
 )
 
 func TestCleanMetadataCmd_Initialization(t *testing.T) {
-	// Test that clean metadata command is properly initialized
 	assert.NotNil(t, cleanMetadataCmd)
 	assert.NotNil(t, cleanMetadataCmd.Use)
 	assert.NotNil(t, cleanMetadataCmd.Short)
@@ -16,7 +15,6 @@ func TestCleanMetadataCmd_Initialization(t *testing.T) {
 }
 
 func TestCleanMetadataCmd_Flags(t *testing.T) {
-	// Test that flags are properly set
 	locationFlag := cleanMetadataCmd.Flags().Lookup("includingLocation")
 	assert.NotNil(t, locationFlag)
 	assert.Equal(t, "l", locationFlag.Shorthand)
@@ -73,6 +71,11 @@ func TestRunCleanMetadata(t *testing.T) {
 		recursively = origRecursively
 		DryRun = origDryRun
 	}()
+
+	// Create test exiftool wrapper to capture arguments and exec calls
+	testTool := newTestExifTool()
+	exifToolObj = &testTool.exifToolWrapper
+	defer func() { exifToolObj = nil }()
 
 	tests := []struct {
 		name           string
@@ -162,42 +165,41 @@ func TestRunCleanMetadata(t *testing.T) {
 				"-Canon:all=",
 			},
 		},
+		{
+			name:   "dry run",
+			args:   []string{"test.jpg"},
+			dryRun: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Set up test flags
 			includingLocation = tt.location
 			includingVendor = tt.vendor
 			includingCamera = tt.camera
 			recursively = tt.recursive
 			DryRun = tt.dryRun
 
-			// Create a new test command
 			cmd := &cobra.Command{}
-
-			// Create test exiftool wrapper to capture arguments
-			testTool := newExifTool()
-			oldTool := exifToolObj
-			exifToolObj = testTool
-			defer func() { exifToolObj = oldTool }()
 
 			// Run the command
 			runCleanMetadata(cmd, tt.args)
 
 			testArgs := testTool.args
-			// Verify expected tags are present
+
+			assert.Contains(t, testArgs.args, tt.args[0], "source path not set in %s", tt.name)
+
 			for _, tag := range tt.expectedTags {
 				assert.Contains(t, testArgs.args, tag, "missing expected tag in %s", tt.name)
 			}
 
-			// Verify unexpected tags are not present
 			for _, tag := range tt.unexpectedTags {
 				assert.NotContains(t, testArgs.args, tag, "found unexpected tag in %s", tt.name)
 			}
 
-			// Verify source path is set
-			assert.Contains(t, testArgs.args, tt.args[0], "source path not set in %s", tt.name)
+			if tt.dryRun {
+				assert.False(t, testTool.execCalled, "exiftool exec was called when DryRun is true in %s", tt.name)
+			}
 		})
 	}
 }
