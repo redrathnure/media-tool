@@ -28,37 +28,40 @@ var cleanNamesCmd = &cobra.Command{
 	Long: `Renaming files with the -copy suffix to shorten variations. 
 	files argument may be dir (process all files) or wildcards file names (process only matched files)`,
 	Args: cobra.RangeArgs(1, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		printCommandArgs(cmd, args)
+	Run:  runCleanNames,
+}
 
-		files := extractPath(args, 0, ".")
-		log.Infof("files to process: '%s'", files)
+func runCleanNames(cmd *cobra.Command, args []string) {
+	printCommandArgs(cmd, args)
 
-		log.Infof("recursively: %v", recursively)
+	files := extractPath(args, 0, ".")
+	log.Infof("files to process: '%s'", files)
 
-		log.Infof("dry ryn: %v", DryRun)
+	log.Infof("recursively: %v", recursively)
 
-		exifTool := getExifTool()
+	log.Infof("dry ryn: %v", DryRun)
 
-		imgArgs := exifTool.newArgs()
-		tagName := "filename"
+	exifTool := getExifTool()
 
-		if DryRun {
-			tagName = "testname"
-		}
-		imgArgs.changeTag(tagName, "${filename;s/ - Copy/%-c/i}")
+	imgArgs := exifTool.newArgs()
+	tagName := "filename"
 
-		//Images and video
-		//imgArgs.forImages()
-		//imgArgs.forVideoMp4()
-		if recursively {
-			imgArgs.recursively()
-		}
+	if DryRun {
+		tagName = "testname"
+	}
+	imgArgs.changeTag(tagName, "${filename;s/ - Copy/%-c/i}")
 
-		imgArgs.src(files)
+	//Images and video
+	//imgArgs.forImages()
+	//imgArgs.forVideoMp4()
+	if recursively {
+		imgArgs.recursively()
+	}
 
-		exifTool.exec()
-	},
+	imgArgs.src(files)
+
+	//tagName = "testname" should avoid real renaming
+	exifTool.exec()
 }
 
 func init() {
