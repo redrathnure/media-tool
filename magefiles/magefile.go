@@ -61,6 +61,21 @@ func Build() error {
 	return nil
 }
 
+// Test runs all tests in the project
+func Test() error {
+	if err := sh.RunV("go", "test", "./..."); err != nil {
+		return err
+	}
+	return nil
+}
+
+func TestV() error {
+	if err := sh.RunV("go", "test", "./...", "-v"); err != nil {
+		return err
+	}
+	return nil
+}
+
 func buildArch(arch string) error {
 	return Build()
 }
