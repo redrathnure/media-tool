@@ -57,7 +57,7 @@ var cleanNamesCmd = &cobra.Command{
 
 		imgArgs.src(files)
 
-		exifTool.exec(imgArgs)
+		exifTool.exec()
 	},
 }
 

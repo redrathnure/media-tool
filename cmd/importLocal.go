@@ -78,7 +78,7 @@ var importLocal = &cobra.Command{
 		imgArgs.recursively()
 		imgArgs.src(src)
 
-		exifTool.exec(imgArgs)
+		exifTool.exec()
 
 		//Video
 		vidArgs := exifTool.newArgs()
@@ -91,7 +91,7 @@ var importLocal = &cobra.Command{
 		vidArgs.recursively()
 		vidArgs.src(src)
 
-		exifTool.exec(vidArgs)
+		exifTool.exec()
 	},
 }
 

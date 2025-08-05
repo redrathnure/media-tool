@@ -86,7 +86,7 @@ var camVideoCmd = &cobra.Command{
 		videoArgs.recursively()
 		videoArgs.src(src)
 
-		exifTool.exec(videoArgs)
+		exifTool.exec()
 	},
 }
 

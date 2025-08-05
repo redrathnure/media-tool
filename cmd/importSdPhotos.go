@@ -86,7 +86,7 @@ var sdPhotos = &cobra.Command{
 		imgArgs.recursively()
 		imgArgs.src(src)
 
-		exifTool.exec(imgArgs)
+		exifTool.exec()
 	},
 }
 

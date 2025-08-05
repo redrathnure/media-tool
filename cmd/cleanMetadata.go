@@ -32,45 +32,47 @@ var cleanMetadataCmd = &cobra.Command{
 	Long: `Remove vendor metadata from media files. 
 	files argument may be dir (process all files) or wildcards file names (process only matched files)`,
 	Args: cobra.RangeArgs(1, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		printCommandArgs(cmd, args)
+	Run:  runCleanMetadata,
+}
 
-		files := extractPath(args, 0, ".")
-		log.Infof("files to process: '%s'", files)
+func runCleanMetadata(cmd *cobra.Command, args []string) {
+	printCommandArgs(cmd, args)
 
-		log.Infof("recursively: %v", recursively)
-		log.Infof("includingLocation: %v", includingLocation)
-		log.Infof("includingVendor: %v", includingVendor)
+	files := extractPath(args, 0, ".")
+	log.Infof("files to process: '%s'", files)
 
-		log.Infof("dry ryn: %v", DryRun)
+	log.Infof("recursively: %v", recursively)
+	log.Infof("includingLocation: %v", includingLocation)
+	log.Infof("includingVendor: %v", includingVendor)
 
-		exifTool := getExifTool()
+	log.Infof("dry ryn: %v", DryRun)
 
-		imgArgs := exifTool.newArgs()
-		if includingLocation {
-			imgArgs.cleanLocationTags()
-		}
-		if includingVendor {
-			imgArgs.cleanVendorTags()
-		}
-		if includingCamera {
-			imgArgs.cleanCameraTags()
-		}
+	exifTool := getExifTool()
 
-		//Images and video
-		//imgArgs.forImages()
-		//imgArgs.forVideoMp4()
+	imgArgs := exifTool.newArgs()
+	if includingLocation {
+		imgArgs.cleanLocationTags()
+	}
+	if includingVendor {
+		imgArgs.cleanVendorTags()
+	}
+	if includingCamera {
+		imgArgs.cleanCameraTags()
+	}
 
-		if recursively {
-			imgArgs.recursively()
-		}
+	//Images and video
+	//imgArgs.forImages()
+	//imgArgs.forVideoMp4()
 
-		imgArgs.src(files)
+	if recursively {
+		imgArgs.recursively()
+	}
 
-		if !DryRun {
-			exifTool.exec(imgArgs)
-		}
-	},
+	imgArgs.src(files)
+
+	if !DryRun {
+		exifTool.exec()
+	}
 }
 
 func init() {

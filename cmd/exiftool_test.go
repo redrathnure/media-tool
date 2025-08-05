@@ -83,7 +83,10 @@ func TestExifToolWrapper_InitCmd_AppDirSubstitution(t *testing.T) {
 }
 
 func TestExifToolArgs_NewArgs(t *testing.T) {
-	sut := newExifTool().newArgs()
+	tool := newExifTool()
+	sut := tool.newArgs()
+
+	assert.Equal(t, &tool.args, sut)
 
 	assert.NotNil(t, sut)
 	assert.NotNil(t, sut.args)

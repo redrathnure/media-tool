@@ -85,7 +85,7 @@ var goproCmd = &cobra.Command{
 		imgArgs.recursively()
 		imgArgs.src(src)
 
-		exifTool.exec(imgArgs)
+		exifTool.exec()
 
 		//Video
 		vidArgs := exifTool.newArgs()
@@ -98,7 +98,7 @@ var goproCmd = &cobra.Command{
 		vidArgs.recursively()
 		vidArgs.src(src)
 
-		exifTool.exec(vidArgs)
+		exifTool.exec()
 
 		//Video Preview
 		vidPreviewArgs := exifTool.newArgs()
@@ -111,7 +111,7 @@ var goproCmd = &cobra.Command{
 		vidPreviewArgs.recursively()
 		vidPreviewArgs.src(src)
 
-		exifTool.exec(vidPreviewArgs)
+		exifTool.exec()
 
 		removeFiles(src, "leinfo.sav")
 		removeFiles(src, "**\\*.THM")
