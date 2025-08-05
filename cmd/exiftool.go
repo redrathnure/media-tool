@@ -35,6 +35,7 @@ type exifToolWrapper struct {
 	cmd         string
 	defaultArgs []string
 	args        exifToolArgs
+	execCommand func(name string, args ...string) *exec.Cmd
 }
 
 type exifToolArgs struct {
@@ -47,6 +48,7 @@ func newExifTool() *exifToolWrapper {
 	result := exifToolWrapper{
 		cmd:         "exiftool",
 		defaultArgs: []string{"-v0", "-progress"},
+		execCommand: exec.Command,
 	}
 	result.initCmd()
 	result.newArgs()
@@ -87,7 +89,7 @@ func (tool *exifToolWrapper) initCmd() {
 }
 
 func (tool *exifToolWrapper) exec() {
-	cmd := exec.Command(tool.cmd, tool.args.args...)
+	cmd := tool.execCommand(tool.cmd, tool.args.args...)
 
 	log.Debugf("ExifTool command: '%s'\n", cmd.String())
 

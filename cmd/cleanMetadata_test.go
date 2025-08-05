@@ -72,11 +72,6 @@ func TestRunCleanMetadata(t *testing.T) {
 		DryRun = origDryRun
 	}()
 
-	// Create test exiftool wrapper to capture arguments and exec calls
-	testTool := newTestExifTool()
-	exifToolObj = &testTool.exifToolWrapper
-	defer func() { exifToolObj = nil }()
-
 	tests := []struct {
 		name           string
 		args           []string
@@ -180,6 +175,10 @@ func TestRunCleanMetadata(t *testing.T) {
 			recursively = tt.recursive
 			DryRun = tt.dryRun
 
+			// Mock the exifTool exec calls
+			testTool := newTestExifTool()
+			defer func() { testTool.clear() }()
+
 			cmd := &cobra.Command{}
 
 			// Run the command
@@ -199,6 +198,8 @@ func TestRunCleanMetadata(t *testing.T) {
 
 			if tt.dryRun {
 				assert.False(t, testTool.execCalled, "exiftool exec was called when DryRun is true in %s", tt.name)
+			} else {
+				assert.True(t, testTool.execCalled, "exiftool exec should be called in %s", tt.name)
 			}
 		})
 	}

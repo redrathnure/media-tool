@@ -45,11 +45,6 @@ func TestRunCleanNames(t *testing.T) {
 		DryRun = origDryRun
 	}()
 
-	// Create test exiftool wrapper to capture arguments and exec calls
-	testTool := newTestExifTool()
-	exifToolObj = &testTool.exifToolWrapper
-	defer func() { exifToolObj = nil }()
-
 	tests := []struct {
 		name           string
 		args           []string
@@ -89,6 +84,10 @@ func TestRunCleanNames(t *testing.T) {
 			recursively = tt.recursive
 			DryRun = tt.dryRun
 
+			// Mock the exifTool exec calls
+			testTool := newTestExifTool()
+			defer func() { testTool.clear() }()
+
 			cmd := &cobra.Command{}
 
 			// Run the command
@@ -105,8 +104,7 @@ func TestRunCleanNames(t *testing.T) {
 				assert.NotContains(t, testArgs.args, tag, "found unexpected tag in %s", tt.name)
 			}
 
-			// TODO fix mocks
-			//assert.True(t, testTool.execCalled, "exiftool exec should be called in %s", tt.name)
+			assert.True(t, testTool.execCalled, "exiftool exec should be called in %s", tt.name)
 		})
 	}
 }

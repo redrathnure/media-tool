@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os/exec"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -107,6 +108,33 @@ func TestExifToolArgs_Add(t *testing.T) {
 	assert.Equal(t, "arg1", sut.args[2])
 	assert.Equal(t, "arg2", sut.args[3])
 	assert.Equal(t, "arg3", sut.args[4])
+}
+
+func TestExifToolWrapper_Exec(t *testing.T) {
+	var capturedCmd string
+	var capturedArgs []string
+
+	// Create test instance with mock command
+	mockExecCommand := func(name string, args ...string) *exec.Cmd {
+		capturedCmd = name
+		capturedArgs = args
+		return exec.Command("echo", "test") // Use a harmless command
+	}
+
+	tool := &exifToolWrapper{
+		cmd:         "test-exiftool",
+		defaultArgs: []string{"-v0", "-progress"},
+		execCommand: mockExecCommand,
+	}
+	tool.newArgs()
+	tool.args.add("-test", "value")
+
+	// Execute
+	tool.exec()
+
+	// Verify command and arguments
+	assert.Equal(t, "test-exiftool", capturedCmd, "Incorrect command executed")
+	assert.Equal(t, []string{"-v0", "-progress", "-test", "value"}, capturedArgs, "Incorrect arguments passed")
 }
 
 func TestExifToolArgs_Recursively(t *testing.T) {
