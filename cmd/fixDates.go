@@ -30,30 +30,34 @@ var fixDatesCmd = &cobra.Command{
 	Long: `Reads dates from file name and put into Exif and QuickTime metadata attributes. 
 	files argument may be dir (process all files) or wildcards file names (process only matched files)`,
 	Args: cobra.RangeArgs(1, 1),
-	Run: func(cmd *cobra.Command, args []string) {
-		printCommandArgs(cmd, args)
+	Run:  runFixDates,
+}
 
-		files := extractPath(args, 0, ".")
-		log.Infof("files to process: '%s'", files)
+func runFixDates(cmd *cobra.Command, args []string) {
+	printCommandArgs(cmd, args)
 
-		log.Infof("recursively: %v", recursively)
+	files := extractPath(args, 0, ".")
+	log.Infof("files to process: '%s'", files)
 
-		exifTool := getExifTool()
+	log.Infof("recursively: %v", recursively)
 
-		//Images and video
-		imgArgs := exifTool.newArgs()
-		imgArgs.changeFileDate("filename")
-		imgArgs.changeExifDate("filename")
-		imgArgs.changeMp4Date("filename")
-		//imgArgs.forImages()
-		//imgArgs.forVideoMp4()
-		if recursively {
-			imgArgs.recursively()
-		}
-		imgArgs.src(files)
+	exifTool := getExifTool()
 
-		exifTool.exec()
-	},
+	//Images and video
+	imgArgs := exifTool.newArgs()
+	imgArgs.changeFileDate("filename")
+	imgArgs.changeExifDate("filename")
+	imgArgs.changeMp4Date("filename")
+	//imgArgs.forImages()
+	//imgArgs.forVideoMp4()
+	if recursively {
+		imgArgs.recursively()
+	}
+	imgArgs.src(files)
+
+	exifTool.exec()
+
+	// TODO dryRun?
 }
 
 func init() {
