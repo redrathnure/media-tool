@@ -33,5 +33,4 @@ func init() {
 
 	cleanCmd.PersistentFlags().BoolVarP(&DryRun, "dry", "d", false, "Dry run")
 	cleanCmd.PersistentFlags().BoolVarP(&recursively, "recursively", "r", false, "also analyze child directories")
-
 }
