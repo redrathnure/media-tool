@@ -77,7 +77,7 @@ A `media-tool import fixDates` command will try to read date from file name and 
 
 ### Cleanup Image Names and Metadata
 
-A `media-tool clean names` and `media-tool clean metadata` commands may be used to remove `- Copy` filename suffixes and to wipe image metadata (e.g. wiping GPS data before publishing photos in Internet).
+A `media-tool clean names` and `media-tool clean metadata` commands may be used to remove a `- Copy` and ` Copy` suffixes from filename and to wipe image metadata (e.g. wiping GPS data before publishing photos in Internet).
 
 ## Development
 
