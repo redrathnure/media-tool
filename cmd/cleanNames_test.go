@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCleanNamesCmd_Initialization(t *testing.T) {
@@ -58,7 +61,7 @@ func TestRunCleanNames(t *testing.T) {
 			args:           []string{"testdir"},
 			recursive:      false,
 			dryRun:         false,
-			expectedTags:   []string{"-filename<${filename;s/ - Copy/%-c/i}"},
+			expectedTags:   []string{"-filename<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}"},
 			unexpectedTags: []string{"-r"},
 		},
 		{
@@ -66,7 +69,7 @@ func TestRunCleanNames(t *testing.T) {
 			args:           []string{"testdir"},
 			recursive:      false,
 			dryRun:         true,
-			expectedTags:   []string{"-testname<${filename;s/ - Copy/%-c/i}"},
+			expectedTags:   []string{"-testname<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}"},
 			unexpectedTags: []string{"-r"},
 		},
 		{
@@ -74,7 +77,7 @@ func TestRunCleanNames(t *testing.T) {
 			args:         []string{"testdir"},
 			recursive:    true,
 			dryRun:       false,
-			expectedTags: []string{"-filename<${filename;s/ - Copy/%-c/i}", "-r"},
+			expectedTags: []string{"-filename<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}", "-r"},
 		},
 	}
 
@@ -107,4 +110,202 @@ func TestRunCleanNames(t *testing.T) {
 			assert.True(t, testTool.execCalled, "exiftool exec should be called in %s", tt.name)
 		})
 	}
+}
+
+func TestCleanNames_CopyRenameSimple(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	originFileCopy := createFile(t, tmpDir, "test - Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(originFileCopy)
+	assert.True(t, os.IsNotExist(err), "copy file should not exist after renaming")
+
+	renamedFile := filepath.Join(tmpDir, "test.jpg")
+	_, err = os.Stat(renamedFile)
+	assert.NoError(t, err, "renamed file should exist")
+}
+
+func TestCleanNames_CopyRenameWithoutDash(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	originFileCopy := createFile(t, tmpDir, "test Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(originFileCopy)
+	assert.True(t, os.IsNotExist(err), "copy file should not exist after renaming")
+
+	renamedFile := filepath.Join(tmpDir, "test.jpg")
+	_, err = os.Stat(renamedFile)
+	assert.NoError(t, err, "renamed file should exist")
+}
+
+func TestCleanNames_CopyRenameWithPrefix(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	createFile(t, tmpDir, "test.jpg")
+	originFileCopy := createFile(t, tmpDir, "test - Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(originFileCopy)
+	assert.True(t, os.IsNotExist(err), "copy file should not exist after renaming")
+
+	expectedFiles := []string{
+		"test.jpg",
+		"test-1.jpg", // From "test - Copy.jpg"
+	}
+
+	for _, f := range expectedFiles {
+		_, err = os.Stat(filepath.Join(tmpDir, f))
+		assert.NoError(t, err, "expected file %s should exist", f)
+	}
+}
+
+func TestCleanNames_CopyRenameWithoutDashWithPrefix(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	createFile(t, tmpDir, "test.jpg")
+	originFileCopy := createFile(t, tmpDir, "test Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(originFileCopy)
+	assert.True(t, os.IsNotExist(err), "copy file should not exist after renaming")
+
+	expectedFiles := []string{
+		"test.jpg",
+		"test-1.jpg", // From "test Copy.jpg"
+	}
+
+	for _, f := range expectedFiles {
+		_, err = os.Stat(filepath.Join(tmpDir, f))
+		assert.NoError(t, err, "expected file %s should exist", f)
+	}
+}
+
+func TestCleanNames_CopyRenameDouble(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	origFileCopy := createFile(t, tmpDir, "test - Copy - Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(origFileCopy)
+	assert.True(t, os.IsNotExist(err), "original file should not exist after rename")
+
+	renamedFile := filepath.Join(tmpDir, "test.jpg")
+	_, err = os.Stat(renamedFile)
+	assert.NoError(t, err, "renamed file should exist")
+}
+
+func TestCleanNames_CopyRenameDoubleExisted(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	createFile(t, tmpDir, "test.jpg")
+	origFileCopy := createFile(t, tmpDir, "test - Copy.jpg")
+	origFileCopyCopy := createFile(t, tmpDir, "test - Copy - Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(origFileCopy)
+	assert.True(t, os.IsNotExist(err), "copy file should not exist after rename")
+	// Verify the copy copy file no longer exists and new file exists
+	_, err = os.Stat(origFileCopyCopy)
+	assert.True(t, os.IsNotExist(err), "copy copy file should not exist after rename")
+
+	expectedFiles := []string{
+		"test.jpg",
+		"test-1.jpg",
+		"test-1-1.jpg", // From "test Copy.jpg"
+	}
+
+	for _, f := range expectedFiles {
+		_, err = os.Stat(filepath.Join(tmpDir, f))
+		assert.NoError(t, err, "expected file %s should exist", f)
+	}
+}
+
+func TestCleanNames_MultipleConflicts(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "cleannames-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	// Create initial files
+	createFile(t, tmpDir, "test.jpg")
+	createFile(t, tmpDir, "test-1.jpg")
+	origFileCopy := createFile(t, tmpDir, "test Copy.jpg")
+
+	origDryRun := DryRun
+	defer func() { DryRun = origDryRun }()
+	DryRun = false
+
+	cmd := &cobra.Command{}
+	runCleanNames(cmd, []string{tmpDir})
+
+	_, err = os.Stat(origFileCopy)
+	assert.True(t, os.IsNotExist(err), "copy file should not exist after renaming")
+
+	expectedFiles := []string{
+		"test.jpg",
+		"test-1.jpg",
+		"test-2.jpg", // From "test Copy.jpg"
+	}
+
+	for _, f := range expectedFiles {
+		_, err = os.Stat(filepath.Join(tmpDir, f))
+		assert.NoError(t, err, "expected file %s should exist", f)
+	}
+}
+
+func createFile(t *testing.T, tmpDir string, origFileName string) string {
+	result := filepath.Join(tmpDir, origFileName)
+
+	err := os.WriteFile(result, []byte("test data"), 0644)
+	require.NoError(t, err)
+	return result
 }

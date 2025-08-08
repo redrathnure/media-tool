@@ -49,7 +49,7 @@ func runCleanNames(cmd *cobra.Command, args []string) {
 	if DryRun {
 		tagName = "testname"
 	}
-	imgArgs.changeTag(tagName, "${filename;s/ - Copy/%-c/i}")
+	imgArgs.changeTag(tagName, "${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}")
 
 	//Images and video
 	//imgArgs.forImages()
