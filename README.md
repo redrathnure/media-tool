@@ -13,9 +13,9 @@ The second group of requirements is related to the metadata handling and files o
 
 So, my base workflow has following points:
 
-1. I have a place for home/family video and separate place for photos. 
-2. All media files organized by date (e.g. `2020.01.02` or `2020.01.02_Awesome_Event`). `YYYY.MM.DD` date format help me in searching, processing an arhivig activities. 
-3. I came to ide to have unified file naming scheme with timestamp in file name. e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`. Especially I dislike GoPro naming :) 
+1. I have a place for home/family video and separate place for photos.
+2. All media files organized by date (e.g. `2020.01.02` or `2020.01.02_Awesome_Event`). `YYYY.MM.DD` date format help me in searching, processing an arhivig activities.
+3. I came to ide to have unified file naming scheme with timestamp in file name. e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`. Especially I dislike GoPro naming :)
 4. Sometimes I need to parse date from file name and put it into the embedded metadata (Exif for photo and QuickTime attributes for video).
 
 And in some cases I need to fix file names and metadata for certain files.
@@ -26,7 +26,7 @@ This application was designed to automatize these routines... and to practice in
 
 ## Installation
 
-Step 1: put [`media-tool.exe`](https://github.com/redrathnure/media-tool/releases) to some folder (preferably in `$PATH` locations). 
+Step 1: put [`media-tool.exe`](https://github.com/redrathnure/media-tool/releases) to some folder (preferably in `$PATH` locations).
 
 Step 2. Install [ExifTool by Phil Harvey](https://Exiftool.org/) which is used to perform files and metadata manipulations. `Exiftool.exe` should be placed into `APP_DIR\Exiftool` dir OR into any `$PATH` location.
 
@@ -63,7 +63,7 @@ It was tested with a few Nikon and Canon cameras, however should also work with 
 
 ### Import Video From Panasonic Camcorder
 
-A `media-tool import camvideo` command try to find connected camcorder and import video into specified directory. 
+A `media-tool import camvideo` command try to find connected camcorder and import video into specified directory.
 If target dir was not specified, command takes it from config file. WARNING Seems Panasonic cameras expose ReadOnly storage, this is why after successful import you have to manually remove files from camera.  
 It was tested with Panasoic HC-V700 camera.
 
@@ -84,11 +84,19 @@ A `media-tool clean names` and `media-tool clean metadata` commands may be used 
 ### How to Build
 
 1. Install Go [v1.23.1 or later](https://go.dev/doc/install)
-2. Install [Mage](https://github.com/magefile/mage). E.g. by `mkdir %GOPATH%\src && cd %GOPATH%\src && git clone https://github.com/magefile/mage && cd mage && go run bootstrap.go`
+2. Install [Mage](https://github.com/magefile/mage). E.g. by `go install github.com/magefile/mage@latest &&
+mage -init`
 3. Use one of predefined tasks:
-    * `mage -l` - show available tasks
-    * `mage releasePkg` - prepare release package
-    * `mage reBuild` - build application
+
+
+### Useful Commands
+
+Dev routines:
+
+* `mage -l` - show available tasks
+* `mage goUpdateDeps` - update dependencies
+* `mage releasePkg` - prepare release package
+* `mage reBuild` - build application
 
 ### TODOs
 
