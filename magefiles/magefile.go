@@ -97,6 +97,7 @@ func ReleasePkg() error {
 		fmt.Printf("Building %s release for %s arch\n", version, arch)
 
 		os.Setenv("GOARCH", arch)
+		os.Setenv("GOOS", "windows")
 
 		ReBuild(arch)
 
