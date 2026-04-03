@@ -13,6 +13,28 @@
                 "reveal": "always",
                 "panel": "shared"
             }
+        },
+        {
+            "label": "media-tool: update deps",
+            "type": "shell",
+            "command": "mage goUpdateDeps",
+            "group": "build",
+            "problemMatcher":"$go",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "media-tool: release",
+            "type": "shell",
+            "command": "mage releasePkg",
+            "group": "build",
+            "problemMatcher":"$go",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
         }
     ]
 }
