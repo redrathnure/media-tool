@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	version = "1.6.1"
+	version = "1.6.2"
 )
 
 var cfgFile string
@@ -39,7 +39,7 @@ var verbose bool
 var rootCmd = &cobra.Command{
 	Use:   "media-tool",
 	Short: "Tooling to handle video and photo content",
-	Long: `Application for importing and correction of video and photo 
+	Long: `Application for importing and correction of video and photo
 	materials from digital video about photo cameras.`,
 	Version: version,
 }
