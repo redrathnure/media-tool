@@ -1,0 +1,16 @@
+exiftool:
+  # Only to use manually installed exiftool instance.
+  # Better to use OS preinstalled version, e.g. `/usr/bin/exiftool` from `sudo apt install exiftooll`
+  path: $APP_DIR/exiftool
+  # or 
+  #path: /opt/exiftool
+import:
+  goPro:
+    default:
+      targetDir: ~/Media/gopro
+  camVideo:
+    default:
+      targetDir: ~/Media/camera
+  sdPhotos:
+    default:
+      targetDir: ~/Media/photos
