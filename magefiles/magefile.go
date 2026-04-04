@@ -112,10 +112,11 @@ func TestV() error {
 }
 
 func runTest(verbose bool) error {
-	covDir := path.Join("build", "unittest")
+	covDir := path.Join(".", "build", "unittest")
 	covFile := path.Join(covDir, "coverage.out")
 	covReport := path.Join(covDir, "coverage.html")
-	os.Mkdir(covDir, 0755)
+
+	os.MkdirAll(covDir, 0755)
 
 	args := []string{"test", "./...", "-cover", "-coverprofile", covFile}
 	if verbose {
