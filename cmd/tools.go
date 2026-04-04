@@ -57,7 +57,7 @@ func removeDir(dirName string, removeNonEmpty bool) {
 }
 
 func removeFiles(baseDir string, glob string) {
-	files, err := filepath.Glob(baseDir + "\\" + glob)
+	files, err := filepath.Glob(path.Join(baseDir, glob))
 	if err != nil {
 		log.Warningf("Unable to open scan '%v' with '%v' pattern", baseDir, glob)
 	}
