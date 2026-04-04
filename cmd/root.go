@@ -27,9 +27,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	version = "1.6.2"
-)
+// It may be overridden during build. And it will be overridden during release
+var version = "1.6.2"
 
 var cfgFile string
 

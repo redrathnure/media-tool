@@ -64,6 +64,7 @@ func UpdateDeps() error {
 
 // Build project
 func Build(platform *string, // target architecture, e.g. linux/arm64, windows/amd64 or linux
+	version *string, // Release version, e.g. 1.2.3
 ) error {
 
 	os_name, arch := parsePlatform(platform)
@@ -75,7 +76,12 @@ func Build(platform *string, // target architecture, e.g. linux/arm64, windows/a
 	if err := sh.RunV("go", "version"); err != nil {
 		return err
 	}
-	if err := sh.RunV("go", "build"); err != nil {
+
+	args := []string{"build"}
+	if version != nil && *version != "" {
+		args = append(args, "-ldflags", fmt.Sprintf("-X github.com/redrathnure/media-tool/cmd.version=%s", *version))
+	}
+	if err := sh.RunV("go", args...); err != nil {
 		return err
 	}
 	return nil
@@ -98,10 +104,11 @@ func TestV() error {
 
 // Clean and build project
 func BuildClean(platform *string, // target architecture, e.g. linux/arm64, windows/amd64 or linux
+	version *string, // Release version, e.g. 1.2.3
 ) {
 	//mg.Deps(GoClean, Clean, Build)
 	Clean()
-	Build(platform)
+	Build(platform, version)
 }
 
 /* Release related */
@@ -117,7 +124,7 @@ func Release() error {
 	for _, platform := range releasePlatforms {
 
 		fmt.Printf("\nPreparing %s package...\n", platform)
-		BuildClean(&platform)
+		BuildClean(&platform, &version)
 
 		if err := prepareReleaseDir(platform); err != nil {
 			return err
@@ -150,7 +157,11 @@ func prepareReleaseDir(platform string) error {
 	if err := copyToDir("README.md", releaseDir); err != nil {
 		return err
 	}
-	if err := copyToDir("media-tool.exe", releaseDir); err != nil {
+	var binFile = "media-tool"
+	if os_name == "windows" {
+		binFile = "media-tool.exe"
+	}
+	if err := copyToDir(binFile, releaseDir); err != nil {
 		return err
 	}
 
