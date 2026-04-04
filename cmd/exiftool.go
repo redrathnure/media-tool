@@ -25,10 +25,6 @@ import (
 	"strings"
 )
 
-const (
-	cfgExifToolPath = "exiftool.path"
-)
-
 type exifToolWrapper struct {
 	cmd         string
 	defaultArgs []string
@@ -61,7 +57,7 @@ func getExifTool() *exifToolWrapper {
 }
 
 func (tool *exifToolWrapper) initCmd() {
-	customPath := conf.GetString(cfgExifToolPath)
+	customPath := conf.GetExifToolPath()
 	if customPath != "" {
 
 		if strings.Contains(customPath, "$APP_DIR") {
@@ -229,8 +225,4 @@ func (toolArgs *exifToolArgs) cleanCameraTags() {
 
 func (toolArgs *exifToolArgs) cleanLocationTags() {
 	toolArgs.cleanTag("gps:all")
-}
-
-func init() {
-	conf.SetDefault(cfgExifToolPath, "")
 }

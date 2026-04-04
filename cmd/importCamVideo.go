@@ -25,10 +25,6 @@ import (
 	"github.com/redrathnure/media-tool/cmd/removable"
 )
 
-const (
-	cfgImportCamVideoDefaultDst = "import.camvideo.default.targetDir"
-)
-
 // goproCmd represents the gopro command
 var camVideoCmd = &cobra.Command{
 	Use:   "camVideo targetDir",
@@ -47,8 +43,9 @@ var camVideoCmd = &cobra.Command{
 
 		dstDir := extractPath(args, 0, "")
 		if dstDir == "" {
-			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportCamVideoDefaultDst)
-			dstDir = conf.GetString(cfgImportCamVideoDefaultDst)
+			dstDir = conf.GetImportCamVideoDefaultDst()
+			log.Infof("No args for targetDir was specified. Using '%s' from configuration", dstDir)
+
 			if dstDir == "" {
 				log.Errorf("No target dir was specified")
 				os.Exit(1)
@@ -91,6 +88,4 @@ var camVideoCmd = &cobra.Command{
 
 func init() {
 	importCmd.AddCommand(camVideoCmd)
-
-	conf.SetDefault(cfgImportCamVideoDefaultDst, "")
 }

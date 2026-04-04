@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/redrathnure/media-tool/core/config"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -48,7 +49,7 @@ func TestExifToolWrapper_InitCmd_CustomPath(t *testing.T) {
 	// Reset config to ensure clean state
 	conf.Reset()
 
-	conf.Set(cfgExifToolPath, "/custom/path/exiftool")
+	conf.Set(config.ExifToolPath, "/custom/path/exiftool")
 
 	sut.initCmd()
 
@@ -70,7 +71,7 @@ func TestExifToolWrapper_InitCmd_AppDirSubstitution(t *testing.T) {
 	conf.Reset()
 
 	// Set app directory path (this matches the name used in the exiftool.go implementation)
-	conf.Set(cfgExifToolPath, "$APP_DIR/..")
+	conf.Set(config.ExifToolPath, "$APP_DIR/..")
 
 	sut.initCmd()
 

@@ -55,7 +55,11 @@ func (c *ConfigBuilder) Build() (*Config, error) {
 		}
 
 	}
-	return &Config{ko: c.ko}, nil
+
+	result := Config{ko: c.ko}
+	result.InitDefaults()
+
+	return &result, nil
 }
 
 func (c *ConfigBuilder) loadFile(confFile string) error {

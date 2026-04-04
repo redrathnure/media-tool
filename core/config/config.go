@@ -8,12 +8,35 @@ import (
 	"github.com/knadh/koanf/v2"
 )
 
+const (
+	ExifToolPath             = "exiftool.path"
+	ImportCamVideoDefaultDst = "import.camvideo.default.targetDir"
+	ImportGoProDefaultDst    = "import.gopro.default.targetDir"
+	ImportSdPhotosDefaultDst = "import.sdPhotos.default.targetDir"
+)
+
+var defaults = map[string]map[string]string{
+	"linux": map[string]string{
+		//use OS preinstalled version
+		ExifToolPath:             "",
+		ImportCamVideoDefaultDst: "~/Media/camera",
+		ImportGoProDefaultDst:    "~/Media/gopro",
+		ImportSdPhotosDefaultDst: "~/Media/photos",
+	},
+	"windows": map[string]string{
+		ExifToolPath:             "",
+		ImportCamVideoDefaultDst: "d:\\video\\camera",
+		ImportGoProDefaultDst:    "d:\\video\\gopro",
+		ImportSdPhotosDefaultDst: "d:\\photos"},
+}
+
 type Config struct {
-	ko             *koanf.Koanf
+	ko *koanf.Koanf
 }
 
 func Empty() *Config {
-	return &Config{ko: koanf.New(".")}
+	result := Config{ko: koanf.New(".")}
+	return &result
 }
 
 func (c *Config) GetString(key string) string {
@@ -32,6 +55,8 @@ func (c *Config) Set(key string, value interface{}) error {
 
 func (c *Config) Reset() {
 	c.ko = koanf.New(".")
+
+	c.InitDefaults()
 }
 
 func (c *Config) WriteConfigAs(dstFile string) error {
@@ -45,4 +70,31 @@ func (c *Config) WriteConfigAs(dstFile string) error {
 	}
 
 	return os.WriteFile(dstFile, data, 0o644)
+}
+
+func (c *Config) InitDefaults() {
+	defs, ok := defaults[os.Getenv("OS")]
+	if !ok {
+		defs = defaults["linux"]
+	}
+
+	for key, value := range defs {
+		c.SetDefault(key, value)
+	}
+}
+
+func (c *Config) GetImportCamVideoDefaultDst() string {
+	return c.ko.String(ImportCamVideoDefaultDst)
+}
+
+func (c *Config) GetExifToolPath() string {
+	return c.ko.String(ExifToolPath)
+}
+
+func (c *Config) GetImportGoProDefaultDst() string {
+	return c.ko.String(ImportGoProDefaultDst)
+}
+
+func (c *Config) GetImportSdPhotosDefaultDst() string {
+	return c.ko.String(ImportSdPhotosDefaultDst)
 }

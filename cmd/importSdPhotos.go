@@ -25,9 +25,7 @@ import (
 	"github.com/redrathnure/media-tool/cmd/removable"
 )
 
-const (
-	cfgImportSdPhotosDefaultDst = "import.sdPhotos.default.targetDir"
-)
+const ()
 
 // sdPhotos represents the gopro command
 var sdPhotos = &cobra.Command{
@@ -47,8 +45,9 @@ var sdPhotos = &cobra.Command{
 
 		dstDir := extractPath(args, 0, "")
 		if dstDir == "" {
-			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportSdPhotosDefaultDst)
-			dstDir = conf.GetString(cfgImportSdPhotosDefaultDst)
+			dstDir = conf.GetImportSdPhotosDefaultDst()
+			log.Infof("No args for targetDir was specified. Using '%s' from configuration", dstDir)
+
 			if dstDir == "" {
 				log.Errorf("No target dir was specified")
 				os.Exit(1)
@@ -91,6 +90,4 @@ var sdPhotos = &cobra.Command{
 
 func init() {
 	importCmd.AddCommand(sdPhotos)
-
-	conf.SetDefault(cfgImportSdPhotosDefaultDst, "")
 }
