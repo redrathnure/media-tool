@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -91,14 +92,29 @@ func Build(platform *string, // target architecture, e.g. linux/arm64, windows/a
 
 // Test runs all tests in the project
 func Test() error {
-	if err := sh.RunV("go", "test", "./..."); err != nil {
-		return err
-	}
-	return nil
+	return runTest(false)
 }
 
 func TestV() error {
-	if err := sh.RunV("go", "test", "./...", "-v"); err != nil {
+
+	return runTest(true)
+}
+
+func runTest(verbose bool) error {
+	covDir := path.Join("build", "unittest")
+	covFile := path.Join(covDir, "coverage.out")
+	covReport := path.Join(covDir, "coverage.html")
+	os.Mkdir(covDir, 0755)
+
+	args := []string{"test", "./...", "-cover", "-coverprofile", covFile}
+	if verbose {
+		args = append(args, "-v")
+	}
+	if err := sh.RunV("go", args...); err != nil {
+		return err
+	}
+
+	if err := sh.RunV("go", "tool", "cover", "-html", covFile, "-o", covReport); err != nil {
 		return err
 	}
 	return nil
