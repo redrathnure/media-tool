@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/magefile/mage/mg"
@@ -139,9 +140,14 @@ func Release() error {
 }
 
 // Prepare new release version. It updates version in root.go, prepares git tag and runs `release` task.
-func ReleaseVersion(newVersion string, // New version to be released, e.g. 1.2.3
+func ReleaseVersion(newVersion string, // New version to be released, e.g. 1.2.3 or MAJOR/MINOR/PATCH
 ) error {
 	fmt.Printf("Preparing new '%s' release...\n", newVersion)
+
+	newVersion, err := calcNewVersion(newVersion)
+	if err != nil {
+		return fmt.Errorf("failed to calculate a new version: %v", err)
+	}
 
 	fmt.Printf("Updating 'cmd/root.go' version...\n")
 	content, err := os.ReadFile("cmd/root.go")
@@ -318,4 +324,61 @@ func parsePlatform(platform *string) (os_name string, arch string) {
 	}
 
 	return runtime.GOOS, runtime.GOARCH
+}
+
+func calcNewVersion(newVersion string) (string, error) {
+	versionType := cleanupVersion(newVersion)
+
+	if versionType != "major" && versionType != "minor" && versionType != "patch" {
+		return newVersion, nil
+	}
+
+	gitVersion, err := getGitVersion()
+	if err != nil {
+		return "", fmt.Errorf("failed to get git version: %v", err)
+	}
+	latestTag := cleanupVersion(gitVersion)
+
+	// Extract version components using regexp
+	versionRegex := regexp.MustCompile(`(\d+)\.(\d+)\.(\d+)`)
+	matches := versionRegex.FindStringSubmatch(latestTag)
+	if len(matches) != 4 {
+		return "", fmt.Errorf("unexpected tag version format: %s", latestTag)
+	}
+
+	major, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return "", fmt.Errorf("invalid major version: %v", err)
+	}
+	minor, err := strconv.Atoi(matches[2])
+	if err != nil {
+		return "", fmt.Errorf("invalid minor version: %v", err)
+	}
+	patch, err := strconv.Atoi(matches[3])
+	if err != nil {
+		return "", fmt.Errorf("invalid patch version: %v", err)
+	}
+
+	switch versionType {
+	case "major":
+		major++
+		minor = 0
+		patch = 0
+	case "minor":
+		minor++
+		patch = 0
+	case "patch":
+		patch++
+	}
+
+	newVersion = fmt.Sprintf("%d.%d.%d", major, minor, patch)
+	fmt.Printf("New version is '%s'\n", newVersion)
+
+	return newVersion, nil
+}
+
+func cleanupVersion(version string) string {
+	version = strings.TrimSpace(version)
+	version = strings.TrimPrefix(version, "v")
+	return strings.ToLower(version)
 }

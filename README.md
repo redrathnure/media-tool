@@ -95,15 +95,17 @@ Dev routines:
 
 * `mage -l` - show available tasks
 * `mage goUpdateDeps` - update dependencies
-* `mage releasePkg` - prepare release package
-* `mage reBuild` - build application
+* `mage build` - build application
+* `mage buildClean` - cleanup project and build application
+* `mage release` - build release packages
+* `mage releaseVersion` - get or calculate new version ,prepare tag and build release packages
+
 
 ### TODOs
 
 * Extract logging format to the config
 * Parse Exiftool output. Warning: [minor] to debug
 * Build script + prepare installation package
-* Update version based on git blame
 * Store image and videos formats to the config (mp4 and tsd)
 * Coping speed and progress indicator
 * try Exiftool -short -groupNames -if "$file:MIMEType=~/video/i" * for image and video
