@@ -1,42 +1,50 @@
 # Media Toolkit
 
 TL;TR;
-Tool to import video and photos from cameras like GoPro, Nikon DSLR or Panasonic camcorders. Plus additional features to manage file name and Exif/metadata routine. For Windows users only (at least now).
+A tool to import photos and videos from GoPro/cameras/camcoders. Plus helpers to automatize file name and Exif/metadata routine.
 
 ## Motivation
 
-Primary goal was to simplify import from various digital cameras.
+There are two groups of the tasks to be automatized:
 
-Each device has "own way" to be connected to PC/Laptop and file naming scheme. I need a tool that will hide all this complexity and copy media files to a laptop with predefined naming and without unnecessary questions. And I would get rid of proprietary (and outdated) applications like HD Writer.
+- import data from various digital cameras(GoPro, Nikon/Cannon DSLR or Panasonic camcorders).
+- prepare proper file names and/or correct Exif data (date creation, removing some tags etc).
 
-The second group of requirements is related to the metadata handling and files organizing (file renaming, dates fixing, metadata wiping etc).
+A base workflows:
 
-So, my base workflow has following points:
-
-1. I have a place for home/family video and separate place for photos.
-2. All media files organized by date (e.g. `2020.01.02` or `2020.01.02_Awesome_Event`). `YYYY.MM.DD` date format help me in searching, processing an arhivig activities.
-3. I came to ide to have unified file naming scheme with timestamp in file name. e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`. Especially I dislike GoPro naming :)
-4. Sometimes I need to parse date from file name and put it into the embedded metadata (Exif for photo and QuickTime attributes for video).
-
-And in some cases I need to fix file names and metadata for certain files.
-
-This application was designed to automatize these routines... and to practice in GoLang programming :)
+1. Impoting Photos/videos from camera:
+    - connect camera
+    - run script
+    - move needed photo and video content to specific place and organize by folder with `YYYY.MM.DD` naming format
+    - remove original content from the camera
+2. Cleanup names:
+    - run tool in directory with wrong/unexpectd files names OR/AND "copy" name suffixes OR/AND not full Exif data (e.g. photos from WhatsApp)
+    - rename files to desired naming schema (e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`)
+    - ... including handling a "Copy" suffixes.
+    - fill/correct missed Exif data
+3. Cleanup unecessury Exif data:
+    - run tool in directory with photos to remove unecessury information about camera, location and other tags whcich should not be shared with other users
 
 *⚠️ WARNING* This application may perform destructive actions for media files (move, delete files or change metadata). You use it at your own risk and without any warranties. Author is not responsible for any kind of loss or damage of your data. It is strongly recommended to make data backups before any file operations.
 
 ## Installation
 
-Step 1: put [`media-tool.exe`](https://github.com/redrathnure/media-tool/releases) to some folder (preferably in `$PATH` locations).
+Manual installation:
 
-Step 2. Install [ExifTool by Phil Harvey](https://Exiftool.org/) which is used to perform files and metadata manipulations. `Exiftool.exe` should be placed into `APP_DIR\Exiftool` dir OR into any `$PATH` location.
-
-Step 3. (optional) Prepare Default Configuration. By default the application looks to `$HOME\.media-tool\media-tool.yaml` or `APP_DIR\conf\media-tool.yml` configuration file. Please see `media-tool.example.yml` file and chapters bellow for more details.
+1. Download one of [`release packages`](https://github.com/redrathnure/media-tool/releases) and put `media-tool.exe`/`media-tool` to some folder (preferably in `$PATH` locations).
+2. Install [ExifTool by Phil Harvey](https://Exiftool.org/) which is used to perform files and metadata manipulations. 
+    - Windows: `Exiftool.exe` should be placed into `APP_DIR\Exiftool` dir OR into any `$PATH` location. 
+    - Linux: something like `sudo apt install exiftool`
+3. (optional) Prepare configuration (see `media-tool.example.yml` file and chapters bellow for more details). By default the application looks into following locations:
+    - (preferable for a Linux env) `~/.config/media-tool/media-tool.yaml`
+    - (preferable for a Windows env) `$HOME\.media-tool\media-tool.yaml`
+    - (portable installation)`APP_DIR\conf\media-tool.yml` 
 
 ## Usage
 
 The application has a few different commands. Please use `media-tool -h` or `media-tool {cmd} -h` to get description and related arguments.
 
-Each command has `--config` or `-c` arg to specify configuration file from non default location. May be useful if default `$HOME\.media-tool\media-tool.yaml` OR `APP_DIR\conf\media-tool.yml` locations do not work well or if you need to keep a few different configurations.
+Each command has `--config` or `-c` arg to specify configuration file from non default location. May be useful if default (`~/.config/media-tool/media-tool.yaml`, `$HOME\.media-tool\media-tool.yaml` or `APP_DIR\conf\media-tool.yml`) location do not work well or if you need to temporally use different config.
 
 Each command has `-v` or `--verbose` arg which enable extra logging and may be useful for troubleshooting or initial learning phase.
 
@@ -109,3 +117,10 @@ Dev routines:
 * Store image and videos formats to the config (mp4 and tsd)
 * Coping speed and progress indicator
 * try Exiftool -short -groupNames -if "$file:MIMEType=~/video/i" * for image and video
+* Import data from SD/flash storage (Linux)
+* Import data from MTP devices (Linux)
+* proper OS related defaults
+* deb packet?
+* WhatApp and GPixel files handling
+* Proper handling of unproper dates (a "1971 year for FAT32" issue)
+* Handle more "Copy" naming patterns
