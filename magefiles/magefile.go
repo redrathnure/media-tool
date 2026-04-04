@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -135,6 +136,52 @@ func Release() error {
 	}
 
 	return nil
+}
+
+// Prepare new release version. It updates version in root.go, prepares git tag and runs `release` task.
+func ReleaseVersion(newVersion string, // New version to be released, e.g. 1.2.3
+) error {
+	fmt.Printf("Preparing new '%s' release...\n", newVersion)
+
+	fmt.Printf("Updating 'cmd/root.go' version...\n")
+	content, err := os.ReadFile("cmd/root.go")
+	if err != nil {
+		return fmt.Errorf("failed to read root.go: %v", err)
+	}
+	reExpr := regexp.MustCompile(`var version = ".*"`)
+	newContent := reExpr.ReplaceAllString(string(content), fmt.Sprintf(`var version = "%s"`, newVersion))
+	err = os.WriteFile("cmd/root.go", []byte(newContent), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write root.go: %v", err)
+	}
+
+	// Check git changes
+	status, err := sh.Output("git", "status", "--porcelain", "cmd/root.go")
+	if err != nil {
+		return fmt.Errorf("failed to check git status: %v", err)
+	}
+
+	if status != "" {
+		fmt.Printf("Committing changes...\n")
+
+		if err := sh.RunV("git", "add", "cmd/root.go"); err != nil {
+			return fmt.Errorf("failed to add file to git: %v", err)
+		}
+		if err := sh.RunV("git", "commit", "-m", "chore: bump version to "+newVersion); err != nil {
+			return fmt.Errorf("failed to commit: %v", err)
+		}
+
+	}
+
+	fmt.Printf("Removing existed '%s' git tag if any...\n", newVersion)
+	sh.RunV("git", "tag", "-d", newVersion)
+
+	fmt.Printf("Creating '%s' git tag...\n", newVersion)
+	if err := sh.RunV("git", "tag", newVersion); err != nil {
+		return fmt.Errorf("failed to create new tag: %v", err)
+	}
+
+	return Release()
 }
 
 /* Helpers*/
