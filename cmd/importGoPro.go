@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/redrathnure/media-tool/cmd/mtp"
+	"github.com/redrathnure/media-tool/cmd/removable"
 )
 
 const (
@@ -59,7 +59,7 @@ var goproCmd = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadGoProVideos(dstDir, DryRun)
+		src, err := removable.LoadGoProVideos(dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy GoPro files: %v", err)
 			os.Exit(1)

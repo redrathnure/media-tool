@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/redrathnure/media-tool/cmd/mtp"
+	"github.com/redrathnure/media-tool/cmd/removable"
 )
 
 const (
@@ -59,7 +59,7 @@ var sdPhotos = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadSdPhotos(dstDir, DryRun)
+		src, err := removable.LoadSdPhotos(dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy photos files: %v", err)
 			os.Exit(1)

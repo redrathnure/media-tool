@@ -1,4 +1,7 @@
-package mtp
+//go:build windows
+// +build windows
+
+package mtp_windows
 
 import (
 	"fmt"

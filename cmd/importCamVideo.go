@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/redrathnure/media-tool/cmd/mtp"
+	"github.com/redrathnure/media-tool/cmd/removable"
 )
 
 const (
@@ -59,7 +59,7 @@ var camVideoCmd = &cobra.Command{
 
 		log.Infof("dry ryn: %v", DryRun)
 
-		src, err := mtp.LoadCamVideos(dstDir, DryRun)
+		src, err := removable.LoadCamVideos(dstDir, DryRun)
 		if err != nil {
 			log.Errorf("Unable to copy camcoder files: %v", err)
 			os.Exit(1)
