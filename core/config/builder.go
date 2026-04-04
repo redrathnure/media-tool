@@ -68,7 +68,7 @@ func (c *ConfigBuilder) loadFile(confFile string) error {
 		return nil
 	}
 
-	log.Infof("Loading configuration from '%s' file...", confFile)
+	log.Debugf("Loading configuration from '%s' file...", confFile)
 	if err := c.ko.Load(file.Provider(confFile), yaml.Parser()); err != nil {
 		return fmt.Errorf("Unable to load '%v' config: %v", confFile, err)
 	}
