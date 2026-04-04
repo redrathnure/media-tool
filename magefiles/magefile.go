@@ -80,10 +80,21 @@ func Build(platform *string, // target architecture, e.g. linux/arm64, windows/a
 		return err
 	}
 
-	args := []string{"build"}
-	if version != nil && *version != "" {
-		args = append(args, "-ldflags", fmt.Sprintf("-X github.com/redrathnure/media-tool/cmd.version=%s", *version))
+	if version == nil || *version == "" {
+		gitVersion, err := getGitVersion()
+		if err != nil {
+			return fmt.Errorf("failed to get git version: %v", err)
+		}
+		version = &gitVersion
 	}
+
+	args := []string{"build"}
+	ldflags := []string{fmt.Sprintf("-X github.com/redrathnure/media-tool/cmd.goVersion=%s", runtime.Version()),
+		fmt.Sprintf("-X github.com/redrathnure/media-tool/cmd.goBuildPlatform=%s/%s", runtime.GOOS, runtime.GOARCH),
+		fmt.Sprintf("-X github.com/redrathnure/media-tool/cmd.version=%s", *version),
+	}
+
+	args = append(args, "-ldflags", strings.Join(ldflags, " "))
 	if err := sh.RunV("go", args...); err != nil {
 		return err
 	}
@@ -155,7 +166,7 @@ func Release() error {
 	return nil
 }
 
-// Prepare new release version. It updates version in root.go, prepares git tag and runs `release` task.
+// Prepare new release version. It updates version in version.go, prepares git tag and runs `release` task.
 func ReleaseVersion(newVersion string, // New version to be released, e.g. 1.2.3 or MAJOR/MINOR/PATCH
 ) error {
 	fmt.Printf("Preparing new '%s' release...\n", newVersion)
@@ -165,20 +176,20 @@ func ReleaseVersion(newVersion string, // New version to be released, e.g. 1.2.3
 		return fmt.Errorf("failed to calculate a new version: %v", err)
 	}
 
-	fmt.Printf("Updating 'cmd/root.go' version...\n")
+	fmt.Printf("Updating 'cmd/version.go' version...\n")
 	content, err := os.ReadFile("cmd/root.go")
 	if err != nil {
-		return fmt.Errorf("failed to read root.go: %v", err)
+		return fmt.Errorf("failed to read version.go: %v", err)
 	}
 	reExpr := regexp.MustCompile(`var version = ".*"`)
 	newContent := reExpr.ReplaceAllString(string(content), fmt.Sprintf(`var version = "%s"`, newVersion))
-	err = os.WriteFile("cmd/root.go", []byte(newContent), 0644)
+	err = os.WriteFile("cmd/version.go", []byte(newContent), 0644)
 	if err != nil {
-		return fmt.Errorf("failed to write root.go: %v", err)
+		return fmt.Errorf("failed to write version.go: %v", err)
 	}
 
 	// Check git changes
-	status, err := sh.Output("git", "status", "--porcelain", "cmd/root.go")
+	status, err := sh.Output("git", "status", "--porcelain", "cmd/version.go")
 	if err != nil {
 		return fmt.Errorf("failed to check git status: %v", err)
 	}
@@ -186,7 +197,7 @@ func ReleaseVersion(newVersion string, // New version to be released, e.g. 1.2.3
 	if status != "" {
 		fmt.Printf("Committing changes...\n")
 
-		if err := sh.RunV("git", "add", "cmd/root.go"); err != nil {
+		if err := sh.RunV("git", "add", "cmd/version.go"); err != nil {
 			return fmt.Errorf("failed to add file to git: %v", err)
 		}
 		if err := sh.RunV("git", "commit", "-m", "chore: bump version to "+newVersion); err != nil {

@@ -23,9 +23,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// It may be overridden during build. And it will be overridden during release
-var version = "1.6.2"
-
 var cfgFile string
 
 var verbose bool
@@ -36,7 +33,6 @@ var rootCmd = &cobra.Command{
 	Short: "Tooling to handle video and photo content",
 	Long: `Application for importing and correction of video and photo
 	materials from digital video about photo cameras.`,
-	Version: version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
