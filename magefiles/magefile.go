@@ -22,7 +22,7 @@ const (
 	distDir    = "./dist/"
 )
 
-var releasePlatforms = [...]string{"windows/amd64", "windows/arm64"}
+var releasePlatforms = [...]string{"windows/amd64", "windows/arm64", "linux/amd64", "linux/arm64"}
 
 /* Cleanup tasks */
 
