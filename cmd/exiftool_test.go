@@ -4,7 +4,6 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,8 +30,8 @@ func TestExifToolWrapper_InitCmd_Default(t *testing.T) {
 		defaultArgs: []string{"-v0", "-progress"},
 	}
 
-	// Reset viper to ensure clean state
-	viper.Reset()
+	// Reset config to ensure clean state
+	conf.Reset()
 
 	sut.initCmd()
 
@@ -46,17 +45,17 @@ func TestExifToolWrapper_InitCmd_CustomPath(t *testing.T) {
 		defaultArgs: []string{"-v0", "-progress"},
 	}
 
-	// Reset viper to ensure clean state
-	viper.Reset()
+	// Reset config to ensure clean state
+	conf.Reset()
 
-	viper.Set(cfgExifToolPath, "/custom/path/exiftool")
+	conf.Set(cfgExifToolPath, "/custom/path/exiftool")
 
 	sut.initCmd()
 
 	assert.Equal(t, "/custom/path/exiftool", sut.cmd)
 
-	// Reset viper and singleton for next tests
-	viper.Reset()
+	// Reset config and singleton for next tests
+	conf.Reset()
 	exifToolObj = nil
 }
 
@@ -67,19 +66,19 @@ func TestExifToolWrapper_InitCmd_AppDirSubstitution(t *testing.T) {
 		defaultArgs: []string{"-v0", "-progress"},
 	}
 
-	// Reset viper to ensure clean state
-	viper.Reset()
+	// Reset config to ensure clean state
+	conf.Reset()
 
 	// Set app directory path (this matches the name used in the exiftool.go implementation)
-	viper.Set(cfgExifToolPath, "$APP_DIR/..")
+	conf.Set(cfgExifToolPath, "$APP_DIR/..")
 
 	sut.initCmd()
 
 	// Verify $APP_DIR was replaced with the configured path
 	assert.NotEqual(t, "$APP_DIR/..", sut.cmd)
 
-	// Reset viper and singleton for next tests
-	viper.Reset()
+	// Reset config and singleton for next tests
+	conf.Reset()
 	exifToolObj = nil
 }
 

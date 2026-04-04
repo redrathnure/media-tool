@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/redrathnure/media-tool/cmd/removable"
 )
@@ -49,7 +48,7 @@ var sdPhotos = &cobra.Command{
 		dstDir := extractPath(args, 0, "")
 		if dstDir == "" {
 			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportSdPhotosDefaultDst)
-			dstDir = viper.GetString(cfgImportSdPhotosDefaultDst)
+			dstDir = conf.GetString(cfgImportSdPhotosDefaultDst)
 			if dstDir == "" {
 				log.Errorf("No target dir was specified")
 				os.Exit(1)
@@ -93,5 +92,5 @@ var sdPhotos = &cobra.Command{
 func init() {
 	importCmd.AddCommand(sdPhotos)
 
-	viper.SetDefault(cfgImportSdPhotosDefaultDst, "")
+	conf.SetDefault(cfgImportSdPhotosDefaultDst, "")
 }

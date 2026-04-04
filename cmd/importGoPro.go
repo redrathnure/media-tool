@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/redrathnure/media-tool/cmd/removable"
 )
@@ -49,7 +48,7 @@ var goproCmd = &cobra.Command{
 		dstDir := extractPath(args, 0, "")
 		if dstDir == "" {
 			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportGoProDefaultDst)
-			dstDir = viper.GetString(cfgImportGoProDefaultDst)
+			dstDir = conf.GetString(cfgImportGoProDefaultDst)
 			if dstDir == "" {
 				log.Errorf("No target dir was specified")
 				os.Exit(1)
@@ -121,5 +120,5 @@ var goproCmd = &cobra.Command{
 func init() {
 	importCmd.AddCommand(goproCmd)
 
-	viper.SetDefault(cfgImportGoProDefaultDst, "")
+	conf.SetDefault(cfgImportGoProDefaultDst, "")
 }

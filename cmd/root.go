@@ -19,12 +19,8 @@ package cmd
 
 import (
 	"os"
-	"path"
-	"path/filepath"
 
 	"github.com/spf13/cobra"
-
-	"github.com/spf13/viper"
 )
 
 // It may be overridden during build. And it will be overridden during release
@@ -60,31 +56,4 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.media-tool/media-tool.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Print debug messages")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		viper.SetConfigName("media-tool")
-		viper.SetConfigType("yml")
-
-		if ex, err := os.Executable(); err == nil {
-			rootConfigDir := path.Join(filepath.Dir(ex), "conf")
-			viper.AddConfigPath(rootConfigDir)
-		}
-
-		viper.AddConfigPath("/etc/media-tool")
-		viper.AddConfigPath("$HOME/.media-tool")
-		viper.AddConfigPath("./conf")
-	}
-
-	viper.AutomaticEnv()
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
-	}
 }

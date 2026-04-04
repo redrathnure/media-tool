@@ -44,7 +44,7 @@ Manual installation:
 
 The application has a few different commands. Please use `media-tool -h` or `media-tool {cmd} -h` to get description and related arguments.
 
-Each command has `--config` or `-c` arg to specify configuration file from non default location. May be useful if default (`~/.config/media-tool/media-tool.yaml`, `$HOME\.media-tool\media-tool.yaml` or `APP_DIR\conf\media-tool.yml`) location do not work well or if you need to temporally use different config.
+Each command has `--config` or `-c` arg to specify configuration file from non default location. May be useful if default (`~/.config/media-tool/media-tool.yaml`, `$HOME\.media-tool\media-tool.yaml` or `APP_DIR\conf\media-tool.yml`) location do not work well or if you need to temporally use different conf.
 
 Each command has `-v` or `--verbose` arg which enable extra logging and may be useful for troubleshooting or initial learning phase.
 

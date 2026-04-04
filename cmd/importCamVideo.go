@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/redrathnure/media-tool/cmd/removable"
 )
@@ -49,7 +48,7 @@ var camVideoCmd = &cobra.Command{
 		dstDir := extractPath(args, 0, "")
 		if dstDir == "" {
 			log.Infof("No args for targetDir was specified. Reading '%s' configuration", cfgImportCamVideoDefaultDst)
-			dstDir = viper.GetString(cfgImportCamVideoDefaultDst)
+			dstDir = conf.GetString(cfgImportCamVideoDefaultDst)
 			if dstDir == "" {
 				log.Errorf("No target dir was specified")
 				os.Exit(1)
@@ -93,5 +92,5 @@ var camVideoCmd = &cobra.Command{
 func init() {
 	importCmd.AddCommand(camVideoCmd)
 
-	viper.SetDefault(cfgImportCamVideoDefaultDst, "")
+	conf.SetDefault(cfgImportCamVideoDefaultDst, "")
 }

@@ -23,8 +23,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
 const (
@@ -63,7 +61,7 @@ func getExifTool() *exifToolWrapper {
 }
 
 func (tool *exifToolWrapper) initCmd() {
-	customPath := viper.GetString(cfgExifToolPath)
+	customPath := conf.GetString(cfgExifToolPath)
 	if customPath != "" {
 
 		if strings.Contains(customPath, "$APP_DIR") {
@@ -234,5 +232,5 @@ func (toolArgs *exifToolArgs) cleanLocationTags() {
 }
 
 func init() {
-	viper.SetDefault(cfgExifToolPath, "")
+	conf.SetDefault(cfgExifToolPath, "")
 }
