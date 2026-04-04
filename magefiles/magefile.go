@@ -9,6 +9,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -20,15 +22,32 @@ const (
 	distDir    = "./dist/"
 )
 
-var releaseArch = [...]string{"amd64", "arm64"}
+var releasePlatforms = [...]string{"windows/amd64", "windows/arm64"}
 
-// Clean go modules
-func GoClean() error {
-	return sh.RunV("go", "clean")
+/* Cleanup tasks */
+
+// Remove build dir and all temp files
+func Clean() {
+	fmt.Printf("Removing '%s' dir...\n", buildDir)
+	os.RemoveAll(buildDir)
 }
 
 // Clean go modules
-func GoUpdateDeps() error {
+func CleanGo() error {
+	fmt.Printf("Running 'go clean'...\n")
+	return sh.RunV("go", "clean")
+}
+
+// Remove all build files and perform cleanGo
+func CleanAll() {
+	mg.Deps(CleanGo, Clean)
+}
+
+/* Project maintenance tasks */
+
+// Update Go dependencies
+func UpdateDeps() error {
+	fmt.Printf("Updating Go dependencies...\n")
 	if err := sh.RunV("go", "get", "-u"); err != nil {
 		return err
 	}
@@ -41,17 +60,18 @@ func GoUpdateDeps() error {
 	return nil
 }
 
-// Clean build dir
-func Clean() {
-	os.RemoveAll(buildDir)
-}
-
-func cleanArch(arch string) {
-	Clean()
-}
+/* Build related */
 
 // Build project
-func Build() error {
+func Build(platform *string, // target architecture, e.g. linux/arm64, windows/amd64 or linux
+) error {
+
+	os_name, arch := parsePlatform(platform)
+	fmt.Printf("Building for %s/%s platform...\n", os_name, arch)
+
+	os.Setenv("GOOS", os_name)
+	os.Setenv("GOARCH", arch)
+
 	if err := sh.RunV("go", "version"); err != nil {
 		return err
 	}
@@ -76,35 +96,33 @@ func TestV() error {
 	return nil
 }
 
-func buildArch(arch string) error {
-	return Build()
+// Clean and build project
+func BuildClean(platform *string, // target architecture, e.g. linux/arm64, windows/amd64 or linux
+) {
+	//mg.Deps(GoClean, Clean, Build)
+	Clean()
+	Build(platform)
 }
 
-// Clean and build project
-func ReBuild(arch string) {
-	//mg.Deps(GoClean, Clean, Build)
-	mg.Deps(GoClean, mg.F(cleanArch, arch), mg.F(buildArch, arch))
-}
+/* Release related */
 
 // Prepare release package
-func ReleasePkg() error {
+func Release() error {
 	version, err := getGitVersion()
 	if err != nil {
 		return err
 	}
 
-	for _, arch := range releaseArch {
-		fmt.Printf("Building %s release for %s arch\n", version, arch)
+	fmt.Printf("Preparing %s release...\n", version)
+	for _, platform := range releasePlatforms {
 
-		os.Setenv("GOARCH", arch)
-		os.Setenv("GOOS", "windows")
+		fmt.Printf("\nPreparing %s package...\n", platform)
+		BuildClean(&platform)
 
-		ReBuild(arch)
-
-		if err := prepareReleaseDir(); err != nil {
+		if err := prepareReleaseDir(platform); err != nil {
 			return err
 		}
-		if err := buildReleasePackage(version, arch); err != nil {
+		if err := buildReleasePackage(version, platform); err != nil {
 			return err
 		}
 	}
@@ -112,11 +130,17 @@ func ReleasePkg() error {
 	return nil
 }
 
+/* Helpers*/
+
 func getGitVersion() (string, error) {
 	return sh.Output("git", "describe", "--tags")
 }
 
-func prepareReleaseDir() error {
+func prepareReleaseDir(platform string) error {
+	fmt.Printf("Preparing '%s' dir...\n", releaseDir)
+
+	os_name, _ := parsePlatform(&platform)
+
 	if err := os.MkdirAll(releaseDir, 0755); err != nil {
 		return err
 	}
@@ -129,18 +153,30 @@ func prepareReleaseDir() error {
 	if err := copyToDir("media-tool.exe", releaseDir); err != nil {
 		return err
 	}
-	if err := copyToDir("media-tool.example.yml", releaseDir); err != nil {
+
+	var exampleFile = "media-tool.example.linux.yml"
+	if os_name == "windows" {
+		exampleFile = "media-tool.example.windows.yml"
+	}
+	if err := copyToDir2(exampleFile, releaseDir, "media-tool.example.yml"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func copyToDir(fileName, dstDir string) error {
-	return os.Link(fileName, dstDir+fileName)
+func copyToDir(srcFileName, dstDir string) error {
+	return copyToDir2(srcFileName, dstDir, srcFileName)
 }
 
-func buildReleasePackage(version, arch string) error {
-	releaseFile := fmt.Sprintf("%s/media-tool_%s_%s.zip", distDir, version, arch)
+func copyToDir2(srcFileName, dstDir string, dstFileName string) error {
+	var dstFile = filepath.Join(dstDir, dstFileName)
+	return os.Link(srcFileName, dstFile)
+}
+
+func buildReleasePackage(version string, platform string) error {
+	os_name, arch := parsePlatform(&platform)
+
+	releaseFile := filepath.Join(distDir, fmt.Sprintf("media-tool_%s_%s-%s.zip", version, os_name, arch))
 	fmt.Printf("Building '%s' archive\n", releaseFile)
 
 	os.MkdirAll(distDir, 0755)
@@ -148,6 +184,8 @@ func buildReleasePackage(version, arch string) error {
 }
 
 func zipDir(sourceDir, targetFile string) error {
+	fmt.Printf("Compressing '%s' dir...\n", sourceDir)
+
 	// 1. Create a ZIP file and zip.Writer
 	f, err := os.Create(targetFile)
 	if err != nil {
@@ -207,4 +245,19 @@ func zipDir(sourceDir, targetFile string) error {
 		_, err = io.Copy(headerWriter, f)
 		return err
 	})
+}
+
+func parsePlatform(platform *string) (os_name string, arch string) {
+	if platform != nil {
+
+		parts := strings.Split(*platform, "/")
+		if len(parts) == 1 {
+			return parts[0], runtime.GOARCH
+		}
+		if len(parts) == 2 {
+			return parts[0], parts[1]
+		}
+	}
+
+	return runtime.GOOS, runtime.GOARCH
 }
