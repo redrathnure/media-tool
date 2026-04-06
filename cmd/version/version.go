@@ -7,7 +7,7 @@ import (
 )
 
 // It may be overridden during build. And it will be overridden during release
-var version = "1.6.2"
+var version = "1.7.0"
 var goVersion = "???"
 var goBuildPlatform = "???"
 
