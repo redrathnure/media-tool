@@ -1,7 +1,6 @@
 # Media Toolkit
 
-TL;TR;
-A tool to import photos and videos from GoPro/cameras/camcoders. Plus helpers to automatize file name and Exif/metadata routine.
+A tool for importing and managing media data from GoPro, photo cameras, camcoders, smartphones and other media devices. Contains features to automatize file name and Exif/metadata related routine.
 
 ## Motivation
 
@@ -10,35 +9,52 @@ There are two groups of the tasks to be automatized:
 - import data from various digital cameras(GoPro, Nikon/Cannon DSLR or Panasonic camcorders).
 - prepare proper file names and/or correct Exif data (date creation, removing some tags etc).
 
-A base workflows:
+Base workflows:
 
-1. Impoting Photos/videos from camera:
+1. Importing photos/videos from camera:
     - connect camera
-    - run script
-    - move needed photo and video content to specific place and organize by folder with `YYYY.MM.DD` naming format
-    - remove original content from the camera
+    - run tool which will ...
+    - ...move photo and video content to specific place and organize by folder with `YYYY.MM.DD` naming format
+    - ...remove original content from the camera
 2. Cleanup names:
-    - run tool in directory with wrong/unexpectd files names OR/AND "copy" name suffixes OR/AND not full Exif data (e.g. photos from WhatsApp)
+    - run tool in directory with wrong/unexpected names OR/AND "copy" name suffixes OR/AND not full Exif data (e.g. photos from WhatsApp)
     - rename files to desired naming schema (e.g. `VID_${TIMESTAMP}.mp4` and `IMG_{TIMESTAMP}.jpg`)
     - ... including handling a "Copy" suffixes.
     - fill/correct missed Exif data
-3. Cleanup unecessury Exif data:
-    - run tool in directory with photos to remove unecessury information about camera, location and other tags whcich should not be shared with other users
+3. Cleanup unnecessary Exif data:
+    - run tool in directory with photos to remove unnecessary information about camera, location and other tags, which should not be shared with other users
 
 *⚠️ WARNING* This application may perform destructive actions for media files (move, delete files or change metadata). You use it at your own risk and without any warranties. Author is not responsible for any kind of loss or damage of your data. It is strongly recommended to make data backups before any file operations.
+
+
+### Commands and Features
+
+List of commands with a short description. Please run `media_tool <command> -h` to get more information.
+
+|| Command || Description ||
+| `clean metadata` | Remove camera, location and other information from images |
+| `clean names` | Cleanup file names, remove `Copy` prefixes|
+| `fixDates` | Reads dates from file name and put into Exif and QuickTime metadata attributes |
+| `import camVideo` | Copy video from Panasonic camcoder (WPD) to disk |
+| `import gopro` | Copy images and video from GoPro card (WPD) to disk |
+| `import local` | Copy images and video from directory to disk |
+| `import sdphotos` | Copy images and video from SD card(s)to disk |
+| `completion` | Generate the autocompletion script for media-tool for the specified shell |
+| `genConfig` | Generate example configuration file |
+
 
 ## Installation
 
 Manual installation:
 
 1. Download one of [`release packages`](https://github.com/redrathnure/media-tool/releases) and put `media-tool.exe`/`media-tool` to some folder (preferably in `$PATH` locations).
-2. Install [ExifTool by Phil Harvey](https://Exiftool.org/) which is used to perform files and metadata manipulations. 
-    - Windows: `Exiftool.exe` should be placed into `APP_DIR\Exiftool` dir OR into any `$PATH` location. 
+2. Install [ExifTool by Phil Harvey](https://Exiftool.org/) which is used to perform files and metadata manipulations.
+    - Windows: `Exiftool.exe` should be placed into `APP_DIR\Exiftool` dir OR into any `$PATH` location.
     - Linux: something like `sudo apt install exiftool`
 3. (optional) Prepare configuration (see `media-tool.example.yml` file and chapters bellow for more details). By default the application looks into following locations:
     - (preferable for a Linux env) `~/.config/media-tool/media-tool.yaml`
     - (preferable for a Windows env) `$HOME\.media-tool\media-tool.yaml`
-    - (portable installation)`APP_DIR\conf\media-tool.yml` 
+    - (portable installation)`APP_DIR\conf\media-tool.yml`
 
 ## Usage
 
@@ -72,8 +88,8 @@ It was tested with a few Nikon and Canon cameras, however should also work with 
 ### Import Video From Panasonic Camcorder
 
 A `media-tool import camvideo` command try to find connected camcorder and import video into specified directory.
-If target dir was not specified, command takes it from config file. WARNING Seems Panasonic cameras expose ReadOnly storage, this is why after successful import you have to manually remove files from camera.  
-It was tested with Panasoic HC-V700 camera.
+If target dir was not specified, command takes it from config file. WARNING Seems Panasonic cameras expose read only storage, this is why after successful import you have to manually remove files from camera.  
+It was tested with Panasonic HC-V700 camera.
 
 ### Organize Files By Date
 
@@ -113,13 +129,11 @@ Dev routines:
 
 * Extract logging format to the config
 * Parse Exiftool output. Warning: [minor] to debug
-* Build script + prepare installation package
 * Store image and videos formats to the config (mp4 and tsd)
 * Coping speed and progress indicator
 * try Exiftool -short -groupNames -if "$file:MIMEType=~/video/i" * for image and video
 * Import data from SD/flash storage (Linux)
 * Import data from MTP devices (Linux)
-* proper OS related defaults
 * deb packet?
 * WhatApp and GPixel files handling
 * Proper handling of unproper dates (a "1971 year for FAT32" issue)
