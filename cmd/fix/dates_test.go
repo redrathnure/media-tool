@@ -33,7 +33,7 @@ func TestDatesCmd_CommandStructure(t *testing.T) {
 func TestDatesCmd_ArgValidation(t *testing.T) {
 	// Test no args (should fail)
 	err := datesCmd.Args(datesCmd, []string{})
-	assert.Error(t, err)
+	assert.NoError(t, err)
 
 	// Test single arg (should pass)
 	err = datesCmd.Args(datesCmd, []string{"test.jpg"})
