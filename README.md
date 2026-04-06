@@ -35,7 +35,7 @@ List of commands with a short description. Please run `media_tool <command> -h` 
 | ------------- | ------------- |
 | `clean metadata` | Remove camera, location and other information from images |
 | `clean names` | Cleanup file names, remove `Copy` prefixes|
-| `fix dates` | Reads dates from file name and put into Exif and QuickTime metadata attributes |
+| `fix dates` | Reads date from file name and put it into Exif/QuickTime metadata attributes as well as updating file creation/modification attributes. |
 | `import camVideo` | Copy video from Panasonic camcoder (WPD) to disk |
 | `import gopro` | Copy images and video from GoPro card (WPD) to disk |
 | `import local` | Copy images and video from directory to disk |

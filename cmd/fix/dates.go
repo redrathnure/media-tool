@@ -8,8 +8,8 @@ import (
 
 var datesCmd = &cobra.Command{
 	Use:   "dates [dir_or_files]",
-	Short: "Fix Exif/QuickTime dates",
-	Long: `Reads dates from file name and put into Exif and QuickTime metadata attributes. 
+	Short: "Fix Exif/QuickTime and file creation dates",
+	Long: `Reads dates from file name and put into Exif and QuickTime metadata attributes s well as updating file creation/modification dates. 
 	'dir_or_files' argument may be dir (to process all files in it) or wildcards file names (process only matched files).
 	A current dir ('.' value) will be used by default.`,
 	Args:    cobra.RangeArgs(0, 1),
