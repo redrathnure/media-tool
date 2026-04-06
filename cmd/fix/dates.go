@@ -6,12 +6,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// datesCmd represents the fixDates command
 var datesCmd = &cobra.Command{
 	Use:   "dates [dir_or_files]",
 	Short: "Fix Exif/QuickTime dates",
 	Long: `Reads dates from file name and put into Exif and QuickTime metadata attributes. 
-	'dir_or_files' argument may be dir (process all files) or wildcards file names (process only matched files).
+	'dir_or_files' argument may be dir (to process all files in it) or wildcards file names (process only matched files).
 	A current dir ('.' value) will be used by default.`,
 	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"fixDates"},
