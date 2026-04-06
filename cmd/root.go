@@ -29,6 +29,6 @@ func init() {
 	cobra.OnInitialize(initLoggerLevel)
 	cobra.OnInitialize(initConfig)
 
-	RootCmd.PersistentFlags().StringVarP(&Context.cfgFile, "config", "c", "", "config file (default is $HOME/.media-tool/media-tool.yaml)")
+	RootCmd.PersistentFlags().StringVarP(&Context.cfgFile, "config", "c", "", "config file (for example: ./custom-config.yaml)")
 	RootCmd.PersistentFlags().BoolVarP(&Context.Verbose, "verbose", "v", false, "Print debug messages")
 }
