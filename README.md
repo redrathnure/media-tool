@@ -31,7 +31,8 @@ Base workflows:
 
 List of commands with a short description. Please run `media_tool <command> -h` to get more information.
 
-|| Command || Description ||
+| Command | Description |
+| ------------- | ------------- |
 | `clean metadata` | Remove camera, location and other information from images |
 | `clean names` | Cleanup file names, remove `Copy` prefixes|
 | `fix dates` | Reads dates from file name and put into Exif and QuickTime metadata attributes |
