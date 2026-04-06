@@ -29,17 +29,22 @@ func runFixDates(cmd *cobra.Command, args []string) {
 
 	//Images and video
 	imgArgs := exifTool.NewArgs()
-	imgArgs.ChangeFileDate("filename")
-	imgArgs.ChangeExifDate("filename")
-	imgArgs.ChangeMp4Date("filename")
-	//imgArgs.forImages()
-	//imgArgs.forVideoMp4()
+	// For all supported files
+	//imgArgs.ForImages()
+	//imgArgs.ForVideoMp4()
+
+	if dryRun {
+		imgArgs.ChangeTag("WriteNothing", "CreateDate")
+	} else {
+		imgArgs.ChangeFileDate("filename")
+		imgArgs.ChangeExifDate("filename")
+		imgArgs.ChangeMp4Date("filename")
+	}
+
 	imgArgs.Recursively(recursively)
 	imgArgs.Src(files)
 
 	exifTool.Exec(root.Context.Verbose)
-
-	// TODO dryRun?
 }
 
 func init() {
