@@ -14,7 +14,7 @@ const (
 var namesCmd = &cobra.Command{
 	Use:   "names [dir_or_files]",
 	Short: "Fix file names",
-	Long: `Fix 'IMG_' and 'VID_' file name prefixes for photo and video files. 
+	Long: `Fix 'IMG_' and 'VID_' name prefixes for photo and video files. 
 	May be useful to correct weird Pixel/GCam file names.  
 	'dir_or_files' argument may be dir (to process all files in it) or wildcards file names (process only matched files).
 	A current dir ('.' value) will be used by default.`,
