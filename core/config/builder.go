@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
-	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 )
@@ -35,20 +34,7 @@ func (c *ConfigBuilder) SetConfigFile(confFile string) {
 	c.configFiles = append(c.configFiles, c.expandPath(confFile))
 }
 
-func (c *ConfigBuilder) AutomaticEnv() {
-	_ = c.ko.Load(env.ProviderWithValue("", ".", func(key string, value string) (string, interface{}) {
-		transformed := strings.ToLower(strings.TrimPrefix(key, "MEDIA_TOOL_"))
-		transformed = strings.ReplaceAll(transformed, "_", ".")
-		if transformed == "" {
-			return "", nil
-		}
-		return transformed, value
-	}), nil)
-}
-
 func (c *ConfigBuilder) Build() (*Config, error) {
-	c.AutomaticEnv()
-
 	for _, confFile := range c.configFiles {
 		if err := c.loadFile(confFile); err != nil {
 			return nil, err

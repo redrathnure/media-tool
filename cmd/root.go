@@ -23,12 +23,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cfgFile string
-
-var verbose bool
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:   "media-tool",
 	Short: "Tooling to handle video and photo content",
 	Long: `Application for importing and correction of video and photo
@@ -38,7 +34,7 @@ var rootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		log.Error(err)
 		os.Exit(1)
 	}
@@ -50,6 +46,6 @@ func init() {
 	cobra.OnInitialize(initLoggerLevel)
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.media-tool/media-tool.yaml)")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Print debug messages")
+	RootCmd.PersistentFlags().StringVarP(&Context.cfgFile, "config", "c", "", "config file (default is $HOME/.media-tool/media-tool.yaml)")
+	RootCmd.PersistentFlags().BoolVarP(&Context.Verbose, "verbose", "v", false, "Print debug messages")
 }

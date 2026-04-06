@@ -1,0 +1,229 @@
+/*
+Package cmd provides command handlers
+
+Copyright © 2020 Maksym Medvedev <redrathnure@gmail.com>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package tools
+
+import (
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+)
+
+type ExifToolWrapper struct {
+	cmd         string
+	defaultArgs []string
+	Args        ExifToolArgs
+	execCommand func(name string, args ...string) *exec.Cmd
+}
+
+type ExifToolArgs struct {
+	Args []string
+}
+
+var exifToolObj *ExifToolWrapper
+
+var ExifToolPath = ""
+
+func newExifTool() *ExifToolWrapper {
+	result := ExifToolWrapper{
+		cmd:         "exiftool",
+		defaultArgs: []string{"-v0", "-progress"},
+		execCommand: exec.Command,
+	}
+	result.initCmd()
+	result.NewArgs()
+	return &result
+}
+
+func GetExifTool() *ExifToolWrapper {
+	if exifToolObj == nil {
+		exifToolObj = newExifTool()
+	}
+	return exifToolObj
+}
+
+func (tool *ExifToolWrapper) initCmd() {
+	customPath := ExifToolPath
+	if customPath != "" {
+
+		if strings.Contains(customPath, "$APP_DIR") {
+			ex, err := os.Executable()
+			if err != nil {
+				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+				return
+			}
+			customPath = strings.ReplaceAll(customPath, "$APP_DIR", filepath.Dir(ex))
+			customPath, err = filepath.Abs(customPath)
+			if err != nil {
+				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+				return
+			}
+			if _, err := os.Stat(customPath); os.IsNotExist(err) {
+				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+				return
+			}
+		}
+
+		tool.cmd = customPath
+	}
+}
+
+func (tool *ExifToolWrapper) Exec(verbose bool) {
+	cmd := tool.execCommand(tool.cmd, tool.Args.Args...)
+
+	log.Debugf("ExifTool command: '%s'\n", cmd.String())
+
+	cmd.Stdout = os.Stdout
+
+	err := cmd.Run()
+	if err != nil {
+		log.Warningf("ExifTool exec error: '%s'", err)
+	}
+}
+
+func (tool *ExifToolWrapper) NewArgs() *ExifToolArgs {
+	tool.Args = ExifToolArgs{Args: tool.defaultArgs}
+	return &tool.Args
+}
+
+func (toolArgs *ExifToolArgs) add(args ...string) {
+	toolArgs.Args = append(toolArgs.Args, args...)
+}
+
+func (toolArgs *ExifToolArgs) Recursively(recursively bool) {
+	if recursively {
+		toolArgs.add("-r")
+	}
+}
+
+func (toolArgs *ExifToolArgs) Src(dirOrFilepath string) {
+	toolArgs.add(dirOrFilepath)
+}
+
+func (toolArgs *ExifToolArgs) ForImages() {
+	toolArgs.add("-ext", "jpg")
+	toolArgs.add("-ext", "nef")
+	toolArgs.add("-ext", "cr2")
+	toolArgs.add("-ext", "cr3")
+}
+
+func (toolArgs *ExifToolArgs) ForVideoMp4() {
+	toolArgs.add("-ext", "mp4")
+}
+
+func (toolArgs *ExifToolArgs) ForVideoLrv() {
+	toolArgs.add("-ext", "LRV")
+}
+
+func (toolArgs *ExifToolArgs) ForVideoAvchd() {
+	toolArgs.add("-ext", "mts")
+}
+
+func (toolArgs *ExifToolArgs) ForDateFormat(dateFormat string) {
+	toolArgs.add("-d", dateFormat)
+}
+
+func (toolArgs *ExifToolArgs) ChangeTag(tagName string, tagValue string) {
+	toolArgs.add(fmt.Sprintf("-%s<%s", tagName, tagValue))
+}
+
+func (toolArgs *ExifToolArgs) ChangeFileDate(tagValue string) {
+	//File:
+	toolArgs.ChangeTag("FileModifyDate", tagValue)
+	toolArgs.ChangeTag("FileCreateDate", tagValue)
+}
+
+func (toolArgs *ExifToolArgs) ChangeExifDate(tagValue string) {
+	//'EXIF:
+	toolArgs.ChangeTag("CreateDate", tagValue)
+	toolArgs.ChangeTag("DateTimeOriginal", tagValue)
+}
+
+func (toolArgs *ExifToolArgs) ChangeMp4Date(tagValue string) {
+	//quicktime:
+	toolArgs.ChangeTag("CreateDate", tagValue)
+	toolArgs.ChangeTag("ModifyDate", tagValue)
+	toolArgs.ChangeTag("TrackCreateDate", tagValue)
+	toolArgs.ChangeTag("TrackModifyDate", tagValue)
+	toolArgs.ChangeTag("MediaCreateDate", tagValue)
+	toolArgs.ChangeTag("MediaModifyDate", tagValue)
+}
+
+func (toolArgs *ExifToolArgs) CleanTag(tagName string) {
+	toolArgs.add(fmt.Sprintf("-%s=", tagName))
+}
+
+func (toolArgs *ExifToolArgs) CleanVendorTags() {
+	toolArgs.CleanTag("Software")
+	toolArgs.CleanTag("WriterName")
+	toolArgs.CleanTag("ReaderName")
+	toolArgs.CleanTag("HistorySoftwareAgent")
+	toolArgs.CleanTag("LookCopyright")
+	toolArgs.CleanTag("XMPToolkit")
+	toolArgs.CleanTag("photoshop:all")
+	toolArgs.CleanTag("NikonCapture:all")
+	toolArgs.CleanTag("GIMP:all")
+	toolArgs.CleanTag("history*")
+}
+
+func (toolArgs *ExifToolArgs) CleanCameraTags() {
+	// Camera vendor specific
+	toolArgs.CleanTag("Canon:all")
+	toolArgs.CleanTag("Sony:all")
+	toolArgs.CleanTag("GoPro:all")
+	toolArgs.CleanTag("Nikon:all")
+	toolArgs.CleanTag("FujiFilm:all")
+	toolArgs.CleanTag("HP:all")
+	toolArgs.CleanTag("Kodak:all")
+	toolArgs.CleanTag("Minolta:all")
+	toolArgs.CleanTag("Nintendo:all")
+	toolArgs.CleanTag("Olympus:all")
+	toolArgs.CleanTag("Panasonic:all")
+	toolArgs.CleanTag("Pentax:all")
+	toolArgs.CleanTag("Samsung:all")
+	toolArgs.CleanTag("Sanyo:all")
+	toolArgs.CleanTag("Sigma:all")
+	toolArgs.CleanTag("Sony:all")
+	toolArgs.CleanTag("CanonRaw:all")
+	toolArgs.CleanTag("MinoltaRaw:all")
+	toolArgs.CleanTag("PanasonicRaw:all")
+	toolArgs.CleanTag("SigmaRaw:all")
+
+	// Common shot parameters
+	toolArgs.CleanTag("all:canonexposuremode")
+	toolArgs.CleanTag("EXIF:Make")
+	toolArgs.CleanTag("EXIF:Model")
+	toolArgs.CleanTag("EXIF:FNumber")
+	toolArgs.CleanTag("Exposure*")
+	toolArgs.CleanTag("ISO")
+	toolArgs.CleanTag("Lens*")
+	toolArgs.CleanTag("Focal*")
+	toolArgs.CleanTag("Flash*")
+	toolArgs.CleanTag("Camera*")
+	toolArgs.CleanTag("Metering*")
+	toolArgs.CleanTag("Shutter*")
+	toolArgs.CleanTag("Megapixels*")
+	toolArgs.CleanTag("HasCrop")
+	toolArgs.CleanTag("Format")
+
+}
+
+func (toolArgs *ExifToolArgs) CleanLocationTags() {
+	toolArgs.CleanTag("gps:all")
+}

@@ -23,16 +23,16 @@ import (
 	"path/filepath"
 
 	"github.com/redrathnure/media-tool/core/config"
-)
 
-var conf = config.Empty()
+	"github.com/redrathnure/media-tool/core/tools"
+)
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	builder := config.NewConfig()
-	if cfgFile != "" {
-		log.Infof("Loading configuration from '%s' file only. The rest locations will be ignored.", cfgFile)
-		builder.SetConfigFile(cfgFile)
+	if Context.cfgFile != "" {
+		log.Infof("Loading configuration from '%s' file only. The rest locations will be ignored.", Context.cfgFile)
+		builder.SetConfigFile(Context.cfgFile)
 	} else {
 		builder.AddConfigLocation("/", "etc", "media-tool")
 		builder.AddConfigLocation("$HOME", "media-tool")
@@ -50,5 +50,7 @@ func initConfig() {
 		os.Exit(1)
 	}
 
-	conf = newConf
+	Context.Conf = newConf
+
+	tools.ExifToolPath = newConf.GetExifToolPath()
 }

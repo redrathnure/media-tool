@@ -18,10 +18,10 @@ func TestInitLogger(t *testing.T) {
 
 func TestInitLoggerLevel_VerboseTrue(t *testing.T) {
 	// Save original verbose value
-	originalVerbose := verbose
-	defer func() { verbose = originalVerbose }()
+	originalVerbose := Context.Verbose
+	defer func() { Context.Verbose = originalVerbose }()
 
-	verbose = true
+	Context.Verbose = true
 	assert.NotPanics(t, func() {
 		initLoggerLevel()
 	})
@@ -31,10 +31,10 @@ func TestInitLoggerLevel_VerboseTrue(t *testing.T) {
 
 func TestInitLoggerLevel_VerboseFalse(t *testing.T) {
 	// Save original verbose value
-	originalVerbose := verbose
-	defer func() { verbose = originalVerbose }()
+	originalVerbose := Context.Verbose
+	defer func() { Context.Verbose = originalVerbose }()
 
-	verbose = false
+	Context.Verbose = false
 	assert.NotPanics(t, func() {
 		initLoggerLevel()
 	})

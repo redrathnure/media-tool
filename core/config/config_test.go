@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestWriteConfigAs_NewFile(t *testing.T) {
+func TestSaveConfig_NewFile(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", t.Name())
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -19,13 +19,13 @@ func TestWriteConfigAs_NewFile(t *testing.T) {
 	sut := Empty()
 	sut.Set("a", "b")
 
-	result := sut.WriteConfigAs(dstFile)
+	result := sut.SaveConfig(dstFile)
 
 	require.NoError(t, result)
 	assert.Equal(t, "a: b\n", readFile(t, dstFile))
 }
 
-func TestWriteConfigAs_ExistedFile(t *testing.T) {
+func TestSaveConfig_ExistedFile(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", t.Name())
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -35,16 +35,16 @@ func TestWriteConfigAs_ExistedFile(t *testing.T) {
 	sut := Empty()
 	sut.Set("a", "b")
 
-	result := sut.WriteConfigAs(dstFile)
+	result := sut.SaveConfig(dstFile)
 	require.NoError(t, result)
 
-	result = sut.WriteConfigAs(dstFile)
+	result = sut.SaveConfig(dstFile)
 	require.NoError(t, result)
 
 	assert.Equal(t, "a: b\n", readFile(t, dstFile))
 }
 
-func TestWriteConfigAs_WithDir(t *testing.T) {
+func TestSaveConfig_WithDir(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", t.Name())
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -52,9 +52,17 @@ func TestWriteConfigAs_WithDir(t *testing.T) {
 	sut := Empty()
 	sut.Set("a", "b")
 
-	result := sut.WriteConfigAs(tempDir)
+	result := sut.SaveConfig(tempDir)
 	require.Error(t, result)
+}
 
+func TestGetAsYaml_WithDir(t *testing.T) {
+	sut := Empty()
+	sut.Set("a", "b")
+
+	result, err := sut.GetAsYaml()
+	require.NoError(t, err)
+	assert.Contains(t, string(result[:]), "a: b")
 }
 
 func readFile(t *testing.T, fileName string) string {
@@ -108,8 +116,8 @@ func TestDefaultValues(t *testing.T) {
 		assert.NotNil(t, 4, len(val), "No defaults for "+key)
 	}
 
-	assert.NotNil(t,  sut.GetExifToolPath())
+	assert.NotNil(t, sut.GetExifToolPath())
 	assert.NotNil(t, sut.GetImportCamVideoDefaultDst())
-	assert.NotNil(t,  sut.GetImportGoProDefaultDst())
+	assert.NotNil(t, sut.GetImportGoProDefaultDst())
 	assert.NotNil(t, sut.GetImportSdPhotosDefaultDst())
 }

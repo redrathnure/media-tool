@@ -59,17 +59,21 @@ func (c *Config) Reset() {
 	c.InitDefaults()
 }
 
-func (c *Config) WriteConfigAs(dstFile string) error {
+func (c *Config) SaveConfig(dstFile string) error {
 	if err := os.MkdirAll(filepath.Dir(dstFile), 0o755); err != nil {
 		return err
 	}
 
-	data, err := c.ko.Marshal(yaml.Parser())
+	data, err := c.GetAsYaml()
 	if err != nil {
 		return err
 	}
 
 	return os.WriteFile(dstFile, data, 0o644)
+}
+
+func (c *Config) GetAsYaml() ([]byte, error) {
+	return c.ko.Marshal(yaml.Parser())
 }
 
 func (c *Config) InitDefaults() {
