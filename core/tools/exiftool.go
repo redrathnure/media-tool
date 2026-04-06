@@ -15,6 +15,13 @@ type ExifToolWrapper struct {
 	execCommand func(name string, args ...string) *exec.Cmd
 }
 
+func (tool *ExifToolWrapper) GetFileNameTag(dryRun bool) string {
+	if dryRun {
+		return "TestName"
+	}
+	return "FileName"
+}
+
 type ExifToolArgs struct {
 	Args []string
 }

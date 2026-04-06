@@ -31,12 +31,9 @@ func runFixNames(cmd *cobra.Command, args []string) {
 
 	log.Infof("recursively: %v", recursively)
 
-	tagName := "FileName"
-	if dryRun {
-		tagName = "TestName"
-	}
-
 	exifTool := tools.GetExifTool()
+
+	tagName := exifTool.GetFileNameTag(dryRun)
 
 	log.Infof("Processing image files...")
 

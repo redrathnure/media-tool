@@ -48,12 +48,9 @@ var sdPhotosCmd = &cobra.Command{
 		defer tools.RemoveDir(src, dryRun)
 		log.Infof("Files were downloaded to: %v. Moving to target folder...", src)
 
-		tagName := "FileName"
-		if dryRun {
-			tagName = "TestName"
-		}
-
 		exifTool := tools.GetExifTool()
+
+		tagName := exifTool.GetFileNameTag(dryRun)
 
 		//Images and video
 		imgArgs := exifTool.NewArgs()

@@ -47,15 +47,11 @@ var videoCamCmd = &cobra.Command{
 		defer tools.RemoveDir(src, dryRun)
 		log.Infof("Files were downloaded to: %v. Moving to target folder...", src)
 
-		tagName := "FileName"
-		if dryRun {
-			tagName = "TestName"
-		}
-
-		//Video
 		exifTool := tools.GetExifTool()
 
-		//Images
+		tagName := exifTool.GetFileNameTag(dryRun)
+
+		//Video
 		videoArgs := exifTool.NewArgs()
 		if !dryRun {
 			videoArgs.ChangeFileDate("DateTimeOriginal")

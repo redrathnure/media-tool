@@ -37,10 +37,9 @@ var localCmd = &cobra.Command{
 		log.Infof("dst dir format: '%s'", dstSubDir)
 		log.Infof("renaming: %v", localRename)
 
-		tagName := "FileName"
-		if dryRun {
-			tagName = "TestName"
-		}
+		exifTool := tools.GetExifTool()
+
+		tagName := exifTool.GetFileNameTag(dryRun)
 
 		imgFileName := "%%f%%-c.%%e"
 		vidFileName := "%%f%%-c.%%e"
@@ -48,8 +47,6 @@ var localCmd = &cobra.Command{
 			imgFileName = "IMG_%Y%m%d_%H%M%S%%-c.%%e"
 			vidFileName = "VID_%Y%m%d_%H%M%S%%-c.%%e"
 		}
-
-		exifTool := tools.GetExifTool()
 
 		//Images
 		imgArgs := exifTool.NewArgs()
