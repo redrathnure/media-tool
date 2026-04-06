@@ -63,9 +63,7 @@ func TestRunFixNames(t *testing.T) {
 			args:      []string{"test.jpg"},
 			recursive: false,
 			expectedTags: []string{
-				"-FileModifyDate<filename",
-				"-CreateDate<filename",
-				"-TrackModifyDate<filename",
+				"-FileName<CreateDate",
 			},
 			unexpectedTags: []string{
 				"-r",
@@ -76,9 +74,7 @@ func TestRunFixNames(t *testing.T) {
 			args:      []string{"test.jpg"},
 			recursive: true,
 			expectedTags: []string{
-				"-FileModifyDate<filename",
-				"-CreateDate<filename",
-				"-TrackModifyDate<filename",
+				"-FileName<CreateDate",
 				"-r",
 			},
 		},
@@ -93,7 +89,7 @@ func TestRunFixNames(t *testing.T) {
 			defer testTool.Clear()
 
 			// Run the command
-			runFixDates(namesCmd, tt.args)
+			runFixNames(namesCmd, tt.args)
 
 			testArgs := testTool.Args
 
