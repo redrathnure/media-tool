@@ -51,6 +51,11 @@ func TestRunFixNames(t *testing.T) {
 		recursively = origRecursively
 	}()
 
+	origDryRun := dryRun
+	defer func() {
+		dryRun = origDryRun
+	}()
+
 	tests := []struct {
 		name           string
 		args           []string
@@ -83,6 +88,80 @@ func TestRunFixNames(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			recursively = tt.recursive
+			dryRun = false
+
+			// Create a test exiftool wrapper
+			testTool := tools.NewTestExifTool()
+			defer testTool.Clear()
+
+			// Run the command
+			runFixNames(namesCmd, tt.args)
+
+			testArgs := testTool.Args
+
+			assert.Contains(t, testArgs.Args, tt.args[0], "source path not set in %s", tt.name)
+			for _, tag := range tt.expectedTags {
+				assert.Contains(t, testArgs.Args, tag, "missing expected tag in %s", tt.name)
+			}
+
+			for _, tag := range tt.unexpectedTags {
+				assert.NotContains(t, testArgs.Args, tag, "found unexpected tag in %s", tt.name)
+			}
+
+			assert.True(t, testTool.ExecCalled, "exiftool exec should be called in %s", tt.name)
+		})
+	}
+}
+
+func TestRunFixNames_DryRun(t *testing.T) {
+	// Save original values to restore after test
+	origRecursively := recursively
+	defer func() {
+		recursively = origRecursively
+	}()
+
+	origDryRun := dryRun
+	defer func() {
+		dryRun = origDryRun
+	}()
+
+	tests := []struct {
+		name           string
+		args           []string
+		recursive      bool
+		expectedTags   []string
+		unexpectedTags []string
+	}{
+		{
+			name:      "without recursion",
+			args:      []string{"test.jpg"},
+			recursive: false,
+			expectedTags: []string{
+				"-TestName<CreateDate",
+			},
+			unexpectedTags: []string{
+				"-FileModifyDate<CreateDate",
+				"-r",
+			},
+		},
+		{
+			name:      "with recursion",
+			args:      []string{"test.jpg"},
+			recursive: true,
+			expectedTags: []string{
+				"-TestName<CreateDate",
+				"-r",
+			},
+			unexpectedTags: []string{
+				"-FileModifyDate<CreateDate",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			recursively = tt.recursive
+			dryRun = true
 
 			// Create a test exiftool wrapper
 			testTool := tools.NewTestExifTool()
