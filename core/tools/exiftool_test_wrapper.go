@@ -1,11 +1,14 @@
 package tools
 
-import "os/exec"
+import (
+	"os/exec"
+	"strings"
+)
 
 // testExifToolWrapper is a test implementation of exifToolWrapper that tracks exec calls
 type testExifToolWrapper struct {
 	ExifToolWrapper
-	ExecCalled bool
+	Calls []string
 }
 
 func NewTestExifTool() *testExifToolWrapper {
@@ -13,7 +16,7 @@ func NewTestExifTool() *testExifToolWrapper {
 		ExifToolWrapper: *newExifTool(),
 	}
 	mockExecCommand := func(name string, args ...string) *exec.Cmd {
-		tool.ExecCalled = true
+		tool.Calls = append(tool.Calls, strings.Join(args, " "))
 		return exec.Command(name, args...)
 	}
 
@@ -26,4 +29,5 @@ func NewTestExifTool() *testExifToolWrapper {
 
 func (testTool *testExifToolWrapper) Clear() {
 	exifToolObj = nil
+	testTool.Calls = []string{}
 }

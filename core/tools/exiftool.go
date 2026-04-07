@@ -16,7 +16,7 @@ const (
 type ExifToolWrapper struct {
 	cmd         string
 	defaultArgs []string
-	Args        ExifToolArgs
+	args        ExifToolArgs
 	execCommand func(name string, args ...string) *exec.Cmd
 }
 
@@ -28,7 +28,7 @@ func (tool *ExifToolWrapper) GetFileNameTag(dryRun bool) string {
 }
 
 type ExifToolArgs struct {
-	Args []string
+	args []string
 }
 
 var exifToolObj *ExifToolWrapper
@@ -80,7 +80,7 @@ func (tool *ExifToolWrapper) initCmd() {
 }
 
 func (tool *ExifToolWrapper) Exec(verbose bool) {
-	cmd := tool.execCommand(tool.cmd, tool.Args.Args...)
+	cmd := tool.execCommand(tool.cmd, tool.args.args...)
 
 	log.Debugf("ExifTool command: '%s'\n", cmd.String())
 
@@ -93,12 +93,12 @@ func (tool *ExifToolWrapper) Exec(verbose bool) {
 }
 
 func (tool *ExifToolWrapper) NewArgs() *ExifToolArgs {
-	tool.Args = ExifToolArgs{Args: tool.defaultArgs}
-	return &tool.Args
+	tool.args = ExifToolArgs{args: tool.defaultArgs}
+	return &tool.args
 }
 
 func (toolArgs *ExifToolArgs) add(args ...string) {
-	toolArgs.Args = append(toolArgs.Args, args...)
+	toolArgs.args = append(toolArgs.args, args...)
 }
 
 func (toolArgs *ExifToolArgs) Recursively(recursively bool) {

@@ -101,18 +101,17 @@ func TestRunFixDates(t *testing.T) {
 			// Run the command
 			runFixDates(datesCmd, tt.args)
 
-			testArgs := testTool.Args
+			assert.Len(t, testTool.Calls, 1, "exiftool exec should be called in %s", tt.name)
+			testArgs := testTool.Calls[0]
 
-			assert.Contains(t, testArgs.Args, tt.args[0], "source path not set in %s", tt.name)
+			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
 			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs.Args, tag, "missing expected tag in %s", tt.name)
+				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
 			}
 
 			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs.Args, tag, "found unexpected tag in %s", tt.name)
+				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
 			}
-
-			assert.True(t, testTool.ExecCalled, "exiftool exec should be called in %s", tt.name)
 		})
 	}
 }
@@ -178,18 +177,18 @@ func TestRunFixDates_DryRun(t *testing.T) {
 			// Run the command
 			runFixDates(datesCmd, tt.args)
 
-			testArgs := testTool.Args
+			assert.Len(t, testTool.Calls, 1, "exiftool exec should be called in %s", tt.name)
+			testArgs := testTool.Calls[0]
 
-			assert.Contains(t, testArgs.Args, tt.args[0], "source path not set in %s", tt.name)
+			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
 			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs.Args, tag, "missing expected tag in %s", tt.name)
+				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
 			}
 
 			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs.Args, tag, "found unexpected tag in %s", tt.name)
+				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
 			}
 
-			assert.True(t, testTool.ExecCalled, "exiftool exec should be called in %s", tt.name)
 		})
 	}
 }

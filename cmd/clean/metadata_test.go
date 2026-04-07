@@ -189,22 +189,22 @@ func TestRunCleanMetadata(t *testing.T) {
 			// Run the command
 			runMetadata(cmd, tt.args)
 
-			testArgs := testTool.Args
-
-			assert.Contains(t, testArgs.Args, tt.args[0], "source path not set in %s", tt.name)
-
-			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs.Args, tag, "missing expected tag in %s", tt.name)
-			}
-
-			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs.Args, tag, "found unexpected tag in %s", tt.name)
-			}
-
 			if tt.dryRun {
-				assert.False(t, testTool.ExecCalled, "exiftool exec was called when DryRun is true in %s", tt.name)
+				assert.Len(t, testTool.Calls, 0, "exiftool exec was called when DryRun is true in %s", tt.name)
 			} else {
-				assert.True(t, testTool.ExecCalled, "exiftool exec should be called in %s", tt.name)
+				assert.Len(t, testTool.Calls, 1, "exiftool exec should be called in %s", tt.name)
+
+				testArgs := testTool.Calls[0]
+
+				assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
+
+				for _, tag := range tt.expectedTags {
+					assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
+				}
+
+				for _, tag := range tt.unexpectedTags {
+					assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
+				}
 			}
 		})
 	}
