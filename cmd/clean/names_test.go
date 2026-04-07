@@ -56,44 +56,27 @@ func TestRunCleanNames(t *testing.T) {
 		dryRun = origDryRun
 	}()
 
-	tests := []struct {
-		name           string
-		args           []string
-		recursive      bool
-		dryRun         bool
-		expectedTags   []string
-		unexpectedTags []string
-	}{
+	tests := []tools.ExifSingleCallCaseData{
 		{
-			name:           "rename",
-			args:           []string{"testdir"},
-			recursive:      false,
-			dryRun:         false,
-			expectedTags:   []string{"-filename<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}"},
-			unexpectedTags: []string{"-r"},
+			Name:       "rename",
+			Args:       []string{"testdir"},
+			Recursive:  false,
+			Expected:   []string{"-filename<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}"},
+			Unexpected: []string{"-r"},
 		},
 		{
-			name:           "dry run rename",
-			args:           []string{"testdir"},
-			recursive:      false,
-			dryRun:         true,
-			expectedTags:   []string{"-testname<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}"},
-			unexpectedTags: []string{"-r"},
-		},
-		{
-			name:         "recursive rename",
-			args:         []string{"testdir"},
-			recursive:    true,
-			dryRun:       false,
-			expectedTags: []string{"-filename<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}", "-r"},
+			Name:      "recursive rename",
+			Args:      []string{"testdir"},
+			Recursive: true,
+			Expected:  []string{"-filename<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}", "-r"},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(tt.Name, func(t *testing.T) {
 			// Setup
-			recursively = tt.recursive
-			dryRun = tt.dryRun
+			recursively = tt.Recursive
+			dryRun = false
 
 			// Mock the exifTool exec calls
 			testTool := tools.NewTestExifTool()
@@ -102,20 +85,59 @@ func TestRunCleanNames(t *testing.T) {
 			cmd := &cobra.Command{}
 
 			// Run the command
-			runNames(cmd, tt.args)
+			runNames(cmd, tt.Args)
 
-			assert.Len(t, testTool.Calls, 1, "exiftool exec should be called in %s", tt.name)
+			// Check ExifTool calls
+			testTool.AssertCalls(t, 1)
 
-			testArgs := testTool.Calls[0]
+			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs())
+		})
+	}
+}
 
-			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
-			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
-			}
+func TestRunCleanNames_DryRun(t *testing.T) {
+	origRecursively := recursively
+	origDryRun := dryRun
+	defer func() {
+		recursively = origRecursively
+		dryRun = origDryRun
+	}()
 
-			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
-			}
+	tests := []tools.ExifSingleCallCaseData{
+		{
+			Name:       "dry run rename",
+			Args:       []string{"testdir"},
+			Recursive:  false,
+			Expected:   []string{"-testname<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}"},
+			Unexpected: []string{"-r"},
+		},
+		{
+			Name:      "recursive rename",
+			Args:      []string{"testdir"},
+			Recursive: true,
+			Expected:  []string{"-testname<${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}", "-r"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.Name, func(t *testing.T) {
+			// Setup
+			recursively = tt.Recursive
+			dryRun = true
+
+			// Mock the exifTool exec calls
+			testTool := tools.NewTestExifTool()
+			defer func() { testTool.Clear() }()
+
+			cmd := &cobra.Command{}
+
+			// Run the command
+			runNames(cmd, tt.Args)
+
+			// Check ExifTool calls
+			testTool.AssertCalls(t, 1)
+
+			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs())
 		})
 	}
 }

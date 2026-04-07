@@ -47,40 +47,31 @@ func TestDatesCmd_ArgValidation(t *testing.T) {
 func TestRunFixDates(t *testing.T) {
 	// Save original values to restore after test
 	origRecursively := recursively
-	defer func() {
-		recursively = origRecursively
-	}()
-
 	origDryRun := dryRun
 	defer func() {
+		recursively = origRecursively
 		dryRun = origDryRun
 	}()
 
-	tests := []struct {
-		name           string
-		args           []string
-		recursive      bool
-		expectedTags   []string
-		unexpectedTags []string
-	}{
+	tests := []tools.ExifSingleCallCaseData{
 		{
-			name:      "without recursion",
-			args:      []string{"test.jpg"},
-			recursive: false,
-			expectedTags: []string{
+			Name:      "without recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: false,
+			Expected: []string{
 				"-FileModifyDate<filename",
 				"-CreateDate<filename",
 				"-TrackModifyDate<filename",
 			},
-			unexpectedTags: []string{
+			Unexpected: []string{
 				"-r",
 			},
 		},
 		{
-			name:      "with recursion",
-			args:      []string{"test.jpg"},
-			recursive: true,
-			expectedTags: []string{
+			Name:      "with recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: true,
+			Expected: []string{
 				"-FileModifyDate<filename",
 				"-CreateDate<filename",
 				"-TrackModifyDate<filename",
@@ -90,8 +81,8 @@ func TestRunFixDates(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			recursively = tt.recursive
+		t.Run(tt.Name, func(t *testing.T) {
+			recursively = tt.Recursive
 			dryRun = false
 
 			// Create a test exiftool wrapper
@@ -99,19 +90,12 @@ func TestRunFixDates(t *testing.T) {
 			defer testTool.Clear()
 
 			// Run the command
-			runFixDates(datesCmd, tt.args)
+			runFixDates(datesCmd, tt.Args)
 
-			assert.Len(t, testTool.Calls, 1, "exiftool exec should be called in %s", tt.name)
-			testArgs := testTool.Calls[0]
+			// Check ExifTool calls
+			testTool.AssertCalls(t, 1)
 
-			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
-			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
-			}
-
-			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
-			}
+			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs())
 		})
 	}
 }
@@ -119,30 +103,21 @@ func TestRunFixDates(t *testing.T) {
 func TestRunFixDates_DryRun(t *testing.T) {
 	// Save original values to restore after test
 	origRecursively := recursively
-	defer func() {
-		recursively = origRecursively
-	}()
-
 	origDryRun := dryRun
 	defer func() {
+		recursively = origRecursively
 		dryRun = origDryRun
 	}()
 
-	tests := []struct {
-		name           string
-		args           []string
-		recursive      bool
-		expectedTags   []string
-		unexpectedTags []string
-	}{
+	tests := []tools.ExifSingleCallCaseData{
 		{
-			name:      "without recursion",
-			args:      []string{"test.jpg"},
-			recursive: false,
-			expectedTags: []string{
+			Name:      "without recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: false,
+			Expected: []string{
 				"-WriteNothing<filename",
 			},
-			unexpectedTags: []string{
+			Unexpected: []string{
 				"-FileModifyDate<filename",
 				"-CreateDate<filename",
 				"-TrackModifyDate<filename",
@@ -150,14 +125,14 @@ func TestRunFixDates_DryRun(t *testing.T) {
 			},
 		},
 		{
-			name:      "with recursion",
-			args:      []string{"test.jpg"},
-			recursive: true,
-			expectedTags: []string{
+			Name:      "with recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: true,
+			Expected: []string{
 				"-WriteNothing<filename",
 				"-r",
 			},
-			unexpectedTags: []string{
+			Unexpected: []string{
 				"-FileModifyDate<filename",
 				"-CreateDate<filename",
 				"-TrackModifyDate<filename",
@@ -166,8 +141,8 @@ func TestRunFixDates_DryRun(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			recursively = tt.recursive
+		t.Run(tt.Name, func(t *testing.T) {
+			recursively = tt.Recursive
 			dryRun = true
 
 			// Create a test exiftool wrapper
@@ -175,20 +150,12 @@ func TestRunFixDates_DryRun(t *testing.T) {
 			defer testTool.Clear()
 
 			// Run the command
-			runFixDates(datesCmd, tt.args)
+			runFixDates(datesCmd, tt.Args)
 
-			assert.Len(t, testTool.Calls, 1, "exiftool exec should be called in %s", tt.name)
-			testArgs := testTool.Calls[0]
+			// Check ExifTool calls
+			testTool.AssertCalls(t, 1)
 
-			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
-			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
-			}
-
-			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
-			}
-
+			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs())
 		})
 	}
 }

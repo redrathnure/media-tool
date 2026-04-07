@@ -47,55 +47,72 @@ func TestNamesCmd_ArgValidation(t *testing.T) {
 func TestRunFixNames(t *testing.T) {
 	// Save original values to restore after test
 	origRecursively := recursively
-	defer func() {
-		recursively = origRecursively
-	}()
-
 	origDryRun := dryRun
 	defer func() {
+		recursively = origRecursively
 		dryRun = origDryRun
 	}()
 
-	tests := []struct {
-		name           string
-		args           []string
-		recursive      bool
-		expectedTags   []string
-		unexpectedTags []string
-	}{
+	tests := []tools.ExifMultiCallCaseData{
 		{
-			name:      "without recursion",
-			args:      []string{"test.jpg"},
-			recursive: false,
-			expectedTags: []string{
-				"-FileName<CreateDate",
-				"-if",
-				"$filename !~ /WhatsApp/i",
-				"-if",
-				"$filename !~ /_x265/i",
-			},
-			unexpectedTags: []string{
-				"-r",
+			Name:      "without recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: false,
+			CallArgs: []tools.ExifRunArgs{
+				{
+					Expected: []string{
+						"-FileName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d IMG_%Y%m%d_%H%M%S%%-c.%%e",
+					},
+					Unexpected: []string{
+						"-r",
+					},
+				},
+				{
+					Expected: []string{
+						"-FileName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d VID_%Y%m%d_%H%M%S%%-c.%%e",
+					},
+					Unexpected: []string{
+						"-r",
+					},
+				},
 			},
 		},
 		{
-			name:      "with recursion",
-			args:      []string{"test.jpg"},
-			recursive: true,
-			expectedTags: []string{
-				"-FileName<CreateDate",
-				"-if",
-				"$filename !~ /WhatsApp/i",
-				"-if",
-				"$filename !~ /_x265/i",
-				"-r",
+			Name:      "with recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: true,
+			CallArgs: []tools.ExifRunArgs{
+				{
+					Expected: []string{
+						"-FileName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d IMG_%Y%m%d_%H%M%S%%-c.%%e",
+						"-r",
+					},
+				},
+				{
+					Expected: []string{
+						"-FileName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d VID_%Y%m%d_%H%M%S%%-c.%%e",
+						"-r",
+					},
+				},
 			},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			recursively = tt.recursive
+		t.Run(tt.Name, func(t *testing.T) {
+			recursively = tt.Recursive
 			dryRun = false
 
 			// Create a test exiftool wrapper
@@ -103,19 +120,13 @@ func TestRunFixNames(t *testing.T) {
 			defer testTool.Clear()
 
 			// Run the command
-			runFixNames(namesCmd, tt.args)
+			runFixNames(namesCmd, tt.Args)
 
-			assert.Len(t, testTool.Calls, 2, "exiftool exec should be called in %s", tt.name)
-			testArgs := testTool.Calls[1]
+			// Check ExifTool calls
+			testTool.AssertCalls(t, 2)
 
-			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
-			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
-			}
-
-			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
-			}
+			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs[0])
+			testTool.AssertCallArgs(t, 1, tt.Args[0], tt.CallArgs[1])
 		})
 	}
 }
@@ -123,59 +134,80 @@ func TestRunFixNames(t *testing.T) {
 func TestRunFixNames_DryRun(t *testing.T) {
 	// Save original values to restore after test
 	origRecursively := recursively
-	defer func() {
-		recursively = origRecursively
-	}()
-
 	origDryRun := dryRun
 	defer func() {
+		recursively = origRecursively
 		dryRun = origDryRun
 	}()
 
-	tests := []struct {
-		name           string
-		args           []string
-		recursive      bool
-		expectedTags   []string
-		unexpectedTags []string
-	}{
+	tests := []tools.ExifMultiCallCaseData{
 		{
-			name:      "without recursion",
-			args:      []string{"test.jpg"},
-			recursive: false,
-			expectedTags: []string{
-				"-TestName<CreateDate",
-				"-if",
-				"$filename !~ /WhatsApp/i",
-				"-if",
-				"$filename !~ /_x265/i",
-			},
-			unexpectedTags: []string{
-				"-FileModifyDate<CreateDate",
-				"-r",
+			Name:      "without recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: false,
+			CallArgs: []tools.ExifRunArgs{
+				{
+					Expected: []string{
+						"-TestName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d IMG_%Y%m%d_%H%M%S%%-c.%%e",
+					},
+					Unexpected: []string{
+						"-FileModifyDate<CreateDate",
+						"-r",
+					},
+				},
+				{
+					Expected: []string{
+						"-TestName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d VID_%Y%m%d_%H%M%S%%-c.%%e",
+					},
+					Unexpected: []string{
+						"-FileModifyDate<CreateDate",
+						"-r",
+					},
+				},
 			},
 		},
 		{
-			name:      "with recursion",
-			args:      []string{"test.jpg"},
-			recursive: true,
-			expectedTags: []string{
-				"-TestName<CreateDate",
-				"-if",
-				"$filename !~ /WhatsApp/i",
-				"-if",
-				"$filename !~ /_x265/i",
-				"-r",
-			},
-			unexpectedTags: []string{
-				"-FileModifyDate<CreateDate",
+			Name:      "with recursion",
+			Args:      []string{"test.jpg"},
+			Recursive: true,
+			CallArgs: []tools.ExifRunArgs{
+				{
+					Expected: []string{
+						"-TestName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d IMG_%Y%m%d_%H%M%S%%-c.%%e",
+						"-r",
+					},
+					Unexpected: []string{
+						"-FileModifyDate<CreateDate",
+					},
+				},
+				{
+					Expected: []string{
+						"-TestName<CreateDate",
+						"-if $filename !~ /WhatsApp/i",
+						"-if $filename !~ /_x265/i",
+						"-d VID_%Y%m%d_%H%M%S%%-c.%%e",
+						"-r",
+					},
+					Unexpected: []string{
+						"-FileModifyDate<CreateDate",
+					},
+				},
 			},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			recursively = tt.recursive
+		t.Run(tt.Name, func(t *testing.T) {
+			recursively = tt.Recursive
 			dryRun = true
 
 			// Create a test exiftool wrapper
@@ -183,20 +215,13 @@ func TestRunFixNames_DryRun(t *testing.T) {
 			defer testTool.Clear()
 
 			// Run the command
-			runFixNames(namesCmd, tt.args)
+			runFixNames(namesCmd, tt.Args)
 
-			assert.Len(t, testTool.Calls, 2, "exiftool exec should be called in %s", tt.name)
-			testArgs := testTool.Calls[1]
+			// Check ExifTool calls
+			testTool.AssertCalls(t, 2)
 
-			assert.Contains(t, testArgs, tt.args[0], "source path not set in %s", tt.name)
-			for _, tag := range tt.expectedTags {
-				assert.Contains(t, testArgs, tag, "missing expected tag in %s", tt.name)
-			}
-
-			for _, tag := range tt.unexpectedTags {
-				assert.NotContains(t, testArgs, tag, "found unexpected tag in %s", tt.name)
-			}
-
+			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs[0])
+			testTool.AssertCallArgs(t, 1, tt.Args[0], tt.CallArgs[1])
 		})
 	}
 }
