@@ -38,7 +38,7 @@ func runFixFileDates(cmd *cobra.Command, args []string) {
 	//imgArgs.ForVideoMp4()
 
 	if dryRun {
-		imgArgs.ChangeTag("WriteNothing", "CreateDate")
+		imgArgs.CopyTag("WriteNothing", "CreateDate")
 	} else {
 		imgArgs.ChangeFileDate("CreateDate")
 	}

@@ -53,7 +53,7 @@ var localCmd = &cobra.Command{
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
 		}
-		imgArgs.ChangeTag(tagName, "CreateDate")
+		imgArgs.CopyTag(tagName, "CreateDate")
 		imgArgs.ForDateFormat(path.Join(dstDir, dstSubDir, imgFileName))
 		imgArgs.ForImages()
 		imgArgs.Recursively(true)
@@ -66,7 +66,7 @@ var localCmd = &cobra.Command{
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
 		}
-		vidArgs.ChangeTag(tagName, "CreateDate")
+		vidArgs.CopyTag(tagName, "CreateDate")
 		vidArgs.ForDateFormat(path.Join(dstDir, dstSubDir, vidFileName))
 		vidArgs.ForVideoMp4()
 		vidArgs.Recursively(true)

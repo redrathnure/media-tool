@@ -56,7 +56,7 @@ var goProCmd = &cobra.Command{
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
 		}
-		imgArgs.ChangeTag(tagName, "CreateDate")
+		imgArgs.CopyTag(tagName, "CreateDate")
 		imgArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e")
 		imgArgs.ForImages()
 		imgArgs.Recursively(true)
@@ -69,7 +69,7 @@ var goProCmd = &cobra.Command{
 		if !dryRun {
 			vidArgs.ChangeFileDate("CreateDate")
 		}
-		vidArgs.ChangeTag(tagName, "CreateDate")
+		vidArgs.CopyTag(tagName, "CreateDate")
 		vidArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e")
 		vidArgs.ForVideoMp4()
 		vidArgs.Recursively(true)
@@ -82,7 +82,7 @@ var goProCmd = &cobra.Command{
 		if !dryRun {
 			vidPreviewArgs.ChangeFileDate("CreateDate")
 		}
-		vidPreviewArgs.ChangeTag(tagName, "CreateDate")
+		vidPreviewArgs.CopyTag(tagName, "CreateDate")
 		vidPreviewArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.preview.mp4")
 		vidPreviewArgs.ForVideoLrv()
 		vidPreviewArgs.Recursively(true)

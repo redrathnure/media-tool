@@ -40,7 +40,7 @@ func runFixNames(cmd *cobra.Command, args []string) {
 	imgArgs := exifTool.NewArgs()
 	imgArgs.ForImages()
 
-	imgArgs.ChangeTag(tagName, "CreateDate")
+	imgArgs.CopyTag(tagName, "CreateDate")
 	imgArgs.ForDateFormat(imgFileNameTemplate)
 
 	imgArgs.Recursively(recursively)
@@ -55,7 +55,7 @@ func runFixNames(cmd *cobra.Command, args []string) {
 	vidArgs := exifTool.NewArgs()
 	vidArgs.ForVideoMp4()
 
-	vidArgs.ChangeTag(tagName, "CreateDate")
+	vidArgs.CopyTag(tagName, "CreateDate")
 	vidArgs.ForDateFormat(vidFileNameTemplate)
 
 	vidArgs.Recursively(recursively)

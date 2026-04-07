@@ -240,29 +240,29 @@ func TestExifToolArgs_ForDateFormat(t *testing.T) {
 	assert.Equal(t, "YYYY:MM:DD HH:MM:SS", sut.Args[3])
 }
 
-func TestExifToolArgs_ChangeTag(t *testing.T) {
+func TestExifToolArgs_CopyTag(t *testing.T) {
 	sut := newExifTool().NewArgs()
 	assert.Len(t, sut.Args, 2)
 
-	sut.ChangeTag("DateTime", "2023:01:01 12:00:00")
+	sut.CopyTag("DateTime", "someOtherTag")
 
 	assert.Len(t, sut.Args, 3)
 	assert.Equal(t, "-v0", sut.Args[0])
 	assert.Equal(t, "-progress", sut.Args[1])
-	assert.Equal(t, "-DateTime<2023:01:01 12:00:00", sut.Args[2])
+	assert.Equal(t, "-DateTime<someOtherTag", sut.Args[2])
 }
 
 func TestExifToolArgs_ChangeFileDate(t *testing.T) {
 	sut := newExifTool().NewArgs()
 	assert.Len(t, sut.Args, 2)
 
-	sut.ChangeFileDate("2023:01:01 12:00:00")
+	sut.ChangeFileDate("someOtherTag")
 
 	assert.Len(t, sut.Args, 4)
 	assert.Equal(t, "-v0", sut.Args[0])
 	assert.Equal(t, "-progress", sut.Args[1])
-	assert.Equal(t, "-FileModifyDate<2023:01:01 12:00:00", sut.Args[2])
-	assert.Equal(t, "-FileCreateDate<2023:01:01 12:00:00", sut.Args[3])
+	assert.Equal(t, "-FileModifyDate<someOtherTag", sut.Args[2])
+	assert.Equal(t, "-FileCreateDate<someOtherTag", sut.Args[3])
 }
 
 func TestExifToolArgs_ChangeExifDate(t *testing.T) {
@@ -465,7 +465,7 @@ func TestExifToolWrapper_ComplexUseCase1(t *testing.T) {
 	sut.Recursively(true)
 	sut.Src("/path/to/files")
 	sut.ForImages()
-	sut.ChangeTag("DateTime", "2023:01:01 12:00:00")
+	sut.CopyTag("DateTime", "2023:01:01 12:00:00")
 	sut.CleanVendorTags()
 
 	// Verify all operations were added (2 default + 1 recursively + 1 src + 8 forImages + 1 changeTag + 10 cleanVendorTags)
@@ -495,7 +495,7 @@ func TestExifToolWrapper_ComplexUseCase2(t *testing.T) {
 	sut.Recursively(true)
 	sut.Src("/test/path")
 	sut.ForImages()
-	sut.ChangeTag("DateTime", "2023:01:01 12:00:00")
+	sut.CopyTag("DateTime", "2023:01:01 12:00:00")
 
 	// Verify the command structure
 	assert.Equal(t, "exiftool", tool.cmd)

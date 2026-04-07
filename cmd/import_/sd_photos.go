@@ -57,7 +57,7 @@ var sdPhotosCmd = &cobra.Command{
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
 		}
-		imgArgs.ChangeTag(tagName, "CreateDate")
+		imgArgs.CopyTag(tagName, "CreateDate")
 		imgArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\%%f%%-c.%%e")
 		imgArgs.ForImages()
 		imgArgs.ForVideoMp4()

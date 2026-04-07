@@ -56,7 +56,7 @@ var videoCamCmd = &cobra.Command{
 		if !dryRun {
 			videoArgs.ChangeFileDate("DateTimeOriginal")
 		}
-		videoArgs.ChangeTag(tagName, "DateTimeOriginal")
+		videoArgs.CopyTag(tagName, "DateTimeOriginal")
 		videoArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\VID_%Y%m%d_%H%M%S%%-c.%%e")
 		videoArgs.ForVideoAvchd()
 		videoArgs.Recursively(true)

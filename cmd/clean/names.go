@@ -35,7 +35,7 @@ func runNames(cmd *cobra.Command, args []string) {
 	if dryRun {
 		tagName = "testname"
 	}
-	imgArgs.ChangeTag(tagName, "${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}")
+	imgArgs.CopyTag(tagName, "${filename;s/ - Copy/%-c/gi;s/ Copy/%-c/gi}")
 
 	//Images and video
 	//imgArgs.forImages()

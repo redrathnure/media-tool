@@ -135,30 +135,30 @@ func (toolArgs *ExifToolArgs) ForDateFormat(dateFormat string) {
 	toolArgs.add("-d", dateFormat)
 }
 
-func (toolArgs *ExifToolArgs) ChangeTag(tagName string, tagValue string) {
-	toolArgs.add(fmt.Sprintf("-%s<%s", tagName, tagValue))
+func (toolArgs *ExifToolArgs) CopyTag(dstTagName string, srcTagName string) {
+	toolArgs.add(fmt.Sprintf("-%s<%s", dstTagName, srcTagName))
 }
 
-func (toolArgs *ExifToolArgs) ChangeFileDate(tagValue string) {
+func (toolArgs *ExifToolArgs) ChangeFileDate(tagName string) {
 	//File:
-	toolArgs.ChangeTag("FileModifyDate", tagValue)
-	toolArgs.ChangeTag("FileCreateDate", tagValue)
+	toolArgs.CopyTag("FileModifyDate", tagName)
+	toolArgs.CopyTag("FileCreateDate", tagName)
 }
 
-func (toolArgs *ExifToolArgs) ChangeExifDate(tagValue string) {
+func (toolArgs *ExifToolArgs) ChangeExifDate(tagName string) {
 	//'EXIF:
-	toolArgs.ChangeTag("CreateDate", tagValue)
-	toolArgs.ChangeTag("DateTimeOriginal", tagValue)
+	toolArgs.CopyTag("CreateDate", tagName)
+	toolArgs.CopyTag("DateTimeOriginal", tagName)
 }
 
-func (toolArgs *ExifToolArgs) ChangeMp4Date(tagValue string) {
+func (toolArgs *ExifToolArgs) ChangeMp4Date(tagName string) {
 	//quicktime:
-	toolArgs.ChangeTag("CreateDate", tagValue)
-	toolArgs.ChangeTag("ModifyDate", tagValue)
-	toolArgs.ChangeTag("TrackCreateDate", tagValue)
-	toolArgs.ChangeTag("TrackModifyDate", tagValue)
-	toolArgs.ChangeTag("MediaCreateDate", tagValue)
-	toolArgs.ChangeTag("MediaModifyDate", tagValue)
+	toolArgs.CopyTag("CreateDate", tagName)
+	toolArgs.CopyTag("ModifyDate", tagName)
+	toolArgs.CopyTag("TrackCreateDate", tagName)
+	toolArgs.CopyTag("TrackModifyDate", tagName)
+	toolArgs.CopyTag("MediaCreateDate", tagName)
+	toolArgs.CopyTag("MediaModifyDate", tagName)
 }
 
 func (toolArgs *ExifToolArgs) CleanTag(tagName string) {
