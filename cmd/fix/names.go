@@ -43,10 +43,11 @@ func runFixNames(cmd *cobra.Command, args []string) {
 	imgArgs.CopyTag(tagName, "CreateDate")
 	imgArgs.ForDateFormat(imgFileNameTemplate)
 
-	imgArgs.Recursively(recursively)
-	imgArgs.Src(files)
 	imgArgs.ExcludeWhatsAppFiles()
 	imgArgs.ExcludeTranscodedVideoFiles()
+
+	imgArgs.Recursively(recursively)
+	imgArgs.Src(files)
 
 	exifTool.Exec(root.Context.Verbose)
 
@@ -58,10 +59,11 @@ func runFixNames(cmd *cobra.Command, args []string) {
 	vidArgs.CopyTag(tagName, "CreateDate")
 	vidArgs.ForDateFormat(vidFileNameTemplate)
 
-	vidArgs.Recursively(recursively)
-	vidArgs.Src(files)
 	vidArgs.ExcludeWhatsAppFiles()
 	vidArgs.ExcludeTranscodedVideoFiles()
+
+	vidArgs.Recursively(recursively)
+	vidArgs.Src(files)
 
 	exifTool.Exec(root.Context.Verbose)
 }
