@@ -139,6 +139,10 @@ func (toolArgs *ExifToolArgs) CopyTag(dstTagName string, srcTagName string) {
 	toolArgs.add(fmt.Sprintf("-%s<%s", dstTagName, srcTagName))
 }
 
+func (toolArgs *ExifToolArgs) SetTag(tagName string, tagValue string) {
+	toolArgs.add(fmt.Sprintf("-%s=%s", tagName, tagValue))
+}
+
 func (toolArgs *ExifToolArgs) ChangeFileDate(tagName string) {
 	//File:
 	toolArgs.CopyTag("FileModifyDate", tagName)
@@ -235,7 +239,7 @@ func (toolArgs *ExifToolArgs) ExcludeWhatsAppFiles() {
 }
 
 func (toolArgs *ExifToolArgs) IncludeWhatsAppFiles() {
-	toolArgs.add("-if", "$filename =~ /"+whatsAppMarker+"/i")
+	toolArgs.add("-if", "$filename =~ /"+whatsAppMarker+" /i")
 }
 
 func (toolArgs *ExifToolArgs) ExcludeTranscodedVideoFiles() {

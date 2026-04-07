@@ -252,6 +252,18 @@ func TestExifToolArgs_CopyTag(t *testing.T) {
 	assert.Equal(t, "-DateTime<someOtherTag", sut.args[2])
 }
 
+func TestExifToolArgs_SetTag(t *testing.T) {
+	sut := newExifTool().NewArgs()
+	assert.Len(t, sut.args, 2)
+
+	sut.SetTag("DateTime", "123")
+
+	assert.Len(t, sut.args, 3)
+	assert.Equal(t, "-v0", sut.args[0])
+	assert.Equal(t, "-progress", sut.args[1])
+	assert.Equal(t, "-DateTime=123", sut.args[2])
+}
+
 func TestExifToolArgs_ChangeFileDate(t *testing.T) {
 	sut := newExifTool().NewArgs()
 	assert.Len(t, sut.args, 2)
@@ -438,7 +450,7 @@ func TestIncludeWhatsAppFiles_NormalCase(t *testing.T) {
 	assert.Equal(t, "-v0", sut.args[0])
 	assert.Equal(t, "-progress", sut.args[1])
 	assert.Equal(t, "-if", sut.args[2])
-	assert.Equal(t, "$filename =~ /WhatsApp/i", sut.args[3])
+	assert.Equal(t, "$filename =~ /WhatsApp /i", sut.args[3])
 }
 
 func TestExcludeTranscodedVideoFiles_NormalCase(t *testing.T) {
