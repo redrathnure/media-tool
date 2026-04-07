@@ -69,6 +69,10 @@ func TestRunFixNames(t *testing.T) {
 			recursive: false,
 			expectedTags: []string{
 				"-FileName<CreateDate",
+				"-if",
+				"$filename !~ /WhatsApp/i",
+				"-if",
+				"$filename !~ /_x265/i",
 			},
 			unexpectedTags: []string{
 				"-r",
@@ -80,6 +84,10 @@ func TestRunFixNames(t *testing.T) {
 			recursive: true,
 			expectedTags: []string{
 				"-FileName<CreateDate",
+				"-if",
+				"$filename !~ /WhatsApp/i",
+				"-if",
+				"$filename !~ /_x265/i",
 				"-r",
 			},
 		},
@@ -138,6 +146,10 @@ func TestRunFixNames_DryRun(t *testing.T) {
 			recursive: false,
 			expectedTags: []string{
 				"-TestName<CreateDate",
+				"-if",
+				"$filename !~ /WhatsApp/i",
+				"-if",
+				"$filename !~ /_x265/i",
 			},
 			unexpectedTags: []string{
 				"-FileModifyDate<CreateDate",
@@ -150,6 +162,10 @@ func TestRunFixNames_DryRun(t *testing.T) {
 			recursive: true,
 			expectedTags: []string{
 				"-TestName<CreateDate",
+				"-if",
+				"$filename !~ /WhatsApp/i",
+				"-if",
+				"$filename !~ /_x265/i",
 				"-r",
 			},
 			unexpectedTags: []string{

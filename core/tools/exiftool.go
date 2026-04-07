@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+const (
+	whatsAppMarker        = "WhatsApp"
+	transcodedVideoMarker = "_x265"
+)
+
 type ExifToolWrapper struct {
 	cmd         string
 	defaultArgs []string
@@ -108,6 +113,7 @@ func (toolArgs *ExifToolArgs) Src(dirOrFilepath string) {
 
 func (toolArgs *ExifToolArgs) ForImages() {
 	toolArgs.add("-ext", "jpg")
+	toolArgs.add("-ext", "jpeg")
 	toolArgs.add("-ext", "nef")
 	toolArgs.add("-ext", "cr2")
 	toolArgs.add("-ext", "cr3")
@@ -216,4 +222,22 @@ func (toolArgs *ExifToolArgs) CleanCameraTags() {
 
 func (toolArgs *ExifToolArgs) CleanLocationTags() {
 	toolArgs.CleanTag("gps:all")
+}
+
+func (toolArgs *ExifToolArgs) ExcludeIfNameContains(fileNameFragments ...string) {
+	if len(fileNameFragments) > 0 {
+		toolArgs.add("-if", "$filename !~ /"+strings.Join(fileNameFragments, "|")+"/i")
+	}
+}
+
+func (toolArgs *ExifToolArgs) ExcludeWhatsAppFiles() {
+	toolArgs.ExcludeIfNameContains(whatsAppMarker)
+}
+
+func (toolArgs *ExifToolArgs) IncludeWhatsAppFiles() {
+	toolArgs.add("-if", "$filename =~ /"+whatsAppMarker+"/i")
+}
+
+func (toolArgs *ExifToolArgs) ExcludeTranscodedVideoFiles() {
+	toolArgs.ExcludeIfNameContains(transcodedVideoMarker)
 }

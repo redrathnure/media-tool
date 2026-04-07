@@ -175,17 +175,19 @@ func TestExifToolArgs_ForImages(t *testing.T) {
 
 	sut.ForImages()
 
-	assert.Len(t, sut.Args, 10)
+	assert.Len(t, sut.Args, 12)
 	assert.Equal(t, "-v0", sut.Args[0])
 	assert.Equal(t, "-progress", sut.Args[1])
 	assert.Equal(t, "-ext", sut.Args[2])
 	assert.Equal(t, "jpg", sut.Args[3])
 	assert.Equal(t, "-ext", sut.Args[4])
-	assert.Equal(t, "nef", sut.Args[5])
+	assert.Equal(t, "jpeg", sut.Args[5])
 	assert.Equal(t, "-ext", sut.Args[6])
-	assert.Equal(t, "cr2", sut.Args[7])
+	assert.Equal(t, "nef", sut.Args[7])
 	assert.Equal(t, "-ext", sut.Args[8])
-	assert.Equal(t, "cr3", sut.Args[9])
+	assert.Equal(t, "cr2", sut.Args[9])
+	assert.Equal(t, "-ext", sut.Args[10])
+	assert.Equal(t, "cr3", sut.Args[11])
 }
 
 func TestExifToolArgs_ForVideoMp4(t *testing.T) {
@@ -361,6 +363,100 @@ func TestExifToolArgs_CleanLocationTags(t *testing.T) {
 	assert.Equal(t, "-gps:all=", sut.Args[2])
 }
 
+func TestExcludeIfNameContains_NoArgs(t *testing.T) {
+	sut := newExifTool().NewArgs()
+
+	assert.Len(t, sut.Args, 2)
+
+	sut.ExcludeIfNameContains()
+
+	// 2 defaults and no extra
+	assert.Len(t, sut.Args, 2)
+
+	assert.Equal(t, "-v0", sut.Args[0])
+	assert.Equal(t, "-progress", sut.Args[1])
+}
+
+func TestExcludeIfNameContains_SingleArg(t *testing.T) {
+	sut := newExifTool().NewArgs()
+
+	assert.Len(t, sut.Args, 2)
+
+	sut.ExcludeIfNameContains("a")
+
+	// 2 defaults and 2 extra
+	assert.Len(t, sut.Args, 4)
+
+	assert.Equal(t, "-v0", sut.Args[0])
+	assert.Equal(t, "-progress", sut.Args[1])
+	assert.Equal(t, "-if", sut.Args[2])
+	assert.Equal(t, "$filename !~ /a/i", sut.Args[3])
+}
+
+func TestExcludeIfNameContains_MultipleArgs(t *testing.T) {
+	sut := newExifTool().NewArgs()
+
+	assert.Len(t, sut.Args, 2)
+
+	sut.ExcludeIfNameContains("a", "b")
+
+	// 2 defaults and 2 extra
+	assert.Len(t, sut.Args, 4)
+
+	assert.Equal(t, "-v0", sut.Args[0])
+	assert.Equal(t, "-progress", sut.Args[1])
+	assert.Equal(t, "-if", sut.Args[2])
+	assert.Equal(t, "$filename !~ /a|b/i", sut.Args[3])
+}
+
+func TestExcludeWhatsAppFiles_NormalCase(t *testing.T) {
+	sut := newExifTool().NewArgs()
+
+	assert.Len(t, sut.Args, 2)
+
+	sut.ExcludeWhatsAppFiles()
+
+	// 2 defaults and 2 extra
+	assert.Len(t, sut.Args, 4)
+
+	assert.Equal(t, "-v0", sut.Args[0])
+	assert.Equal(t, "-progress", sut.Args[1])
+	assert.Equal(t, "-if", sut.Args[2])
+	assert.Equal(t, "$filename !~ /WhatsApp/i", sut.Args[3])
+}
+
+func TestIncludeWhatsAppFiles_NormalCase(t *testing.T) {
+	sut := newExifTool().NewArgs()
+
+	assert.Len(t, sut.Args, 2)
+
+	sut.IncludeWhatsAppFiles()
+
+	// 2 defaults and 2 extra
+	assert.Len(t, sut.Args, 4)
+
+	assert.Equal(t, "-v0", sut.Args[0])
+	assert.Equal(t, "-progress", sut.Args[1])
+	assert.Equal(t, "-if", sut.Args[2])
+	assert.Equal(t, "$filename =~ /WhatsApp/i", sut.Args[3])
+}
+
+func TestExcludeTranscodedVideoFiles_NormalCase(t *testing.T) {
+	sut := newExifTool().NewArgs()
+
+	assert.Len(t, sut.Args, 2)
+
+	sut.ExcludeTranscodedVideoFiles()
+
+	// 2 defaults and 2 extra
+	assert.Len(t, sut.Args, 4)
+
+	assert.Equal(t, "-v0", sut.Args[0])
+	assert.Equal(t, "-progress", sut.Args[1])
+	assert.Equal(t, "-if", sut.Args[2])
+	assert.Equal(t, "$filename !~ /_x265/i", sut.Args[3])
+}
+
 func TestExifToolWrapper_ComplexUseCase1(t *testing.T) {
 	// Test a complex scenario with multiple operations
 	sut := newExifTool().NewArgs()
@@ -373,7 +469,7 @@ func TestExifToolWrapper_ComplexUseCase1(t *testing.T) {
 	sut.CleanVendorTags()
 
 	// Verify all operations were added (2 default + 1 recursively + 1 src + 8 forImages + 1 changeTag + 10 cleanVendorTags)
-	assert.Len(t, sut.Args, 23)
+	assert.Len(t, sut.Args, 25)
 	assert.Equal(t, "-v0", sut.Args[0])
 	assert.Equal(t, "-progress", sut.Args[1])
 	assert.Equal(t, "-r", sut.Args[2])
@@ -404,5 +500,5 @@ func TestExifToolWrapper_ComplexUseCase2(t *testing.T) {
 	// Verify the command structure
 	assert.Equal(t, "exiftool", tool.cmd)
 	assert.Equal(t, []string{"-v0", "-progress"}, tool.defaultArgs)
-	assert.Len(t, sut.Args, 15)
+	assert.Len(t, sut.Args, 17)
 }
