@@ -39,6 +39,7 @@ List of commands with a short description. Please run `media_tool <command> -h` 
 | `fix file_dates` | Reads date from Exif/QuickTime metadata and update file creation/modification attributes.  Similar to 'fix dates' command but takes date from Exif data instead file name. |
 | `fix names` | Fix 'IMG_' and 'VID_' name prefixes for photo and video files (excluding WhatsApp and '*_x265' files). May be useful to correct weird Pixel/GCam file names. |
 | `fix whatsapp` | Fix WhatsApp file names and Exif dates |
+| `fix all` | A shortcut for `fix whatsapp` then `fix dates` then `fix names` tasks |
 | `import camVideo` | Copy video from Panasonic camcoder (WPD) to disk |
 | `import gopro` | Copy images and video from GoPro card (WPD) to disk |
 | `import local` | Copy images and video from directory to disk |
