@@ -19,6 +19,7 @@ var datesCmd = &cobra.Command{
 
 func runFixDates(cmd *cobra.Command, args []string) {
 	tools.PrintCommandArgs(cmd, args, log)
+	log.Infof("Fix Exif/QuickTime and file creation dates")
 
 	files := tools.ExtractPath(args, 0, ".")
 	log.Infof("files to process: '%s'", files)

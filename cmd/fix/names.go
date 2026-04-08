@@ -25,6 +25,7 @@ var namesCmd = &cobra.Command{
 
 func runFixNames(cmd *cobra.Command, args []string) {
 	tools.PrintCommandArgs(cmd, args, log)
+	log.Infof("Fix names files (excluding WhatsApp and '*_x265' files)")
 
 	files := tools.ExtractPath(args, 0, ".")
 	log.Infof("files to process: '%s'", files)

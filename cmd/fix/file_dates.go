@@ -21,6 +21,7 @@ var fileDatesCmd = &cobra.Command{
 
 func runFixFileDates(cmd *cobra.Command, args []string) {
 	tools.PrintCommandArgs(cmd, args, log)
+	log.Infof("Fix file dates")
 
 	files := tools.ExtractPath(args, 0, ".")
 	log.Infof("files to process: '%s'", files)
