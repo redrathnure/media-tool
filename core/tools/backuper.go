@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 const (
@@ -22,6 +24,8 @@ type Backuper struct {
 	recursively bool
 	backupName  string
 }
+
+var MovingProgressTemplate pb.ProgressBarTemplate = `{{with string . "prefix"}}{{.}} {{end}}{{counters . "%s/%s" "%s/?"}} {{bar . }} {{percent . "%.0f%%" "?"}} {{rtime . "ETA %s"}}{{with string . "suffix"}} {{.}}{{end}}`
 
 func NewBackuper(backupLocation string, dryRun bool, recursively bool, taskName string) *Backuper {
 	result := Backuper{backupDir: backupLocation, dryRun: dryRun, recursively: recursively}
@@ -89,6 +93,9 @@ func (b *Backuper) CleanupWorkDir(workDirectory string) error {
 
 	filesTotal := len(filesToMove)
 	if filesTotal > 0 {
+		progressBar := MovingProgressTemplate.Start(filesTotal)
+		defer progressBar.Finish()
+
 		log.Infof("Moving %d '%s' files from '%s' to '%s'", filesTotal, originalFileTemplate, workDir, b.backupDir)
 
 		for i, fileToMove := range filesToMove {
@@ -96,6 +103,8 @@ func (b *Backuper) CleanupWorkDir(workDirectory string) error {
 
 			oldFile := path.Join(workDir, fileToMove)
 			newFile := path.Join(b.backupDir, fileToMove)
+
+			progressBar.Set("prefix", fmt.Sprintf("(%v/%v) '%v'", i+1, filesTotal, fileToMove))
 
 			newDir := filepath.Dir(newFile)
 			if err := os.MkdirAll(newDir, os.ModePerm); err != nil {
@@ -107,6 +116,8 @@ func (b *Backuper) CleanupWorkDir(workDirectory string) error {
 				log.Errorf("Unable to move origin files to backup storage: %s", err)
 				return err
 			}
+
+			progressBar.Increment()
 		}
 	}
 	return nil
