@@ -43,7 +43,7 @@ func (b *Backuper) initLocation(taskName string) {
 		t := time.Now()
 		ts := t.Format("20060102150405")
 
-		b.backupName = taskName + "_" + ts
+		b.backupName = ts + "_" + taskName
 		b.backupDir = b.expandPath(path.Join(b.backupDir, b.backupName))
 	}
 }
