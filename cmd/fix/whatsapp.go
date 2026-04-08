@@ -26,7 +26,7 @@ var whatsAppCmd = &cobra.Command{
 
 func runFixWhatsAppFiles(cmd *cobra.Command, args []string) {
 	tools.PrintCommandArgs(cmd, args, log)
-	log.Infof("Fix WhatsApp files")
+	log.Infof("Fix name and dates for WhatsApp files")
 
 	files := tools.ExtractPath(args, 0, ".")
 	log.Infof("files to process: '%s'", files)
