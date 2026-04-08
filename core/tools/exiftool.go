@@ -97,6 +97,12 @@ func (tool *ExifToolWrapper) NewArgs() *ExifToolArgs {
 	return &tool.args
 }
 
+func (tool *ExifToolWrapper) DeleteOriginals(deleteOriginal bool) {
+	if deleteOriginal {
+		tool.defaultArgs = append(tool.defaultArgs, "-overwrite_original")
+	}
+}
+
 func (toolArgs *ExifToolArgs) add(args ...string) {
 	toolArgs.args = append(toolArgs.args, args...)
 }

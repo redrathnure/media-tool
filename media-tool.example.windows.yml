@@ -1,5 +1,11 @@
 exiftool:
   path: $APP_DIR\exiftool\exiftool.exe
+
+  # Where to tore Exiftool _original files:
+  # none - (danger!) do not keep, will lead to `-overwrite_original` usage
+  # in_place - leave original files in working dir
+  # directory, e.g. d:\tmp\media_backup - move original files to specified place
+  store_original: d:\tmp\media_backup
 import:
   goPro:
     default:

@@ -81,6 +81,34 @@ func TestExifToolWrapper_InitCmd_AppDirSubstitution(t *testing.T) {
 	exifToolObj = nil
 }
 
+func TestExifToolWrapper_DeleteOriginals_True(t *testing.T) {
+	sut := newExifTool()
+
+	sut.DeleteOriginals(true)
+
+	args := sut.NewArgs().args
+
+	// 2 defaults and 1 extra
+	assert.Len(t, args, 3)
+
+	assert.Equal(t, "-v0", args[0])
+	assert.Equal(t, "-progress", args[1])
+	assert.Equal(t, "-overwrite_original", args[2])
+}
+
+func TestExifToolWrapper_DeleteOriginals_False(t *testing.T) {
+	sut := newExifTool()
+
+	sut.DeleteOriginals(false)
+
+	args := sut.NewArgs().args
+
+	assert.Len(t, args, 2)
+
+	assert.Equal(t, "-v0", args[0])
+	assert.Equal(t, "-progress", args[1])
+}
+
 func TestExifToolArgs_NewArgs(t *testing.T) {
 	tool := newExifTool()
 	sut := tool.NewArgs()

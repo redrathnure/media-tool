@@ -32,7 +32,11 @@ func runMetadata(cmd *cobra.Command, args []string) {
 
 	log.Infof("dry ryn: %v", dryRun)
 
+	bu := tools.NewBackuper(getConf().GetBackupLocation(), dryRun, recursively, cmd.CommandPath())
+	defer bu.CleanupWorkDir(files)
+
 	exifTool := tools.GetExifTool()
+	exifTool.DeleteOriginals(bu.ShouldExifDeleteOriginal())
 
 	imgArgs := exifTool.NewArgs()
 	if includingLocation {

@@ -113,10 +113,11 @@ func TestDefaultValues(t *testing.T) {
 	sut := Empty()
 
 	for key, val := range defaults {
-		assert.NotNil(t, 4, len(val), "No defaults for "+key)
+		assert.Equal(t, 5, len(val), "No defaults for "+key)
 	}
 
 	assert.NotNil(t, sut.GetExifToolPath())
+	assert.NotNil(t, sut.GetBackupLocation())
 	assert.NotNil(t, sut.GetImportCamVideoDefaultDst())
 	assert.NotNil(t, sut.GetImportGoProDefaultDst())
 	assert.NotNil(t, sut.GetImportSdPhotosDefaultDst())

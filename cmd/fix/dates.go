@@ -25,7 +25,11 @@ func runFixDates(cmd *cobra.Command, args []string) {
 
 	log.Infof("recursively: %v", recursively)
 
+	bu := tools.NewBackuper(getConf().GetBackupLocation(), dryRun, recursively, cmd.CommandPath())
+	defer bu.CleanupWorkDir(files)
+
 	exifTool := tools.GetExifTool()
+	exifTool.DeleteOriginals(bu.ShouldExifDeleteOriginal())
 
 	//Images and video
 	imgArgs := exifTool.NewArgs()

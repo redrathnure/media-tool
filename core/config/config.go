@@ -10,6 +10,7 @@ import (
 
 const (
 	ExifToolPath             = "exiftool.path"
+	ExifToolBackupLocation   = "exiftool.store_original"
 	ImportCamVideoDefaultDst = "import.camvideo.default.targetDir"
 	ImportGoProDefaultDst    = "import.gopro.default.targetDir"
 	ImportSdPhotosDefaultDst = "import.sdPhotos.default.targetDir"
@@ -19,12 +20,14 @@ var defaults = map[string]map[string]string{
 	"linux": map[string]string{
 		//use OS preinstalled version
 		ExifToolPath:             "",
+		ExifToolBackupLocation:   "~/tmp/media_backup",
 		ImportCamVideoDefaultDst: "~/Media/camera",
 		ImportGoProDefaultDst:    "~/Media/gopro",
 		ImportSdPhotosDefaultDst: "~/Media/photos",
 	},
 	"windows": map[string]string{
 		ExifToolPath:             "",
+		ExifToolBackupLocation:   "d:\\tmp\\media_backup",
 		ImportCamVideoDefaultDst: "d:\\video\\camera",
 		ImportGoProDefaultDst:    "d:\\video\\gopro",
 		ImportSdPhotosDefaultDst: "d:\\photos"},
@@ -101,4 +104,8 @@ func (c *Config) GetImportGoProDefaultDst() string {
 
 func (c *Config) GetImportSdPhotosDefaultDst() string {
 	return c.ko.String(ImportSdPhotosDefaultDst)
+}
+
+func (c *Config) GetBackupLocation() string {
+	return c.ko.String(ExifToolBackupLocation)
 }
