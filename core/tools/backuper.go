@@ -100,7 +100,7 @@ func (b *Backuper) CleanupWorkDir(workDirectory string) error {
 		log.Infof("Moving %d '%s' files from '%s' to '%s'", filesTotal, originalFileTemplate, workDir, b.backupDir)
 
 		for i, fileToMove := range filesToMove {
-			log.Infof("Moving [%d/%d]: '%s'...", i+1, filesTotal, fileToMove)
+			log.Debugf("Moving [%d/%d]: '%s'...", i+1, filesTotal, fileToMove)
 
 			oldFile := path.Join(workDir, fileToMove)
 			newFile := path.Join(b.backupDir, fileToMove)
