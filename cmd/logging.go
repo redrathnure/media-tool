@@ -10,7 +10,7 @@ var log = logging.MustGetLogger("cmd")
 
 func initLogger() {
 	var format = logging.MustStringFormatter(
-		`%{time:15:04:05} %{level:.1s} %{message}`,
+		`%{color}%{time:15:04:05} %{level:.1s} %{message}%{color:reset}`,
 	)
 
 	backend := logging.NewLogBackend(os.Stdout, "", 0)
