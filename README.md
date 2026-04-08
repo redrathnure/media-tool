@@ -140,6 +140,5 @@ Dev routines:
 * Import data from SD/flash storage (Linux)
 * Import data from MTP devices (Linux)
 * deb packet?
-* WhatApp and GPixel files handling
 * Proper handling of unproper dates (a "1971 year for FAT32" issue)
 * Handle more "Copy" naming patterns
