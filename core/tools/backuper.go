@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -111,14 +112,61 @@ func (b *Backuper) CleanupWorkDir(workDirectory string) error {
 				log.Errorf("Unable to prepare backup storage: %s", err)
 				return err
 			}
-			err := os.Rename(oldFile, newFile)
-			if err != nil {
+
+			if err := b.moveFile(oldFile, newFile); err != nil {
 				log.Errorf("Unable to move origin files to backup storage: %s", err)
 				return err
 			}
 
 			progressBar.Increment()
 		}
+	}
+	return nil
+}
+
+func (b *Backuper) moveFile(oldFile string, newFile string) error {
+	err := os.Rename(oldFile, newFile)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid cross-device link") {
+			return b.moveFileManual(oldFile, newFile)
+		} else {
+			return err
+		}
+	}
+	return nil
+}
+
+func (*Backuper) moveFileManual(oldFile string, newFile string) error {
+	src, err := os.Open(oldFile)
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	dst, err := os.Create(newFile)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		return err
+	}
+	src.Close()
+	dst.Close()
+
+	fi, err := os.Stat(oldFile)
+	if err != nil {
+		os.Remove(newFile)
+		return err
+	}
+	err = os.Chmod(newFile, fi.Mode())
+	if err != nil {
+		os.Remove(newFile)
+		return err
+	}
+	if err := os.Remove(oldFile); err != nil {
+		return err
 	}
 	return nil
 }
