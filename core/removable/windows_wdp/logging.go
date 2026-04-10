@@ -1,10 +1,10 @@
 //go:build windows
 // +build windows
 
-package mtp_windows
+package windows_wdp
 
 import (
 	"github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger("mtp")
+var log = logging.MustGetLogger("wdp")

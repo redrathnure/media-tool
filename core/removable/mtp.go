@@ -1,7 +1,4 @@
-//go:build !windows
-// +build !windows
-
-package mtp_linux
+package removable
 
 import (
 	"fmt"
@@ -12,8 +9,7 @@ import (
 
 	"github.com/cheggaaa/pb/v3"
 
-	"github.com/redrathnure/media-tool/core/removable/mtp_linux/core"
-	"github.com/redrathnure/media-tool/core/removable/mtp_linux/udisks"
+	"github.com/redrathnure/media-tool/core/removable/core"
 	"github.com/redrathnure/media-tool/core/tools"
 )
 
@@ -40,6 +36,7 @@ func LoadCamVideos(targetDir string, dryRun bool) (contentDir string, err error)
 
 func loadFromAllWpd(deviceFilter core.DeviceFilter, deviceDir string, targetDir string, dryRun bool) (contentDir string, err error) {
 	result := MtpDownloader{dryRun: dryRun}
+	result.close()
 	if err := result.init(targetDir); err != nil {
 		return "", err
 	}
@@ -65,11 +62,6 @@ func (d *MtpDownloader) loadFromMatchedDevices(deviceFilter core.DeviceFilter, d
 		}
 	}
 	return d.resultDir, nil
-}
-
-func (d *MtpDownloader) findDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
-	result := udisks.FindDevices(deviceFilter)
-	return result
 }
 
 func (d *MtpDownloader) copyContentToTempDir(devIndex int, dev core.RemovableDevice, deviceDir string) error {
@@ -126,20 +118,6 @@ func (d *MtpDownloader) prepareTempDir(devIndex int, dev core.RemovableDevice) e
 	return os.MkdirAll(d.tmpDir, os.ModePerm)
 }
 
-func sizeToLabel(size int64) string {
-	const unit = 1024
-	if size < unit {
-		return fmt.Sprintf("%d B", size)
-	}
-	div, exp := int64(unit), 0
-	for n := size / unit; n >= unit; n /= unit {
-		div *= unit
-		exp++
-	}
-	return fmt.Sprintf("%.1f %ciB",
-		float64(size)/float64(div), "KMGTPE"[exp])
-}
-
 func (d *MtpDownloader) copyToTmpDir(dev core.RemovableDevice, executionPlan *ExecutionPlan) error {
 	progressBar := CopyProgressTemplate.Start64(executionPlan.GetTotalSize())
 	defer progressBar.Finish()
@@ -152,7 +130,6 @@ func (d *MtpDownloader) copyToTmpDir(dev core.RemovableDevice, executionPlan *Ex
 		progressBar.Set("prefix", fmt.Sprintf("(%v/%v) '%v'", i+1, filesTotal, srcFile))
 
 		if !d.dryRun {
-
 			dstDir := filepath.Dir(dstFile)
 			if err := os.MkdirAll(dstDir, os.ModePerm); err != nil {
 				return err
@@ -164,7 +141,7 @@ func (d *MtpDownloader) copyToTmpDir(dev core.RemovableDevice, executionPlan *Ex
 				log.Errorf("Unable to copy '%v' file: %v", srcFile, err)
 				return err
 			} else {
-				log.Debugf("Copy of '%v' - done ('%v')", srcFile, sizeToLabel(bytesCount))
+				log.Debugf("Copy of '%v' - done ('%v')", srcFile, tools.HumanizeFileSize(bytesCount))
 			}
 		}
 	}

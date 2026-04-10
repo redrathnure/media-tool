@@ -3,16 +3,15 @@
 
 package removable
 
-import mtp "github.com/redrathnure/media-tool/core/removable/mtp_linux"
+import (
+	"github.com/redrathnure/media-tool/core/removable/core"
+	udisks "github.com/redrathnure/media-tool/core/removable/linux_udisks"
+)
 
-func LoadSdPhotos(targetDir string, dryRun bool) (string, error) {
-	return mtp.LoadSdPhotos(targetDir, dryRun)
+func (d *MtpDownloader) findDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
+	result := udisks.FindDevices(deviceFilter)
+	return result
 }
 
-func LoadGoProVideos(targetDir string, dryRun bool) (string, error) {
-	return mtp.LoadGoProVideos(targetDir, dryRun)
-}
-
-func LoadCamVideos(targetDir string, dryRun bool) (string, error) {
-	return mtp.LoadCamVideos(targetDir, dryRun)
+func (d *MtpDownloader) close() {
 }

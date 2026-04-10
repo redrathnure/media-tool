@@ -1,12 +1,9 @@
-//go:build !windows
-// +build !windows
-
-package mtp_linux
+package removable
 
 import (
 	"fmt"
 
-	"github.com/redrathnure/media-tool/core/removable/mtp_linux/core"
+	"github.com/redrathnure/media-tool/core/removable/core"
 )
 
 type ExecutionPlan struct {

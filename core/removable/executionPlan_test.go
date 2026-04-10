@@ -1,7 +1,4 @@
-//go:build !windows
-// +build !windows
-
-package mtp_linux
+package removable
 
 import (
 	"testing"
@@ -9,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/redrathnure/media-tool/core/removable/mtp_linux/core"
+	"github.com/redrathnure/media-tool/core/removable/core"
 )
 
 func TestExecutionPlan_EmptyPlan(t *testing.T) {

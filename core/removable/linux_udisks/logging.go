@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-package udisks
+package linux_udisks
 
 import (
 	"github.com/op/go-logging"

@@ -4,17 +4,15 @@
 package removable
 
 import (
-	mtp "github.com/redrathnure/media-tool/core/removable/mtp_windows"
+	"github.com/redrathnure/media-tool/core/removable/core"
+	wdp "github.com/redrathnure/media-tool/core/removable/windows_wdp"
 )
 
-func LoadSdPhotos(targetDir string, dryRun bool) (string, error) {
-	return mtp.LoadSdPhotos(targetDir, dryRun)
+func (d *MtpDownloader) findDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
+	result := wdp.FindDevices(deviceFilter)
+	return result
 }
 
-func LoadGoProVideos(targetDir string, dryRun bool) (string, error) {
-	return mtp.LoadGoProVideos(targetDir, dryRun)
-}
-
-func LoadCamVideos(targetDir string, dryRun bool) (string, error) {
-	return mtp.LoadCamVideos(targetDir, dryRun)
+func (d *MtpDownloader) close() {
+	wdp.Close()
 }

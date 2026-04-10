@@ -1,7 +1,7 @@
 //go:build !windows
 // +build !windows
 
-package udisks
+package linux_udisks
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 	_udisks "github.com/sandbankdisperser/go-udisks"
 
-	"github.com/redrathnure/media-tool/core/removable/mtp_linux/core"
+	"github.com/redrathnure/media-tool/core/removable/core"
 )
 
 type UdiskDevice struct {

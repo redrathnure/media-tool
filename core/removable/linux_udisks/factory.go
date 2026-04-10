@@ -1,12 +1,12 @@
 //go:build !windows
 // +build !windows
 
-package udisks
+package linux_udisks
 
 import (
 	_udisks "github.com/sandbankdisperser/go-udisks"
 
-	"github.com/redrathnure/media-tool/core/removable/mtp_linux/core"
+	"github.com/redrathnure/media-tool/core/removable/core"
 )
 
 func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
@@ -42,10 +42,4 @@ func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
 		}
 	}
 	return result
-}
-
-type FileDescriptor struct {
-	Name  string
-	IsDir bool
-	Size  int64
 }
