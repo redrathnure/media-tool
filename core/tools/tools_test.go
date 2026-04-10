@@ -282,3 +282,11 @@ func TestInitSpecialPaths(t *testing.T) {
 
 	assert.Len(t, specialPaths, 2)
 }
+
+func TestHumanizeFileSize(t *testing.T) {
+	assert.Equal(t, "0 B", HumanizeFileSize(0))
+	assert.Equal(t, "123 B", HumanizeFileSize(123))
+	assert.Equal(t, "1.0 KiB", HumanizeFileSize(1024))
+	assert.Equal(t, "1.0 MiB", HumanizeFileSize(1024*1024))
+	assert.Equal(t, "1.0 GiB", HumanizeFileSize(1024*1024*1024))
+}

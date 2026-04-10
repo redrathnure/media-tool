@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -106,11 +107,12 @@ func initSpecialPaths() {
 			log.Warningf("Unable to resolve '$APP_DIR' path value. A current dir will be used instead.")
 			exePath = "."
 		}
-
+		exePath = filepath.Dir(exePath)
 		specialPaths["$APP_DIR"] = exePath
 	}
 
 }
+
 func ExpandPath(path string) string {
 	initSpecialPaths()
 
@@ -119,4 +121,18 @@ func ExpandPath(path string) string {
 	}
 
 	return filepath.Clean(os.ExpandEnv(path))
+}
+
+func HumanizeFileSize(size int64) string {
+	const unit = 1024
+	if size < unit {
+		return fmt.Sprintf("%d B", size)
+	}
+	div, exp := int64(unit), 0
+	for n := size / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %ciB",
+		float64(size)/float64(div), "KMGTPE"[exp])
 }
