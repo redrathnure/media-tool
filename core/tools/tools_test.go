@@ -2,6 +2,7 @@ package tools
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -250,4 +251,34 @@ func TestCheckDirEmpty(t *testing.T) {
 			assert.Equal(t, tt.expected, result)
 		})
 	}
+}
+
+func TestExpandPath_NormalDirs(t *testing.T) {
+	tests := []string{"a", ".", path.Join("a", "b")}
+
+	for _, tt := range tests {
+		t.Run(tt, func(t *testing.T) {
+			result := ExpandPath(tt)
+
+			assert.Equal(t, tt, result)
+		})
+	}
+}
+
+func TestExpandPath_VarsExplain(t *testing.T) {
+	tests := []string{"~", path.Join("home", "$USER"), "$HOME", "$APP_DIR"}
+
+	for _, tt := range tests {
+		t.Run(tt, func(t *testing.T) {
+			result := ExpandPath(tt)
+
+			assert.NotContains(t, result, tt)
+		})
+	}
+}
+
+func TestInitSpecialPaths(t *testing.T) {
+	initSpecialPaths()
+
+	assert.Len(t, specialPaths, 2)
 }

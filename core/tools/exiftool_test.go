@@ -51,7 +51,8 @@ func TestExifToolWrapper_InitCmd_CustomPath(t *testing.T) {
 
 	sut.initCmd()
 
-	assert.Equal(t, "/custom/path/exiftool", sut.cmd)
+	//Because `/custom/path/exiftool` does not exists
+	assert.Equal(t, "exiftool", sut.cmd)
 
 	// Reset config and singleton for next tests
 	ExifToolPath = ""

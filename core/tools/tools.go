@@ -11,6 +11,8 @@ import (
 	"github.com/op/go-logging"
 )
 
+var specialPaths = map[string]string{}
+
 func extractAbsPath(args []string, argPosition int, defaultValue string) string {
 	if len(args) > argPosition {
 		return getAbsPath(args[argPosition])
@@ -87,4 +89,34 @@ func checkDirEmpty(dirName string) bool {
 
 func PrintCommandArgs(cmd *cobra.Command, args []string, logToUse *logging.Logger) {
 	logToUse.Debugf("%s called with '%v' args", cmd.CommandPath(), strings.Join(args, " "))
+}
+
+func initSpecialPaths() {
+	if len(specialPaths) == 0 {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			log.Warningf("Unable to resolve '~' path value. A current dir will be used instead.")
+			home = "."
+		}
+
+		specialPaths["~"] = home
+
+		exePath, err := os.Executable()
+		if err != nil {
+			log.Warningf("Unable to resolve '$APP_DIR' path value. A current dir will be used instead.")
+			exePath = "."
+		}
+
+		specialPaths["$APP_DIR"] = exePath
+	}
+
+}
+func ExpandPath(path string) string {
+	initSpecialPaths()
+
+	for key, value := range specialPaths {
+		path = strings.ReplaceAll(path, key, value)
+	}
+
+	return filepath.Clean(os.ExpandEnv(path))
 }

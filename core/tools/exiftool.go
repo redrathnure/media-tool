@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -60,22 +59,11 @@ func (tool *ExifToolWrapper) initCmd() {
 	customPath := ExifToolPath
 	if customPath != "" {
 
-		if strings.Contains(customPath, "$APP_DIR") {
-			ex, err := os.Executable()
-			if err != nil {
-				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
-				return
-			}
-			customPath = strings.ReplaceAll(customPath, "$APP_DIR", filepath.Dir(ex))
-			customPath, err = filepath.Abs(customPath)
-			if err != nil {
-				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
-				return
-			}
-			if _, err := os.Stat(customPath); os.IsNotExist(err) {
-				log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
-				return
-			}
+		customPath = ExpandPath(customPath)
+
+		if _, err := os.Stat(customPath); err != nil {
+			log.Infof("Unable to find custom exiftool: '%s'. Trying to use '%s' from $PATH", err, tool.cmd)
+			return
 		}
 
 		tool.cmd = customPath

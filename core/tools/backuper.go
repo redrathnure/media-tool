@@ -44,7 +44,7 @@ func (b *Backuper) initLocation(taskName string) {
 		ts := t.Format("20060102150405")
 
 		b.backupName = ts + "_" + taskName
-		b.backupDir = b.expandPath(path.Join(b.backupDir, b.backupName))
+		b.backupDir = ExpandPath(path.Join(b.backupDir, b.backupName))
 	}
 }
 
@@ -201,15 +201,4 @@ func (b *Backuper) recursiveGlob(root, pattern string) ([]string, error) {
 	})
 
 	return matches, err
-}
-
-func (c *Backuper) expandPath(path string) string {
-	if strings.HasPrefix(path, "~") {
-		home, err := os.UserHomeDir()
-		if err == nil {
-			path = filepath.Join(home, strings.TrimPrefix(path, "~"))
-		}
-	}
-
-	return filepath.Clean(os.ExpandEnv(path))
 }
