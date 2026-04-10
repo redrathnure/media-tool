@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -94,7 +95,9 @@ func (tool *ExifToolWrapper) Exec(verbose bool) {
 
 	err := cmd.Run()
 	if err != nil {
-		log.Warningf("ExifTool exec error: '%s'", err)
+		if cmd.ProcessState.ExitCode() != 2 {
+			log.Warningf("ExifTool exec error: '%s'", err)
+		}
 	}
 }
 
