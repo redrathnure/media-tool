@@ -82,6 +82,7 @@ func (tool *ExifToolWrapper) initCmd() {
 }
 
 func (tool *ExifToolWrapper) Exec(verbose bool) {
+	tool.args.filterPlatformSpecific()
 	cmd := tool.execCommand(tool.cmd, tool.args.args...)
 
 	log.Debugf("ExifTool command: '%s'\n", cmd.String())
@@ -269,4 +270,16 @@ func (toolArgs *ExifToolArgs) IncludeWhatsAppFiles() {
 
 func (toolArgs *ExifToolArgs) ExcludeTranscodedVideoFiles() {
 	toolArgs.ExcludeIfNameContains(transcodedVideoMarker)
+}
+
+func (toolArgs ExifToolArgs) filterPlatformSpecific() {
+	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
+		newArgs := []string{}
+		for _, element := range toolArgs.args {
+			if !strings.Contains(element, "FileCreateDate") {
+				newArgs = append(newArgs, element)
+			}
+		}
+		toolArgs.args = newArgs
+	}
 }
