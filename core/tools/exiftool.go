@@ -1,7 +1,9 @@
 package tools
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -84,11 +86,28 @@ func (tool *ExifToolWrapper) Exec(verbose bool) {
 
 	log.Debugf("ExifTool command: '%s'\n", cmd.String())
 
-	cmd.Stdout = os.Stdout
+	stdOutPipe, _ := cmd.StdoutPipe()
+	stderrPipe, _ := cmd.StderrPipe()
+	go tool.trackStdOut(&stdOutPipe, false)
+	go tool.trackStdOut(&stderrPipe, true)
 
 	err := cmd.Run()
 	if err != nil {
 		log.Warningf("ExifTool exec error: '%s'", err)
+	}
+}
+
+func (tool *ExifToolWrapper) trackStdOut(stdOutPipe *io.ReadCloser, isErrorOut bool) {
+	scanner := bufio.NewScanner(*stdOutPipe)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if isErrorOut {
+			log.Warning(line)
+		} else {
+			log.Info(line)
+		}
+
 	}
 }
 
