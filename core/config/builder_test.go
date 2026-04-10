@@ -17,30 +17,6 @@ func TestNewConfig(t *testing.T) {
 	assert.Nil(t, sut.configFiles)
 }
 
-func TestExpandPath_NormalDir(t *testing.T) {
-	sut := NewConfig()
-
-	result := sut.expandPath("a")
-
-	assert.Equal(t, "a", result)
-}
-
-func TestExpandPath_HomeDir(t *testing.T) {
-	sut := NewConfig()
-
-	result := sut.expandPath("~")
-
-	assert.NotEqual(t, "~", result)
-}
-
-func TestExpandPath_Home(t *testing.T) {
-	sut := NewConfig()
-
-	result := sut.expandPath("$HOME")
-
-	assert.NotEqual(t, "$HOME", result)
-}
-
 func TestLoadFile_Empty(t *testing.T) {
 	sut := NewConfig()
 
@@ -90,6 +66,15 @@ func TestLoadFile_ValidFile(t *testing.T) {
 	assert.Equal(t, "b", sut.ko.Get("a"))
 }
 
+func TestSetConfigFile_ExplainPath(t *testing.T) {
+	sut := NewConfig()
+
+	sut.SetConfigFile("~")
+
+	assert.Len(t, sut.configFiles, 1)
+	assert.NotContains(t, sut.configFiles[0], "~")
+}
+
 func TestSetConfigFile_InvalidFile(t *testing.T) {
 	tempDir, err := os.MkdirTemp("", t.Name())
 	require.NoError(t, err)
@@ -120,6 +105,15 @@ func TestSetConfigFile_ValidFile(t *testing.T) {
 
 	require.NoError(t, err)
 	assert.Equal(t, "b", result.GetString("a"))
+}
+
+func TestAddConfigLocation_ExplainPath(t *testing.T) {
+	sut := NewConfig()
+
+	sut.AddConfigLocation("~")
+
+	assert.Len(t, sut.configFiles, 1)
+	assert.NotContains(t, sut.configFiles[0], "~")
 }
 
 func TestAddConfigLocation_NoFile(t *testing.T) {

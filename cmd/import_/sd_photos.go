@@ -2,6 +2,7 @@ package import_
 
 import (
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
 
@@ -36,6 +37,7 @@ var sdPhotosCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		}
+		dstDir = tools.ExpandPath(dstDir)
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", dryRun)
@@ -58,7 +60,7 @@ var sdPhotosCmd = &cobra.Command{
 			imgArgs.ChangeFileDate("CreateDate")
 		}
 		imgArgs.CopyTag(tagName, "CreateDate")
-		imgArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\%%f%%-c.%%e")
+		imgArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", "%%f%%-c.%%e"))
 		imgArgs.ForImages()
 		imgArgs.ForVideoMp4()
 		imgArgs.Recursively(true)

@@ -25,7 +25,8 @@ var localCmd = &cobra.Command{
 		src := tools.ExtractPath(args, 0, ".")
 		log.Infof("src: '%s'", src)
 
-		dstDir := tools.ExtractPath(args, 1, src+"\\..")
+		dstDir := tools.ExtractPath(args, 1, path.Join(src, ".."))
+		dstDir = tools.ExpandPath(dstDir)
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", dryRun)

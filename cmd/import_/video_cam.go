@@ -2,6 +2,7 @@ package import_
 
 import (
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
 
@@ -35,6 +36,7 @@ var videoCamCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		}
+		dstDir = tools.ExpandPath(dstDir)
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", dryRun)
@@ -57,7 +59,7 @@ var videoCamCmd = &cobra.Command{
 			videoArgs.ChangeFileDate("DateTimeOriginal")
 		}
 		videoArgs.CopyTag(tagName, "DateTimeOriginal")
-		videoArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\VID_%Y%m%d_%H%M%S%%-c.%%e")
+		videoArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", "VID_%Y%m%d_%H%M%S%%-c.%%e"))
 		videoArgs.ForVideoAvchd()
 		videoArgs.Recursively(true)
 		videoArgs.Src(src)

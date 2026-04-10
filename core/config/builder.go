@@ -5,11 +5,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+	"github.com/redrathnure/media-tool/core/tools"
 )
 
 const configFileName = "media-tool.yml"
@@ -25,13 +25,13 @@ func NewConfig() *ConfigBuilder {
 
 func (c *ConfigBuilder) AddConfigLocation(pathComponents ...string) {
 	path := path.Join(pathComponents...)
-	path = c.expandPath(path)
+	path = tools.ExpandPath(path)
 	candidate := filepath.Join(path, configFileName)
 	c.configFiles = append(c.configFiles, candidate)
 }
 
 func (c *ConfigBuilder) SetConfigFile(confFile string) {
-	c.configFiles = append(c.configFiles, c.expandPath(confFile))
+	c.configFiles = append(c.configFiles, tools.ExpandPath(confFile))
 }
 
 func (c *ConfigBuilder) Build() (*Config, error) {
@@ -64,15 +64,4 @@ func (c *ConfigBuilder) loadFile(confFile string) error {
 	}
 
 	return nil
-}
-
-func (c *ConfigBuilder) expandPath(path string) string {
-	if strings.HasPrefix(path, "~") {
-		home, err := os.UserHomeDir()
-		if err == nil {
-			path = filepath.Join(home, strings.TrimPrefix(path, "~"))
-		}
-	}
-
-	return filepath.Clean(os.ExpandEnv(path))
 }

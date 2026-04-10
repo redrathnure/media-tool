@@ -3,22 +3,16 @@
 
 package removable
 
-import "fmt"
+import mtp "github.com/redrathnure/media-tool/core/removable/mtp_linux"
 
 func LoadSdPhotos(targetDir string, dryRun bool) (string, error) {
-	return warnUnsupported("LoadSdPhotos", targetDir)
+	return mtp.LoadSdPhotos(targetDir, dryRun)
 }
 
 func LoadGoProVideos(targetDir string, dryRun bool) (string, error) {
-	return warnUnsupported("LoadGoProVideos", targetDir)
+	return mtp.LoadGoProVideos(targetDir, dryRun)
 }
 
 func LoadCamVideos(targetDir string, dryRun bool) (string, error) {
-	return warnUnsupported("LoadCamVideos", targetDir)
-}
-
-func warnUnsupported(name, targetDir string) (string, error) {
-	message := fmt.Sprintf("%s is not supported on this platform. MTP imports are only available on Windows. Target dir: %s", name, targetDir)
-	log.Warningf(message)
-	return "", fmt.Errorf("%s", message)
+	return mtp.LoadCamVideos(targetDir, dryRun)
 }

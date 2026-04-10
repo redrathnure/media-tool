@@ -2,6 +2,7 @@ package import_
 
 import (
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
 
@@ -35,6 +36,7 @@ var goProCmd = &cobra.Command{
 				os.Exit(1)
 			}
 		}
+		dstDir = tools.ExpandPath(dstDir)
 		log.Infof("dst: '%s'", dstDir)
 
 		log.Infof("dry ryn: %v", dryRun)
@@ -57,7 +59,7 @@ var goProCmd = &cobra.Command{
 			imgArgs.ChangeFileDate("CreateDate")
 		}
 		imgArgs.CopyTag(tagName, "CreateDate")
-		imgArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\src\\IMG_%Y%m%d_%H%M%S%%-c.%%e")
+		imgArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", "src", "IMG_%Y%m%d_%H%M%S%%-c.%%e"))
 		imgArgs.ForImages()
 		imgArgs.Recursively(true)
 		imgArgs.Src(src)
@@ -70,7 +72,7 @@ var goProCmd = &cobra.Command{
 			vidArgs.ChangeFileDate("CreateDate")
 		}
 		vidArgs.CopyTag(tagName, "CreateDate")
-		vidArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.%%e")
+		vidArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", "src", "VID_%Y%m%d_%H%M%S%%-c.%%e"))
 		vidArgs.ForVideoMp4()
 		vidArgs.Recursively(true)
 		vidArgs.Src(src)
@@ -83,7 +85,7 @@ var goProCmd = &cobra.Command{
 			vidPreviewArgs.ChangeFileDate("CreateDate")
 		}
 		vidPreviewArgs.CopyTag(tagName, "CreateDate")
-		vidPreviewArgs.ForDateFormat(dstDir + "\\%Y.%m.%d\\src\\VID_%Y%m%d_%H%M%S%%-c.preview.mp4")
+		vidPreviewArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", "src", "VID_%Y%m%d_%H%M%S%%-c.preview.mp4"))
 		vidPreviewArgs.ForVideoLrv()
 		vidPreviewArgs.Recursively(true)
 		vidPreviewArgs.Src(src)
@@ -91,7 +93,7 @@ var goProCmd = &cobra.Command{
 		exifTool.Exec(root.Context.Verbose)
 
 		tools.RemoveFiles(src, "leinfo.sav")
-		tools.RemoveFiles(src, "**\\*.THM")
+		tools.RemoveFiles(src, path.Join("**", "*.THM"))
 	},
 }
 
