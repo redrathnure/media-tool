@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/v2"
@@ -80,7 +81,7 @@ func (c *Config) GetAsYaml() ([]byte, error) {
 }
 
 func (c *Config) InitDefaults() {
-	defs, ok := defaults[os.Getenv("OS")]
+	defs, ok := defaults[runtime.GOOS]
 	if !ok {
 		defs = defaults["linux"]
 	}
