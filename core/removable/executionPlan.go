@@ -38,9 +38,6 @@ func (p *ExecutionPlan) GetTotalSizeString() string {
 }
 
 func BuildExecutionPlan(dev core.RemovableDevice, deviceDir string) (*ExecutionPlan, error) {
-
-	log.Infof("Scanning %s :: '%s'...", dev.Name(), deviceDir)
-
 	var result = ExecutionPlan{files: []string{}}
 
 	if err := result.addChildren(dev, deviceDir); err != nil {
@@ -51,7 +48,7 @@ func BuildExecutionPlan(dev core.RemovableDevice, deviceDir string) (*ExecutionP
 }
 
 func (p *ExecutionPlan) addChildren(dev core.RemovableDevice, deviceDir string) error {
-	log.Debugf("Parsing '%s' directory...", deviceDir)
+	log.Infof("Scanning %s :: '%s'...", dev.Name(), deviceDir)
 
 	children, err := dev.GetChildren(deviceDir)
 	if err != nil {
