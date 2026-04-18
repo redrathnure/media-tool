@@ -54,6 +54,7 @@ var videoCamCmd = &cobra.Command{
 		tagName := exifTool.GetFileNameTag(dryRun)
 
 		//Video
+		log.Infof("Processing video files...")
 		videoArgs := exifTool.NewArgs()
 		if !dryRun {
 			videoArgs.ChangeFileDate("DateTimeOriginal")

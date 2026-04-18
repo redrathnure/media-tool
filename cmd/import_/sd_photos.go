@@ -66,6 +66,7 @@ var sdPhotosCmd = &cobra.Command{
 		tagName := exifTool.GetFileNameTag(dryRun)
 
 		//Images
+		log.Infof("Processing image files...")
 		imgArgs := exifTool.NewArgs()
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
@@ -79,6 +80,7 @@ var sdPhotosCmd = &cobra.Command{
 		exifTool.Exec(root.Context.Verbose)
 
 		// Video
+		log.Infof("Processing video files...")
 		vidArgs := exifTool.NewArgs()
 		if !dryRun {
 			vidArgs.ChangeFileDate("CreateDate")

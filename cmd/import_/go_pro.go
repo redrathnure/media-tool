@@ -54,6 +54,7 @@ var goProCmd = &cobra.Command{
 		tagName := exifTool.GetFileNameTag(dryRun)
 
 		//Images
+		log.Infof("Processing image files...")
 		imgArgs := exifTool.NewArgs()
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
@@ -67,6 +68,7 @@ var goProCmd = &cobra.Command{
 		exifTool.Exec(root.Context.Verbose)
 
 		//Video
+		log.Infof("Processing video files...")
 		vidArgs := exifTool.NewArgs()
 		if !dryRun {
 			vidArgs.ChangeFileDate("CreateDate")
@@ -80,6 +82,7 @@ var goProCmd = &cobra.Command{
 		exifTool.Exec(root.Context.Verbose)
 
 		//Video Preview
+		log.Infof("Processing video preview files...")
 		vidPreviewArgs := exifTool.NewArgs()
 		if !dryRun {
 			vidPreviewArgs.ChangeFileDate("CreateDate")
