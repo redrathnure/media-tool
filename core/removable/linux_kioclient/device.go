@@ -56,10 +56,10 @@ func (d *KioDevice) DeleteFile(deviceFile string) error {
 	return nil
 }
 
-func (d *KioDevice) GetChildren(deviceFile string) (children []core.FileDescriptor, err error) {
+func (d *KioDevice) GetChildren(deviceFile string) (children []*core.FileDescriptor, err error) {
 	fullPath := path.Join(d.baseUrl, deviceFile)
 
-	children = []core.FileDescriptor{}
+	children = []*core.FileDescriptor{}
 
 	entries := d.client.Ls(fullPath)
 
@@ -67,7 +67,7 @@ func (d *KioDevice) GetChildren(deviceFile string) (children []core.FileDescript
 		name := entry
 		isDir, size := d.client.GetState(path.Join(fullPath, name))
 
-		children = append(children, core.FileDescriptor{Name: path.Join(deviceFile, name), IsDir: isDir, Size: size})
+		children = append(children, &core.FileDescriptor{Name: path.Join(deviceFile, name), IsDir: isDir, Size: size})
 	}
 	return children, nil
 }

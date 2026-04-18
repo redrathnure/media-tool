@@ -55,12 +55,12 @@ func (d *MockRemovableDevice) DeleteFile(deviceFile string) error {
 	return nil
 }
 
-func (d *MockRemovableDevice) GetChildren(deviceFile string) (children []FileDescriptor, err error) {
-	result := []FileDescriptor{}
+func (d *MockRemovableDevice) GetChildren(deviceFile string) (children []*FileDescriptor, err error) {
+	result := []*FileDescriptor{}
 
 	for _, file := range d.files {
 		if strings.HasPrefix(file, deviceFile) {
-			result = append(result, FileDescriptor{Name: file, IsDir: false, Size: 10})
+			result = append(result, &FileDescriptor{Name: file, IsDir: false, Size: 10})
 		}
 	}
 	return result, nil

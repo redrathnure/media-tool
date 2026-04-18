@@ -36,7 +36,7 @@ func LoadCamVideos(targetDir string, dryRun bool) (contentDir string, err error)
 
 func loadFromAllWpd(deviceFilter core.DeviceFilter, deviceDir string, targetDir string, dryRun bool) (contentDir string, err error) {
 	result := MtpDownloader{dryRun: dryRun}
-	result.close()
+	defer result.close()
 	if err := result.init(targetDir); err != nil {
 		return "", err
 	}
@@ -64,7 +64,7 @@ func (d *MtpDownloader) loadFromMatchedDevices(deviceFilter core.DeviceFilter, d
 	return d.resultDir, nil
 }
 
-func (d *MtpDownloader) copyContentToTempDir(devIndex int, dev core.RemovableDevice, deviceDir string) error {
+func (d *MtpDownloader) copyContentToTempDir(devIndex int, dev *core.RemovableDevice, deviceDir string) error {
 	if err := d.prepareTempDir(devIndex, dev); err != nil {
 		return err
 	}
@@ -90,13 +90,13 @@ func (d *MtpDownloader) copyContentToTempDir(devIndex int, dev core.RemovableDev
 	return nil
 }
 
-func (d *MtpDownloader) removeSrcFiles(dev core.RemovableDevice, executionPlan *ExecutionPlan) error {
+func (d *MtpDownloader) removeSrcFiles(dev *core.RemovableDevice, executionPlan *ExecutionPlan) error {
 	if d.dryRun {
 		log.Infof("Source files will not be removed ('DryRun' flag is true)")
 		return nil
 	}
 
-	log.Infof("Deleting origin files from %v", dev.Name())
+	log.Infof("Deleting origin files from %v", (*dev).Name())
 
 	filesTotal := len(executionPlan.files)
 	progressBar := DeletingProgressTemplate.Start(filesTotal)
@@ -105,7 +105,7 @@ func (d *MtpDownloader) removeSrcFiles(dev core.RemovableDevice, executionPlan *
 	for i, srcFile := range executionPlan.files {
 		progressBar.Set("prefix", fmt.Sprintf("(%v/%v) '%v'", i+1, filesTotal, srcFile))
 
-		if err := dev.DeleteFile(srcFile); err != nil {
+		if err := (*dev).DeleteFile(srcFile); err != nil {
 			log.Warningf("Unable to remove'%v' file: %v", srcFile, err)
 		}
 		progressBar.Increment()
@@ -113,12 +113,12 @@ func (d *MtpDownloader) removeSrcFiles(dev core.RemovableDevice, executionPlan *
 	return nil
 }
 
-func (d *MtpDownloader) prepareTempDir(devIndex int, dev core.RemovableDevice) error {
-	d.tmpDir = path.Join(d.resultDir, fmt.Sprintf("%v_%v", devIndex, dev.Name()))
+func (d *MtpDownloader) prepareTempDir(devIndex int, dev *core.RemovableDevice) error {
+	d.tmpDir = path.Join(d.resultDir, fmt.Sprintf("%v_%v", devIndex, (*dev).Name()))
 	return os.MkdirAll(d.tmpDir, os.ModePerm)
 }
 
-func (d *MtpDownloader) copyToTmpDir(dev core.RemovableDevice, executionPlan *ExecutionPlan) error {
+func (d *MtpDownloader) copyToTmpDir(dev *core.RemovableDevice, executionPlan *ExecutionPlan) error {
 	progressBar := CopyProgressTemplate.Start64(executionPlan.GetTotalSize())
 	defer progressBar.Finish()
 
@@ -135,7 +135,7 @@ func (d *MtpDownloader) copyToTmpDir(dev core.RemovableDevice, executionPlan *Ex
 				return err
 			}
 
-			bytesCount, err := dev.CopyFile(srcFile, dstFile, progressBar)
+			bytesCount, err := (*dev).CopyFile(srcFile, dstFile, progressBar)
 
 			if err != nil {
 				log.Errorf("Unable to copy '%v' file: %v", srcFile, err)

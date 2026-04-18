@@ -93,7 +93,7 @@ func (d *WpdDevice) DeleteFile(deviceFile string) error {
 	return nil
 }
 
-func (d *WpdDevice) GetChildren(deviceFile string) (children []core.FileDescriptor, err error) {
+func (d *WpdDevice) GetChildren(deviceFile string) (children []*core.FileDescriptor, err error) {
 	wpdObj := d.findObject(deviceFile)
 	if wpdObj == nil {
 		return nil, fmt.Errorf("'%s' was not found", deviceFile)
@@ -104,7 +104,7 @@ func (d *WpdDevice) GetChildren(deviceFile string) (children []core.FileDescript
 		return nil, err
 	}
 
-	result := []core.FileDescriptor{}
+	result := []*core.FileDescriptor{}
 	for _, o := range objs {
 
 		if d.isIgnored(o.Name) {
@@ -120,46 +120,9 @@ func (d *WpdDevice) GetChildren(deviceFile string) (children []core.FileDescript
 		}
 		log.Debugf("Found: '%s' file", name)
 
-		result = append(result, core.FileDescriptor{Name: name, IsDir: isDir, Size: size})
+		result = append(result, &core.FileDescriptor{Name: name, IsDir: isDir, Size: size})
 	}
 
-	return result, nil
-}
-
-func (*WpdDevice) copyFileManual(srcFile string, dstFile string, progressBar *pb.ProgressBar) (copyBytes int64, err error) {
-	//TODO extract to tools and reuse in backups
-	src, err := os.Open(srcFile)
-	if err != nil {
-		return 0, err
-	}
-	defer src.Close()
-
-	dst, err := os.Create(dstFile)
-	if err != nil {
-		return 0, err
-	}
-	defer dst.Close()
-
-	proxyWriter := progressBar.NewProxyWriter(dst)
-	defer proxyWriter.Close()
-
-	result, err := io.Copy(proxyWriter, src)
-	if err != nil {
-		return result, err
-	}
-	src.Close()
-	proxyWriter.Close()
-	dst.Close()
-
-	fi, err := os.Stat(srcFile)
-	if err != nil {
-		os.Remove(dstFile)
-		return result, err
-	}
-	if err := os.Chmod(dstFile, fi.Mode()); err != nil {
-		os.Remove(dstFile)
-		return result, err
-	}
 	return result, nil
 }
 

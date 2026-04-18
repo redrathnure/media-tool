@@ -37,7 +37,7 @@ func (p *ExecutionPlan) GetTotalSizeString() string {
 	return fmt.Sprintf("%.1f %ciB", float64(size)/float64(div), "KMGTPE"[exp])
 }
 
-func BuildExecutionPlan(dev core.RemovableDevice, deviceDir string) (*ExecutionPlan, error) {
+func BuildExecutionPlan(dev *core.RemovableDevice, deviceDir string) (*ExecutionPlan, error) {
 	var result = ExecutionPlan{files: []string{}}
 
 	if err := result.addChildren(dev, deviceDir); err != nil {
@@ -47,10 +47,10 @@ func BuildExecutionPlan(dev core.RemovableDevice, deviceDir string) (*ExecutionP
 	return &result, nil
 }
 
-func (p *ExecutionPlan) addChildren(dev core.RemovableDevice, deviceDir string) error {
-	log.Infof("Scanning %s :: '%s'...", dev.Name(), deviceDir)
+func (p *ExecutionPlan) addChildren(dev *core.RemovableDevice, deviceDir string) error {
+	log.Infof("Scanning %s :: '%s'...", (*dev).Name(), deviceDir)
 
-	children, err := dev.GetChildren(deviceDir)
+	children, err := (*dev).GetChildren(deviceDir)
 	if err != nil {
 		return err
 	}

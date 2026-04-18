@@ -12,7 +12,7 @@ import (
 func TestExecutionPlan_EmptyPlan(t *testing.T) {
 	dev := core.NewMockDev("Mock")
 
-	sut, err := BuildExecutionPlan(dev, "test")
+	sut, err := BuildExecutionPlan(&dev, "test")
 
 	require.NoError(t, err)
 	assert.Equal(t, []string{}, sut.files)
@@ -24,7 +24,7 @@ func TestExecutionPlan_EmptyPlan(t *testing.T) {
 func TestExecutionPlan_AddFile_1xFile(t *testing.T) {
 	dev := core.NewMockDev("Mock", "test/f1.jpg")
 
-	sut, err := BuildExecutionPlan(dev, "test")
+	sut, err := BuildExecutionPlan(&dev, "test")
 
 	require.NoError(t, err)
 	assert.False(t, sut.IsEmpty())
@@ -35,7 +35,7 @@ func TestExecutionPlan_AddFile_1xFile(t *testing.T) {
 func TestExecutionPlan_AddFile_3xFile(t *testing.T) {
 	dev := core.NewMockDev("Mock", "test/f1.jpg", "test/f2.jpg", "test/f3.jpg")
 
-	sut, err := BuildExecutionPlan(dev, "test")
+	sut, err := BuildExecutionPlan(&dev, "test")
 
 	require.NoError(t, err)
 	assert.False(t, sut.IsEmpty())

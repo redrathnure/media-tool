@@ -7,8 +7,8 @@ import (
 	"github.com/redrathnure/media-tool/core/removable/core"
 )
 
-func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
-	result := []core.RemovableDevice{}
+func FindDevices(deviceFilter core.DeviceFilter) []*core.RemovableDevice {
+	result := []*core.RemovableDevice{}
 
 	client := NewKioClient()
 
@@ -31,7 +31,7 @@ func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
 			log.Infof("Found drives on mtp device: '%s'", diskName)
 
 			if deviceFilter.Accept(&dev) {
-				result = append(result, dev)
+				result = append(result, &dev)
 			} else {
 				log.Infof("Device was rejected by filters. Skipping...")
 			}

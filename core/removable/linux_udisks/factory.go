@@ -9,8 +9,8 @@ import (
 	"github.com/redrathnure/media-tool/core/removable/core"
 )
 
-func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
-	result := []core.RemovableDevice{}
+func FindDevices(deviceFilter core.DeviceFilter) []*core.RemovableDevice {
+	result := []*core.RemovableDevice{}
 
 	client, err := _udisks.NewClient()
 	if err != nil {
@@ -35,7 +35,7 @@ func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
 				continue
 			}
 			if deviceFilter.Accept(&udev) {
-				result = append(result, udev)
+				result = append(result, &udev)
 			} else {
 				log.Infof("Device was rejected by filters. Skipping...")
 			}

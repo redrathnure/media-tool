@@ -63,7 +63,7 @@ func (d *UdiskDevice) DeleteFile(deviceFile string) error {
 	return nil
 }
 
-func (d *UdiskDevice) GetChildren(deviceFile string) (children []core.FileDescriptor, err error) {
+func (d *UdiskDevice) GetChildren(deviceFile string) (children []*core.FileDescriptor, err error) {
 	rootDir, err := d.getMount()
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (d *UdiskDevice) GetChildren(deviceFile string) (children []core.FileDescri
 		return nil, err
 	}
 
-	result := []core.FileDescriptor{}
+	result := []*core.FileDescriptor{}
 
 	for _, entry := range entries {
 		isDir := entry.IsDir()
@@ -90,7 +90,7 @@ func (d *UdiskDevice) GetChildren(deviceFile string) (children []core.FileDescri
 			size = fi.Size()
 		}
 
-		result = append(result, core.FileDescriptor{Name: path.Join(deviceFile, name), IsDir: isDir, Size: size})
+		result = append(result, &core.FileDescriptor{Name: path.Join(deviceFile, name), IsDir: isDir, Size: size})
 	}
 	return result, nil
 }

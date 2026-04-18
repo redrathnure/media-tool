@@ -8,8 +8,8 @@ import (
 	"github.com/tobwithu/gowpd"
 )
 
-func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
-	result := []core.RemovableDevice{}
+func FindDevices(deviceFilter core.DeviceFilter) []*core.RemovableDevice {
+	result := []*core.RemovableDevice{}
 
 	if err := gowpd.Init(); err != nil {
 		log.Warningf("Unable to init WDP devices")
@@ -33,7 +33,7 @@ func FindDevices(deviceFilter core.DeviceFilter) []core.RemovableDevice {
 		udev := NewWpdDevice(wdpDev, i)
 		log.Infof("Found removable device: '%s'", udev.Name())
 		if deviceFilter.Accept(&udev) {
-			result = append(result, udev)
+			result = append(result, &udev)
 		} else {
 			log.Infof("Device was rejected by filters. Skipping...")
 		}

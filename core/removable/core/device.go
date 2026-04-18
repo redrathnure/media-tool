@@ -16,5 +16,5 @@ type RemovableDevice interface {
 	CopyFile(srcDeviceFile string, dstFile string, progressBar *pb.ProgressBar) (bytesCount int64, err error)
 	DeleteFile(deviceFile string) error
 
-	GetChildren(deviceFile string) (children []FileDescriptor, err error)
+	GetChildren(deviceFile string) (children []*FileDescriptor, err error)
 }
