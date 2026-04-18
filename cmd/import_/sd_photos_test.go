@@ -18,7 +18,13 @@ func TestSdPhotosCmd_Flags(t *testing.T) {
 	assert.False(t, persistentFlags.HasFlags())
 
 	flags := sdPhotosCmd.Flags()
-	assert.False(t, flags.HasFlags())
+	assert.True(t, flags.HasFlags())
+
+	localRenameFlag := flags.Lookup("rename")
+	assert.NotNil(t, localRenameFlag)
+	assert.Equal(t, "r", localRenameFlag.Shorthand)
+	assert.Equal(t, "false", localRenameFlag.DefValue)
+	assert.Equal(t, "bool", localRenameFlag.Value.Type())
 }
 
 func TestSdPhotosCmd_CommandStructure(t *testing.T) {

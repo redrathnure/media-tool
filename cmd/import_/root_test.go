@@ -23,7 +23,7 @@ func TestImportCmd_Flags(t *testing.T) {
 	assert.Equal(t, "false", dryRunFlag.DefValue)
 	assert.Equal(t, "bool", dryRunFlag.Value.Type())
 
-			flags := importCmd.Flags()
+	flags := importCmd.Flags()
 	assert.False(t, flags.HasFlags())
 }
 

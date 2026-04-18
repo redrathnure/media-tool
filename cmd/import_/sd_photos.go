@@ -40,7 +40,16 @@ var sdPhotosCmd = &cobra.Command{
 		dstDir = tools.ExpandPath(dstDir)
 		log.Infof("dst: '%s'", dstDir)
 
+		log.Infof("renaming: %v", localRename)
+
 		log.Infof("dry ryn: %v", dryRun)
+
+		imgFileName := "%%f%%-c.%%e"
+		vidFileName := "%%f%%-c.%%e"
+		if localRename {
+			imgFileName = "IMG_%Y%m%d_%H%M%S%%-c.%%e"
+			vidFileName = "VID_%Y%m%d_%H%M%S%%-c.%%e"
+		}
 
 		src, err := removable.LoadSdPhotos(dstDir, dryRun)
 		if err != nil {
@@ -54,17 +63,29 @@ var sdPhotosCmd = &cobra.Command{
 
 		tagName := exifTool.GetFileNameTag(dryRun)
 
-		//Images and video
+		//Images
 		imgArgs := exifTool.NewArgs()
 		if !dryRun {
 			imgArgs.ChangeFileDate("CreateDate")
 		}
 		imgArgs.CopyTag(tagName, "CreateDate")
-		imgArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", "%%f%%-c.%%e"))
+		imgArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", imgFileName))
 		imgArgs.ForImages()
-		imgArgs.ForVideoMp4()
 		imgArgs.Recursively(true)
 		imgArgs.Src(src)
+
+		exifTool.Exec(root.Context.Verbose)
+
+		// Video
+		vidArgs := exifTool.NewArgs()
+		if !dryRun {
+			vidArgs.ChangeFileDate("CreateDate")
+		}
+		vidArgs.CopyTag(tagName, "CreateDate")
+		vidArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", vidFileName))
+		vidArgs.ForVideoMp4()
+		vidArgs.Recursively(true)
+		vidArgs.Src(src)
 
 		exifTool.Exec(root.Context.Verbose)
 	},
@@ -72,4 +93,6 @@ var sdPhotosCmd = &cobra.Command{
 
 func init() {
 	importCmd.AddCommand(sdPhotosCmd)
+
+	sdPhotosCmd.Flags().BoolVarP(&localRename, "rename", "r", false, "Set to rename files using 'IMG_$DATE_$TIME' and 'VID_$DATE_$TIME' patterns")
 }
