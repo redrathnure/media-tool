@@ -123,15 +123,11 @@ func (*UdiskDevice) copyFileManual(srcFile string, dstFile string, progressBar *
 	defer dst.Close()
 
 	proxyWriter := progressBar.NewProxyWriter(dst)
-	defer proxyWriter.Close()
 
 	result, err := io.Copy(proxyWriter, src)
 	if err != nil {
 		return result, err
 	}
-	src.Close()
-	proxyWriter.Close()
-	dst.Close()
 
 	fi, err := os.Stat(srcFile)
 	if err != nil {
