@@ -12,6 +12,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 
 	"github.com/redrathnure/media-tool/core/removable/core"
+	"github.com/redrathnure/media-tool/core/tools"
 	"github.com/tobwithu/gowpd"
 )
 
@@ -71,7 +72,7 @@ func (d *WpdDevice) CopyFile(srcDeviceFile string, dstFile string, progressBar *
 	if err != nil {
 		return 0, err
 	}
-	writer := gowpd.NewBufWriteCloser(f, 0)
+	writer := gowpd.NewBufWriteCloser(f, tools.CopyBufferSize)
 	defer writer.Close()
 
 	proxyWriter := progressBar.NewProxyWriter(writer)

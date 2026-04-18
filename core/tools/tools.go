@@ -12,6 +12,8 @@ import (
 	"github.com/op/go-logging"
 )
 
+const CopyBufferSize = 40 * 1024 * 1024
+
 var specialPaths = map[string]string{}
 
 func extractAbsPath(args []string, argPosition int, defaultValue string) string {
