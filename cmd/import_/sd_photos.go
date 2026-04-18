@@ -12,6 +12,8 @@ import (
 	"github.com/redrathnure/media-tool/core/tools"
 )
 
+var keepFileNames bool
+
 var sdPhotosCmd = &cobra.Command{
 	Use:   "sdphotos targetDir",
 	Short: "Import photos from SD card(s)",
@@ -40,13 +42,13 @@ var sdPhotosCmd = &cobra.Command{
 		dstDir = tools.ExpandPath(dstDir)
 		log.Infof("dst: '%s'", dstDir)
 
-		log.Infof("renaming: %v", localRename)
+		log.Infof("Keep original file names: %v", keepFileNames)
 
 		log.Infof("dry ryn: %v", dryRun)
 
 		imgFileName := "%%f%%-c.%%e"
 		vidFileName := "%%f%%-c.%%e"
-		if localRename {
+		if !keepFileNames {
 			imgFileName = "IMG_%Y%m%d_%H%M%S%%-c.%%e"
 			vidFileName = "VID_%Y%m%d_%H%M%S%%-c.%%e"
 		}
@@ -94,5 +96,5 @@ var sdPhotosCmd = &cobra.Command{
 func init() {
 	importCmd.AddCommand(sdPhotosCmd)
 
-	sdPhotosCmd.Flags().BoolVarP(&localRename, "rename", "r", false, "Set to rename files using 'IMG_$DATE_$TIME' and 'VID_$DATE_$TIME' patterns")
+	sdPhotosCmd.Flags().BoolVarP(&keepFileNames, "keep-names", "k", false, "Keep original file names. By default files will be renamed using 'IMG_$DATE_$TIME' and 'VID_$DATE_$TIME' patterns")
 }

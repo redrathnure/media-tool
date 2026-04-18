@@ -20,9 +20,9 @@ func TestSdPhotosCmd_Flags(t *testing.T) {
 	flags := sdPhotosCmd.Flags()
 	assert.True(t, flags.HasFlags())
 
-	localRenameFlag := flags.Lookup("rename")
+	localRenameFlag := flags.Lookup("keep-names")
 	assert.NotNil(t, localRenameFlag)
-	assert.Equal(t, "r", localRenameFlag.Shorthand)
+	assert.Equal(t, "k", localRenameFlag.Shorthand)
 	assert.Equal(t, "false", localRenameFlag.DefValue)
 	assert.Equal(t, "bool", localRenameFlag.Value.Type())
 }
