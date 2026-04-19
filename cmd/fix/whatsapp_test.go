@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/redrathnure/media-tool/core/tools"
+	"github.com/redrathnure/media-tool/core/tools/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -77,7 +78,7 @@ func TestRunFixWhatsAppFiles(t *testing.T) {
 				{
 					Expected: []string{
 						"-FileName<CreateDate",
-						
+
 						"-if $filename =~ /WhatsApp /i",
 						"-if $filename !~ /_x265/i",
 
@@ -290,4 +291,116 @@ func TestRunFixWhatsAppFiles_DryRun(t *testing.T) {
 			testTool.AssertCallArgs(t, 2, tt.Args[0], tt.CallArgs[2])
 		})
 	}
+}
+
+func TestFixWhatsAppFiles_DryRun(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("WhatsApp Image 2026-04-15 at 15.57.29", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixWhatsAppFiles(srcDir, true, true, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	assert.True(t, tmp.IsFileExist("WhatsApp Image 2026-04-15 at 15.57.29.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("WhatsApp Image 2026-04-15 at 15.57.29.jpeg", "src"))
+
+	assert.True(t, tmp.IsFileExist("WhatsApp Image 2026-04-15 at 15.57.29.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("WhatsApp Image 2026-04-15 at 15.57.29.mp4", "src"))
+}
+
+func TestFixWhatsAppFiles_Fix(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("WhatsApp Image 2026-01-02 at 03.04.05", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixWhatsAppFiles(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	expectedDate := "2026-01-02 03:04:05"
+
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405_WhatsApp.jpg", "src"))
+	assert.Equal(t, expectedDate, tmp.FileDate("IMG_20260102_030405_WhatsApp.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405_WhatsApp.jpeg", "src"))
+	assert.Equal(t, expectedDate, tmp.FileDate("IMG_20260102_030405_WhatsApp.jpeg", "src"))
+
+	//Warning: mkv is not fully supported by exiftool
+	assert.False(t, tmp.IsFileExist("VID_20250612_184641.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("WhatsApp Image 2026-01-02 at 03.04.05.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("VID_20260102_030405_WhatsApp.mp4", "src"))
+	assert.Equal(t, expectedDate, tmp.FileDate("VID_20260102_030405_WhatsApp.mp4", "src"))
+}
+
+func TestFixWhatsAppFiles_ExcludeNonWhatsAppFiles(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("IMG_20260102_030405", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixWhatsAppFiles(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	expectedDate := "2026-01-02 03:04:05"
+
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405.jpg", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405.jpeg", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405.mkv", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405.mp4", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405.mp4", "src"))
+}
+
+func TestFixWhatsAppFiles_ExcludeAlreadyProcessedFiles(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("IMG_20260102_030405_WhatsApp", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixWhatsAppFiles(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	expectedDate := "2026-01-02 03:04:05"
+
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405_WhatsApp.jpg", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405_WhatsApp.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405_WhatsApp.jpeg", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405_WhatsApp.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405_WhatsApp.mkv", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405_WhatsApp.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20260102_030405_WhatsApp.mp4", "src"))
+	assert.NotEqual(t, expectedDate, tmp.FileDate("IMG_20260102_030405_WhatsApp.mp4", "src"))
+}
+
+func TestFixWhatsAppFiles_BadFileName(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	//No information about dateime in file names
+	tmp.MkTestMedia("WhatApp zxc", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixWhatsAppFiles(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	assert.True(t, tmp.IsFileExist("WhatApp zxc.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("WhatApp zxc.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("WhatApp zxc.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("WhatApp zxc.mp4", "src"))
 }

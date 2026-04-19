@@ -36,8 +36,12 @@ func runFixWhatsAppFiles(cmd *cobra.Command, args []string) {
 	bu := tools.NewBackuper(getConf().GetBackupLocation(), dryRun, recursively, cmd.CommandPath())
 	defer bu.CleanupWorkDir(files)
 
+	fixWhatsAppFiles(files, recursively, dryRun, bu.ShouldExifDeleteOriginal())
+}
+
+func fixWhatsAppFiles(files string, recursively, dryRun, shouldExifDeleteOriginal bool) {
 	exifTool := tools.GetExifTool()
-	exifTool.DeleteOriginals(bu.ShouldExifDeleteOriginal())
+	exifTool.DeleteOriginals(shouldExifDeleteOriginal)
 
 	//Adjust metadata
 	log.Infof("Processing WhatsApp image and video metadata...")
