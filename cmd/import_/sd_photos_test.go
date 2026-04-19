@@ -1,8 +1,10 @@
 package import_
 
 import (
+	"path"
 	"testing"
 
+	"github.com/redrathnure/media-tool/core/tools/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -47,4 +49,112 @@ func TestSdPhotosCmd_ArgValidation(t *testing.T) {
 	// Test multiple args
 	err = sdPhotosCmd.Args(sdPhotosCmd, []string{"test1.jpg", "test2.jpg"})
 	assert.Error(t, err)
+}
+
+func TestSdPhotosMoveToDst_DryRun(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+
+	tmp.MkCr3FullExif("src", "zxc.cr3")
+	tmp.MkJpgFullExif("src", "zxc.jpg")
+	tmp.MkJpegFullExif("src", "zxc.jpeg")
+	tmp.MkVideoMkv("src", "zxc.mkv")
+	tmp.MkVideoMp4("src", "zxc.mp4")
+
+	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
+
+	srcDir := tmp.DirName("src")
+	resultDir := tmp.DirName("results")
+
+	sdPhotosMoveToDst(srcDir, resultDir, false, true)
+
+	assert.False(t, tmp.IsDirExist("results"))
+
+	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
+}
+
+func TestSdPhotosMoveToDst_Rename(t *testing.T) {
+
+	tmp := testutil.NewTempDir(t)
+
+	tmp.MkCr3FullExif("src", "zxc.cr3")
+	tmp.MkJpgFullExif("src", "zxc.jpg")
+	tmp.MkJpegFullExif("src", "zxc.jpeg")
+	tmp.MkVideoMkv("src", "zxc.mkv")
+	tmp.MkVideoMp4("src", "zxc.mp4")
+
+	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
+
+	srcDir := tmp.DirName("src")
+	resultDir := tmp.DirName("results")
+
+	sdPhotosMoveToDst(srcDir, resultDir, false, false)
+
+	assert.True(t, tmp.IsDirExist("results"))
+
+	dstImageDir := path.Join("results", "2025.06.12")
+	assert.True(t, tmp.IsFileExist(dstImageDir, "IMG_20250612_184641.cr3"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "IMG_20250612_184641.cr3"))
+
+	assert.True(t, tmp.IsFileExist(dstImageDir, "IMG_20250612_184641.jpg"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "IMG_20250612_184641.jpg"))
+
+	assert.True(t, tmp.IsFileExist(dstImageDir, "IMG_20250612_184641.jpeg"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "IMG_20250612_184641.jpeg"))
+
+	dstVideoDir := path.Join("results", "2025.06.12")
+	//Warning: mkv is not fully supported by exiftool
+	assert.False(t, tmp.IsFileExist(dstVideoDir, "VID_20250612_184641.mkv"))
+	assert.True(t, tmp.IsFileExist(dstVideoDir, "VID_20250612_184641.mp4"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "VID_20250612_184641.mp4"))
+}
+
+func TestSdPhotosMoveToDst_KeepNames(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+
+	tmp.MkCr3FullExif("src", "zxc.cr3")
+	tmp.MkJpgFullExif("src", "zxc.jpg")
+	tmp.MkJpegFullExif("src", "zxc.jpeg")
+	tmp.MkVideoMkv("src", "zxc.mkv")
+	tmp.MkVideoMp4("src", "zxc.mp4")
+
+	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
+
+	srcDir := tmp.DirName("src")
+	resultDir := tmp.DirName("results")
+
+	sdPhotosMoveToDst(srcDir, resultDir, true, false)
+
+	assert.True(t, tmp.IsDirExist("results"))
+
+	dstImageDir := path.Join("results", "2025.06.12")
+	assert.True(t, tmp.IsFileExist(dstImageDir, "zxc.cr3"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "zxc.cr3"))
+
+	assert.True(t, tmp.IsFileExist(dstImageDir, "zxc.jpg"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "zxc.jpg"))
+
+	assert.True(t, tmp.IsFileExist(dstImageDir, "zxc.jpeg"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "zxc.jpeg"))
+
+	dstVideoDir := path.Join("results", "2025.06.12")
+	//Warning: mkv is not fully supported by exiftool
+	assert.False(t, tmp.IsFileExist(dstVideoDir, "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist(dstVideoDir, "zxc.mp4"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate(dstImageDir, "zxc.mp4"))
 }

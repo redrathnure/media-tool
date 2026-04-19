@@ -46,13 +46,6 @@ var sdPhotosCmd = &cobra.Command{
 
 		log.Infof("dry ryn: %v", dryRun)
 
-		imgFileName := "%%f%%-c.%%e"
-		vidFileName := "%%f%%-c.%%e"
-		if !keepFileNames {
-			imgFileName = "IMG_%Y%m%d_%H%M%S%%-c.%%e"
-			vidFileName = "VID_%Y%m%d_%H%M%S%%-c.%%e"
-		}
-
 		src, err := removable.LoadSdPhotos(dstDir, dryRun)
 		if err != nil {
 			log.Errorf("Unable to copy photos files: %v", err)
@@ -61,38 +54,64 @@ var sdPhotosCmd = &cobra.Command{
 		defer tools.RemoveDir(src, dryRun)
 		log.Infof("Files were downloaded to: %v. Moving to target folder...", src)
 
-		exifTool := tools.GetExifTool()
-
-		tagName := exifTool.GetFileNameTag(dryRun)
-
-		//Images
-		log.Infof("Processing image files...")
-		imgArgs := exifTool.NewArgs()
-		if !dryRun {
-			imgArgs.ChangeFileDate("CreateDate")
-		}
-		imgArgs.CopyTag(tagName, "CreateDate")
-		imgArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", imgFileName))
-		imgArgs.ForImages()
-		imgArgs.Recursively(true)
-		imgArgs.Src(src)
-
-		exifTool.Exec(root.Context.Verbose)
-
-		// Video
-		log.Infof("Processing video files...")
-		vidArgs := exifTool.NewArgs()
-		if !dryRun {
-			vidArgs.ChangeFileDate("CreateDate")
-		}
-		vidArgs.CopyTag(tagName, "CreateDate")
-		vidArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", vidFileName))
-		vidArgs.ForVideoMp4()
-		vidArgs.Recursively(true)
-		vidArgs.Src(src)
-
-		exifTool.Exec(root.Context.Verbose)
+		sdPhotosMoveToDst(src, dstDir, keepFileNames, dryRun)
 	},
+}
+
+func sdPhotosMoveToDst(src, dstDir string, keepOriginFileNames, dryRun bool) {
+	imgFileName := "%%f%%-c.%%e"
+	vidFileName := "%%f%%-c.%%e"
+	if !keepOriginFileNames {
+		imgFileName = "IMG_%Y%m%d_%H%M%S%%-c.%%e"
+		vidFileName = "VID_%Y%m%d_%H%M%S%%-c.%%e"
+	}
+
+	exifTool := tools.GetExifTool()
+
+	tagName := exifTool.GetFileNameTag(dryRun)
+
+	if keepOriginFileNames {
+		//Workaround for weird ExifTool file modification handling, when time component are 00:00:00
+		log.Infof("Preparing file dates...")
+		metaArgs := exifTool.NewArgs()
+		if !dryRun {
+			metaArgs.ChangeFileDate("CreateDate")
+		}
+		metaArgs.ForImages()
+		metaArgs.ForVideoMp4()
+		metaArgs.Recursively(true)
+		metaArgs.Src(src)
+
+		exifTool.Exec(root.Context.Verbose)
+	}
+
+	//Images
+	log.Infof("Processing image files...")
+	imgArgs := exifTool.NewArgs()
+	if !dryRun && !keepOriginFileNames {
+		imgArgs.ChangeFileDate("CreateDate")
+	}
+	imgArgs.CopyTag(tagName, "CreateDate")
+	imgArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", imgFileName))
+	imgArgs.ForImages()
+	imgArgs.Recursively(true)
+	imgArgs.Src(src)
+
+	exifTool.Exec(root.Context.Verbose)
+
+	// Video
+	log.Infof("Processing video files...")
+	vidArgs := exifTool.NewArgs()
+	if !dryRun && !keepOriginFileNames {
+		vidArgs.ChangeFileDate("CreateDate")
+	}
+	vidArgs.CopyTag(tagName, "CreateDate")
+	vidArgs.ForDateFormat(path.Join(dstDir, "%Y.%m.%d", vidFileName))
+	vidArgs.ForVideoMp4()
+	vidArgs.Recursively(true)
+	vidArgs.Src(src)
+
+	exifTool.Exec(root.Context.Verbose)
 }
 
 func init() {
