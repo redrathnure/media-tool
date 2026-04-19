@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/cheggaaa/pb/v3"
@@ -114,7 +115,11 @@ func (d *MtpDownloader) removeSrcFiles(dev *core.RemovableDevice, executionPlan 
 }
 
 func (d *MtpDownloader) prepareTempDir(devIndex int, dev *core.RemovableDevice) error {
-	d.tmpDir = path.Join(d.resultDir, fmt.Sprintf("%v_%v", devIndex, (*dev).Name()))
+	name := (*dev).Name()
+	reg, _ := regexp.Compile("[^a-zA-Z0-9 ]+")
+	name = reg.ReplaceAllString(name, "")
+
+	d.tmpDir = path.Join(d.resultDir, fmt.Sprintf("%v_%v", devIndex, name))
 	return os.MkdirAll(d.tmpDir, os.ModePerm)
 }
 
