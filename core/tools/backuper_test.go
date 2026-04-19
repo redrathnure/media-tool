@@ -62,43 +62,43 @@ func TestCleanupWorkDir_Recursive(t *testing.T) {
 	tmp := prepareCleanupWorkDir(t)
 	defer tmp.Clean()
 
-	backupDir := path.Join(tmp.RootDir(), "test")
+	backupDir := tmp.DirName("test")
 	sut := NewBackuper(backupDir, false, true, "test")
 
 	err := sut.CleanupWorkDir(tmp.MkDir("working"))
 	assert.NoError(t, err)
 
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg"))
-	assert.False(t, tmp.IsFileExist("working", "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg", "working"))
+	assert.False(t, tmp.IsFileExist("f1.jpg_original", "working"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg"))
-	assert.False(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f2.jpg", "working", "sub"))
+	assert.False(t, tmp.IsFileExist("f2.jpg_original", "working", "sub"))
 
 	assert.False(t, tmp.IsDirEmptyA(backupDir))
 
-	assert.True(t, tmp.IsFileExist(path.Join("test", sut.backupName), "f1.jpg_original"))
-	assert.True(t, tmp.IsFileExist(path.Join("test", sut.backupName, "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg_original", "test", sut.backupName))
+	assert.True(t, tmp.IsFileExist("f2.jpg_original", "test", sut.backupName, "sub"))
 }
 
 func TestCleanupWorkDir_NoneRecursive(t *testing.T) {
 	tmp := prepareCleanupWorkDir(t)
 	defer tmp.Clean()
 
-	backupDir := path.Join(tmp.RootDir(), "test")
+	backupDir := tmp.DirName("test")
 	sut := NewBackuper(backupDir, false, false, "test")
 
 	err := sut.CleanupWorkDir(tmp.MkDir("working"))
 	assert.NoError(t, err)
 
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg"))
-	assert.False(t, tmp.IsFileExist("working", "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg", "working"))
+	assert.False(t, tmp.IsFileExist("f1.jpg_original", "working"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg"))
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f2.jpg", "working", "sub"))
+	assert.True(t, tmp.IsFileExist("f2.jpg_original", "working", "sub"))
 
-	assert.False(t, tmp.IsDirEmptyA(backupDir))
+	assert.False(t, tmp.IsDirEmpty("test"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("test", sut.backupName), "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg_original", "test", sut.backupName))
 }
 
 func TestCleanupWorkDir_FileAsWorkDir(t *testing.T) {
@@ -111,33 +111,33 @@ func TestCleanupWorkDir_FileAsWorkDir(t *testing.T) {
 	err := sut.CleanupWorkDir(path.Join(tmp.MkDir("working"), "f1.jpg"))
 	assert.NoError(t, err)
 
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg"))
-	assert.False(t, tmp.IsFileExist("working", "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg", "working"))
+	assert.False(t, tmp.IsFileExist("f1.jpg_original", "working"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg"))
-	assert.False(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f2.jpg", "working", "sub"))
+	assert.False(t, tmp.IsFileExist("f2.jpg_original", "working", "sub"))
 
 	assert.False(t, tmp.IsDirEmptyA(backupDir))
 
-	assert.True(t, tmp.IsFileExist(path.Join("test", sut.backupName), "f1.jpg_original"))
-	assert.True(t, tmp.IsFileExist(path.Join("test", sut.backupName, "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg_original", "test", sut.backupName))
+	assert.True(t, tmp.IsFileExist("f2.jpg_original", "test", sut.backupName, "sub"))
 }
 
 func TestCleanupWorkDir_WithDryRun(t *testing.T) {
 	tmp := prepareCleanupWorkDir(t)
 	defer tmp.Clean()
 
-	backupDir := path.Join(tmp.RootDir(), "test")
+	backupDir := tmp.DirName("test")
 	sut := NewBackuper(backupDir, true, true, "test")
 
 	err := sut.CleanupWorkDir(tmp.MkDir("working"))
 	assert.NoError(t, err)
 
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg"))
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg", "working"))
+	assert.True(t, tmp.IsFileExist("f1.jpg_original", "working"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg"))
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f2.jpg", "working", "sub"))
+	assert.True(t, tmp.IsFileExist("f2.jpg_original", "working", "sub"))
 
 	assert.True(t, tmp.IsDirEmptyA(backupDir))
 }
@@ -146,17 +146,17 @@ func TestCleanupWorkDir_NoneLocation(t *testing.T) {
 	tmp := prepareCleanupWorkDir(t)
 	defer tmp.Clean()
 
-	backupDir := path.Join(tmp.RootDir(), "test")
+	backupDir := tmp.DirName("test")
 	sut := NewBackuper("none", false, true, "test")
 
 	err := sut.CleanupWorkDir(tmp.MkDir("working"))
 	assert.NoError(t, err)
 
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg"))
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg", "working"))
+	assert.True(t, tmp.IsFileExist("f1.jpg_original", "working"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg"))
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f2.jpg", "working", "sub"))
+	assert.True(t, tmp.IsFileExist("f2.jpg_original", "working", "sub"))
 
 	assert.True(t, tmp.IsDirEmptyA(backupDir))
 }
@@ -165,17 +165,17 @@ func TestCleanupWorkDir_InPlaceLocation(t *testing.T) {
 	tmp := prepareCleanupWorkDir(t)
 	defer tmp.Clean()
 
-	backupDir := path.Join(tmp.RootDir(), "test")
+	backupDir := tmp.DirName("test")
 	sut := NewBackuper("in_place", false, true, "test")
 
 	err := sut.CleanupWorkDir(tmp.MkDir("working"))
 	assert.NoError(t, err)
 
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg"))
-	assert.True(t, tmp.IsFileExist("working", "f1.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f1.jpg", "working"))
+	assert.True(t, tmp.IsFileExist("f1.jpg_original", "working"))
 
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg"))
-	assert.True(t, tmp.IsFileExist(path.Join("working", "sub"), "f2.jpg_original"))
+	assert.True(t, tmp.IsFileExist("f2.jpg", "working", "sub"))
+	assert.True(t, tmp.IsFileExist( "f2.jpg_original", "working", "sub"))
 
 	assert.True(t, tmp.IsDirEmptyA(backupDir))
 }
@@ -183,11 +183,11 @@ func TestCleanupWorkDir_InPlaceLocation(t *testing.T) {
 func prepareCleanupWorkDir(t *testing.T) *testutil.TempDir {
 	tmp := testutil.NewTempDir(t)
 
-	tmp.MkFile("working", "f1.jpg", "")
-	tmp.MkFile("working", "f1.jpg_original", "")
+	tmp.MkFile("f1.jpg", "", "working")
+	tmp.MkFile("f1.jpg_original", "", "working")
 
-	tmp.MkFile(path.Join("working", "sub"), "f2.jpg", "")
-	tmp.MkFile(path.Join("working", "sub"), "f2.jpg_original", "")
+	tmp.MkFile("f2.jpg", "", "working", "sub")
+	tmp.MkFile("f2.jpg_original", "", "working", "sub")
 
 	return tmp
 }

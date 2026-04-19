@@ -161,12 +161,9 @@ func TestRunFixFileDates_DryRun(t *testing.T) {
 
 func TestFixFileDates_DryRun(t *testing.T) {
 	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
 
-	tmp.MkCr3FullExif("src", "zxc.cr3")
-	tmp.MkJpgFullExif("src", "zxc.jpg")
-	tmp.MkJpegFullExif("src", "zxc.jpeg")
-	tmp.MkVideoMkv("src", "zxc.mkv")
-	tmp.MkVideoMp4("src", "zxc.mp4")
+	tmp.MkTestMedia("zxc", "src")
 
 	srcDir := tmp.DirName("src")
 
@@ -174,27 +171,23 @@ func TestFixFileDates_DryRun(t *testing.T) {
 
 	assert.True(t, tmp.IsDirExist("src"))
 
-	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
-	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.cr3"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
-	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpg"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
-	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpeg"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
-	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mkv"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
-	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mp4"))
+	assert.True(t, tmp.IsFileExist("zxc.cr3", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.cr3", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.jpg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.jpeg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mkv", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mp4", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.mp4", "src"))
 }
 
 func TestFixFileDates_Fix(t *testing.T) {
-
 	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
 
-	tmp.MkCr3FullExif("src", "zxc.cr3")
-	tmp.MkJpgFullExif("src", "zxc.jpg")
-	tmp.MkJpegFullExif("src", "zxc.jpeg")
-	tmp.MkVideoMkv("src", "zxc.mkv")
-	tmp.MkVideoMp4("src", "zxc.mp4")
+	tmp.MkTestMedia("zxc", "src")
 
 	srcDir := tmp.DirName("src")
 
@@ -202,15 +195,15 @@ func TestFixFileDates_Fix(t *testing.T) {
 
 	assert.True(t, tmp.IsDirExist("src"))
 
-	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
-	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.cr3"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
-	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpg"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
-	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpeg"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("zxc.cr3", "src"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("zxc.cr3", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.jpg", "src"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("zxc.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.jpeg", "src"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("zxc.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mkv", "src"))
 	//Warning: mkv is not fully supported by exiftool
-	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mkv"))
-	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
-	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mp4"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mp4", "src"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("zxc.mp4", "src"))
 }

@@ -41,20 +41,22 @@ func (t *TempDir) RootDir() string {
 	return t.rootDir
 }
 
-func (t *TempDir) MkDir(relDir string) string {
-	result := t.DirName(relDir)
+func (t *TempDir) MkDir(relDirs ...string) string {
+	result := t.DirName(relDirs...)
 	err := os.MkdirAll(result, os.ModePerm)
 	require.NoError(t.t, err)
 
 	return result
 }
 
-func (t *TempDir) DirName(relDirName string) string {
-	return path.Join(t.rootDir, relDirName)
+func (t *TempDir) DirName(relDirs ...string) string {
+	pathElements := []string{t.rootDir}
+	pathElements = append(pathElements, relDirs...)
+	return path.Join(pathElements...)
 }
 
-func (t *TempDir) MkFile(relDir string, fileName string, fileContent string) string {
-	dir := t.MkDir(relDir)
+func (t *TempDir) MkFile(fileName string, fileContent string, relDirs ...string) string {
+	dir := t.MkDir(relDirs...)
 
 	result := path.Join(dir, fileName)
 	err := os.WriteFile(result, []byte(fileContent), 0644)
@@ -63,8 +65,8 @@ func (t *TempDir) MkFile(relDir string, fileName string, fileContent string) str
 	return result
 }
 
-func (t *TempDir) copyTestSample(sample_name string, relDir string, fileName string) string {
-	dir := t.MkDir(relDir)
+func (t *TempDir) copyTestSample(sample_name string, fileName string, relDirs ...string) string {
+	dir := t.MkDir(relDirs...)
 	dstFile := path.Join(dir, fileName)
 
 	srcFile, _ := filepath.Abs(path.Join("..", "..", "test_samples", sample_name))
@@ -85,24 +87,32 @@ func (t *TempDir) copyTestSample(sample_name string, relDir string, fileName str
 	return srcFile
 }
 
-func (t *TempDir) MkCr3FullExif(relDir string, fileName string) string {
-	return t.copyTestSample(ExampleFullExifCr3File, relDir, fileName)
+func (t *TempDir) MkCr3FullExif(fileName string, relDirs ...string) string {
+	return t.copyTestSample(ExampleFullExifCr3File, fileName, relDirs...)
 }
 
-func (t *TempDir) MkJpgFullExif(relDir string, fileName string) string {
-	return t.copyTestSample(ExampleFullExifJpgFile, relDir, fileName)
+func (t *TempDir) MkJpgFullExif(fileName string, relDirs ...string) string {
+	return t.copyTestSample(ExampleFullExifJpgFile, fileName, relDirs...)
 }
 
-func (t *TempDir) MkJpegFullExif(relDir string, fileName string) string {
-	return t.copyTestSample(ExampleFullExifJpegFile, relDir, fileName)
+func (t *TempDir) MkJpegFullExif(fileName string, relDirs ...string) string {
+	return t.copyTestSample(ExampleFullExifJpegFile, fileName, relDirs...)
 }
 
-func (t *TempDir) MkVideoMp4(relDir string, fileName string) string {
-	return t.copyTestSample(ExampleMp4File, relDir, fileName)
+func (t *TempDir) MkVideoMp4(fileName string, relDirs ...string) string {
+	return t.copyTestSample(ExampleMp4File, fileName, relDirs...)
 }
 
-func (t *TempDir) MkVideoMkv(relDir string, fileName string) string {
-	return t.copyTestSample(ExampleMkvFile, relDir, fileName)
+func (t *TempDir) MkVideoMkv(fileName string, relDirs ...string) string {
+	return t.copyTestSample(ExampleMkvFile, fileName, relDirs...)
+}
+
+func (t *TempDir) MkTestMedia(fileNameBase string, relDirs ...string) {
+	t.MkCr3FullExif(fileNameBase+".cr3", relDirs...)
+	t.MkJpgFullExif(fileNameBase+".jpg", relDirs...)
+	t.MkJpegFullExif(fileNameBase+".jpeg", relDirs...)
+	t.MkVideoMkv(fileNameBase+".mkv", relDirs...)
+	t.MkVideoMp4(fileNameBase+".mp4", relDirs...)
 }
 
 func (t *TempDir) IsDirEmptyA(dirPath string) bool {
@@ -115,8 +125,8 @@ func (t *TempDir) IsDirEmptyA(dirPath string) bool {
 	return err == io.EOF
 }
 
-func (t *TempDir) IsDirEmpty(relDir string) bool {
-	fullDirName := t.DirName(relDir)
+func (t *TempDir) IsDirEmpty(relDirs ...string) bool {
+	fullDirName := t.DirName(relDirs...)
 	return t.IsDirEmptyA(fullDirName)
 }
 
@@ -125,8 +135,8 @@ func (t *TempDir) IsDirExistA(dirPath string) bool {
 	return err == nil && stat.IsDir()
 }
 
-func (t *TempDir) IsDirExist(relDir string) bool {
-	fullDirName := t.DirName(relDir)
+func (t *TempDir) IsDirExist(relDirs ...string) bool {
+	fullDirName := t.DirName(relDirs...)
 	return t.IsDirExistA(fullDirName)
 }
 
@@ -135,12 +145,12 @@ func (t *TempDir) IsFileExistA(dir string, fileName string) bool {
 	return err == nil
 }
 
-func (t *TempDir) IsFileExist(relDir string, fileName string) bool {
-	return t.IsFileExistA(t.DirName(relDir), fileName)
+func (t *TempDir) IsFileExist(fileName string, relDirs ...string) bool {
+	return t.IsFileExistA(t.DirName(relDirs...), fileName)
 }
 
-func (t *TempDir) FileStat(relDir string, fileName string) (size int64, date string) {
-	dir := t.DirName(relDir)
+func (t *TempDir) FileStat(fileName string, relDirs ...string) (size int64, date string) {
+	dir := t.DirName(relDirs...)
 	require.True(t.t, t.IsFileExistA(dir, fileName))
 
 	stat, err := os.Stat(path.Join(dir, fileName))
@@ -151,12 +161,12 @@ func (t *TempDir) FileStat(relDir string, fileName string) (size int64, date str
 	return
 }
 
-func (t *TempDir) FileSize(relDir string, fileName string) int64 {
-	size, _ := t.FileStat(relDir, fileName)
+func (t *TempDir) FileSize(fileName string, relDirs ...string) int64 {
+	size, _ := t.FileStat(fileName, relDirs...)
 	return size
 }
 
-func (t *TempDir) FileDate(relDir string, fileName string) string {
-	_, date := t.FileStat(relDir, fileName)
+func (t *TempDir) FileDate(fileName string, relDirs ...string) string {
+	_, date := t.FileStat(fileName, relDirs...)
 	return date
 }
