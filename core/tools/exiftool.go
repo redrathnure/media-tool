@@ -263,7 +263,7 @@ func (toolArgs *ExifToolArgs) ExcludeTranscodedVideoFiles() {
 	toolArgs.ExcludeIfNameContains(transcodedVideoMarker)
 }
 
-func (toolArgs ExifToolArgs) filterPlatformSpecific() {
+func (toolArgs *ExifToolArgs) filterPlatformSpecific() {
 	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
 		newArgs := []string{}
 		for _, element := range toolArgs.args {

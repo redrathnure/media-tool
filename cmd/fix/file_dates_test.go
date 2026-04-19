@@ -60,7 +60,8 @@ func TestRunFixFileDates(t *testing.T) {
 			Recursive: false,
 			Expected: []string{
 				"-FileModifyDate<CreateDate",
-				"-FileCreateDate<CreateDate",
+				//Win specific
+				//"-FileCreateDate<CreateDate",
 			},
 			Unexpected: []string{
 				"-r",
@@ -72,7 +73,8 @@ func TestRunFixFileDates(t *testing.T) {
 			Recursive: true,
 			Expected: []string{
 				"-FileModifyDate<CreateDate",
-				"-FileCreateDate<CreateDate",
+				//Win specific
+				//"-FileCreateDate<CreateDate",
 				"-r",
 			},
 		},
