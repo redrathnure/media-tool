@@ -31,8 +31,12 @@ func runFixFileDates(cmd *cobra.Command, args []string) {
 	bu := tools.NewBackuper(getConf().GetBackupLocation(), dryRun, recursively, cmd.CommandPath())
 	defer bu.CleanupWorkDir(files)
 
+	fixFileDates(files, recursively, dryRun, bu.ShouldExifDeleteOriginal())
+}
+
+func fixFileDates(files string, recursively, dryRun, shouldExifDeleteOriginal bool) {
 	exifTool := tools.GetExifTool()
-	exifTool.DeleteOriginals(bu.ShouldExifDeleteOriginal())
+	exifTool.DeleteOriginals(shouldExifDeleteOriginal)
 
 	log.Infof("Processing image and video files...")
 

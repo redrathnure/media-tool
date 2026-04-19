@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/redrathnure/media-tool/core/tools"
+	"github.com/redrathnure/media-tool/core/tools/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -156,4 +157,60 @@ func TestRunFixFileDates_DryRun(t *testing.T) {
 			testTool.AssertCallArgs(t, 0, tt.Args[0], tt.CallArgs())
 		})
 	}
+}
+
+func TestFixFileDates_DryRun(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+
+	tmp.MkCr3FullExif("src", "zxc.cr3")
+	tmp.MkJpgFullExif("src", "zxc.jpg")
+	tmp.MkJpegFullExif("src", "zxc.jpeg")
+	tmp.MkVideoMkv("src", "zxc.mkv")
+	tmp.MkVideoMp4("src", "zxc.mp4")
+
+	srcDir := tmp.DirName("src")
+
+	fixFileDates(srcDir, true, true, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.cr3"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpeg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mp4"))
+}
+
+func TestFixFileDates_Fix(t *testing.T) {
+
+	tmp := testutil.NewTempDir(t)
+
+	tmp.MkCr3FullExif("src", "zxc.cr3")
+	tmp.MkJpgFullExif("src", "zxc.jpg")
+	tmp.MkJpegFullExif("src", "zxc.jpeg")
+	tmp.MkVideoMkv("src", "zxc.mkv")
+	tmp.MkVideoMp4("src", "zxc.mp4")
+
+	srcDir := tmp.DirName("src")
+
+	fixFileDates(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	assert.True(t, tmp.IsFileExist("src", "zxc.cr3"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.cr3"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpg"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.jpeg"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.jpeg"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mkv"))
+	//Warning: mkv is not fully supported by exiftool
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mkv"))
+	assert.True(t, tmp.IsFileExist("src", "zxc.mp4"))
+	assert.Equal(t, testutil.CreationDate, tmp.FileDate("src", "zxc.mp4"))
 }
