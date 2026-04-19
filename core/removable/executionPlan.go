@@ -48,7 +48,7 @@ func BuildExecutionPlan(dev *core.RemovableDevice, deviceDir string) (*Execution
 }
 
 func (p *ExecutionPlan) addChildren(dev *core.RemovableDevice, deviceDir string) error {
-	log.Infof("Scanning %s :: '%s'...", (*dev).Name(), deviceDir)
+	log.Infof("Scanning %s -> '%s'...", (*dev).Name(), deviceDir)
 
 	children, err := (*dev).GetChildren(deviceDir)
 	if err != nil {
