@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/redrathnure/media-tool/core/tools"
+	"github.com/redrathnure/media-tool/core/tools/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -224,4 +225,78 @@ func TestRunFixNames_DryRun(t *testing.T) {
 			testTool.AssertCallArgs(t, 1, tt.Args[0], tt.CallArgs[1])
 		})
 	}
+}
+
+func TestFixNames_DryRun(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("zxc", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixFileNames(srcDir, true, true, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	assert.True(t, tmp.IsFileExist("zxc.cr3", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.cr3", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.jpg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.jpeg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mkv", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mp4", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc.mp4", "src"))
+}
+
+func TestFixNames_Fix(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("zxc", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixFileNames(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	//No any date correction, just rename files
+	assert.True(t, tmp.IsFileExist("IMG_20250612_184641.cr3", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("IMG_20250612_184641.cr3", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20250612_184641.jpg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("IMG_20250612_184641.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("IMG_20250612_184641.jpeg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("IMG_20250612_184641.jpeg", "src"))
+	//Warning: mkv is not fully supported by exiftool
+	assert.False(t, tmp.IsFileExist("VID_20250612_184641.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("zxc.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("VID_20250612_184641.mp4", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("VID_20250612_184641.mp4", "src"))
+}
+
+func TestFixNames_ExcludeWhatsAppFiles(t *testing.T) {
+	tmp := testutil.NewTempDir(t)
+	defer tmp.Clean()
+
+	tmp.MkTestMedia("zxc-whatsapp", "src")
+
+	srcDir := tmp.DirName("src")
+
+	fixFileNames(srcDir, true, false, true)
+
+	assert.True(t, tmp.IsDirExist("src"))
+
+	assert.True(t, tmp.IsFileExist("zxc-whatsapp.cr3", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc-whatsapp.cr3", "src"))
+	assert.True(t, tmp.IsFileExist("zxc-whatsapp.jpg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc-whatsapp.jpg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc-whatsapp.jpeg", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc-whatsapp.jpeg", "src"))
+	assert.True(t, tmp.IsFileExist("zxc-whatsapp.mkv", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc-whatsapp.mkv", "src"))
+	assert.True(t, tmp.IsFileExist("zxc-whatsapp.mp4", "src"))
+	assert.NotEqual(t, testutil.CreationDate, tmp.FileDate("zxc-whatsapp.mp4", "src"))
 }

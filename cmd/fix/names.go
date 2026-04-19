@@ -35,8 +35,12 @@ func runFixNames(cmd *cobra.Command, args []string) {
 	bu := tools.NewBackuper(getConf().GetBackupLocation(), dryRun, recursively, cmd.CommandPath())
 	defer bu.CleanupWorkDir(files)
 
+	fixFileNames(files, recursively, dryRun, bu.ShouldExifDeleteOriginal())
+}
+
+func fixFileNames(files string, recursively, dryRun, shouldExifDeleteOriginal bool) {
 	exifTool := tools.GetExifTool()
-	exifTool.DeleteOriginals(bu.ShouldExifDeleteOriginal())
+	exifTool.DeleteOriginals(shouldExifDeleteOriginal)
 
 	tagName := exifTool.GetFileNameTag(dryRun)
 
