@@ -19,6 +19,7 @@ var namesCmd = &cobra.Command{
 
 func runNames(cmd *cobra.Command, args []string) {
 	tools.PrintCommandArgs(cmd, args, log)
+	log.Infof("Clean names")
 
 	files := tools.ExtractPath(args, 0, ".")
 	log.Infof("files to process: '%s'", files)

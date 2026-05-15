@@ -22,6 +22,7 @@ var metadataCmd = &cobra.Command{
 
 func runMetadata(cmd *cobra.Command, args []string) {
 	tools.PrintCommandArgs(cmd, args, log)
+	log.Infof("Clean metadata")
 
 	files := tools.ExtractPath(args, 0, ".")
 	log.Infof("files to process: '%s'", files)
