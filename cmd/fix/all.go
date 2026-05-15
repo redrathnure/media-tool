@@ -11,7 +11,7 @@ var allCmd = &cobra.Command{
 	'dir_or_files' argument may be dir (to process all files in it) or wildcards file names (process only matched files).
 	A current dir ('.' value) will be used by default.`,
 	Args:    cobra.RangeArgs(0, 1),
-	Aliases: []string{"fixNames"},
+	Aliases: []string{"fix_all", "fixall"},
 	Run:     runFixAll,
 }
 
